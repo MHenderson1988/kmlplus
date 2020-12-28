@@ -2,8 +2,7 @@ from geographiclib.geodesic import Geodesic
 
 """
 This function takes 2 arguments of the coordinate class type and calculates the bearing between the two locations.
-This is used in the creation of arcs/circles.  It returns a float representing a bearing from coordinate 1
-to coordinate 2.  This bearing is based upon true north, not magnetic north.
+This is used in the creation of arcs/circles.
 """
 
 
