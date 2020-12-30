@@ -14,3 +14,5 @@ class TestCoordinates(TestCase):
         for longitude in longitude_list:
             c1.longitude = longitude
             self.assertEqual(c1.longitude, longitude)
+
+        print(c1.to_string())

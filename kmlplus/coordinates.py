@@ -1,12 +1,3 @@
-import re
-from geographiclib.geodesic import Geodesic
-from geopy import distance as gp
-
-# prepend regex pattern with 'r' to show it is a raw string
-decimal_pattern = r'^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}'
-nats_dms_patten = r'''^s*([+-]?\d{1,3}\*?\s+\d{1,2}'?\s+\d{1,2}"?[NSEW]?|\d{1,3}(:\d{2}){2}\.\d[NSEW]\s*){1,2}$'''
-
-
 class Coordinate:
     def __init__(self, lat, long, height, coordinate_type):
         self._latitude = lat
@@ -20,10 +11,7 @@ class Coordinate:
 
     @latitude.setter
     def latitude(self, a_latitude):
-        if re.match(decimal_pattern, a_latitude):
-            self._latitude = a_latitude
-        else:
-            print(ValueError("Latitude must be a valid integer if using DMS coordinates"))
+        self._latitude = a_latitude
 
     @latitude.deleter
     def latitude(self):
@@ -35,10 +23,7 @@ class Coordinate:
 
     @longitude.setter
     def longitude(self, a_longitude):
-        if re.match(decimal_pattern, a_longitude):
-            self._longitude = a_longitude
-        else:
-            print(ValueError("Latitude must be a valid integer if using DMS coordinates"))
+        self._longitude = a_longitude
 
     @longitude.deleter
     def longitude(self):
@@ -60,5 +45,5 @@ class Coordinate:
         del self._height
 
     def to_string(self):
-        the_string = "{}, {}".format(self.latitude, self.longitude)
+        the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
