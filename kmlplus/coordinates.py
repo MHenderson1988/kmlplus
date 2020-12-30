@@ -1,15 +1,9 @@
-import re
-from geographiclib.geodesic import Geodesic
-from geopy import distance as gp
-
-# prepend regex pattern with 'r' to show it is a raw string
-coordinate_regex = r'^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$'
-
-
 class Coordinate:
-    def __init__(self, latitude, longitude):
-        self._latitude = latitude
-        self._longitude = longitude
+    def __init__(self, lat, long, height, coordinate_type):
+        self._latitude = lat
+        self._longitude = long
+        self._height = height
+        self._coordinate_type = coordinate_type
 
     @property
     def latitude(self):
@@ -17,10 +11,11 @@ class Coordinate:
 
     @latitude.setter
     def latitude(self, a_latitude):
-        if re.match(coordinate_regex, a_latitude):
-            self._latitude = a_latitude
-        else:
-            ValueError("Latitude must be a valid integer if using DMS coordinates")
+        self._latitude = a_latitude
+
+    @latitude.deleter
+    def latitude(self):
+        del self._latitude
 
     @property
     def longitude(self):
@@ -28,11 +23,27 @@ class Coordinate:
 
     @longitude.setter
     def longitude(self, a_longitude):
-        if re.match(coordinate_regex, a_longitude):
-            self._longitude = a_longitude
+        self._longitude = a_longitude
+
+    @longitude.deleter
+    def longitude(self):
+        del self._longitude
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, a_height):
+        if a_height.isinstance(float) or a_height.isinstance(int):
+            self._height = a_height
         else:
-            ValueError("Latitude must be a valid integer if using DMS coordinates")
+            print(ValueError("Height must be a valid floating point number eg -5.3"))
+
+    @height.deleter
+    def height(self):
+        del self._height
 
     def to_string(self):
-        the_string = "{}, {}".format(self.latitude, self.longitude)
+        the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
