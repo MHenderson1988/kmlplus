@@ -1,6 +1,3 @@
-from geographiclib.geodesic import Geodesic
-from geopy import distance as gp
-
 """
 The arc class provides functionality to return a list of kml friendly coordinates (y, x, z as opposed to the traditional
 x, y, z).  It has four parameters - start, end, centre and direction.
