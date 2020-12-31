@@ -12,3 +12,5 @@ def get_bearing(coordinate_class_1, coordinate_class_2):
 
     bearing = geo_dict['azi1'] % 360
     return round(bearing, 2)
+
+

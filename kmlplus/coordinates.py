@@ -13,9 +13,6 @@ class Coordinate:
     def latitude(self, a_latitude):
         self._latitude = a_latitude
 
-    @latitude.deleter
-    def latitude(self):
-        del self._latitude
 
     @property
     def longitude(self):
@@ -24,10 +21,6 @@ class Coordinate:
     @longitude.setter
     def longitude(self, a_longitude):
         self._longitude = a_longitude
-
-    @longitude.deleter
-    def longitude(self):
-        del self._longitude
 
     @property
     def height(self):
@@ -39,10 +32,6 @@ class Coordinate:
             self._height = a_height
         else:
             print(ValueError("Height must be a valid floating point number eg -5.3"))
-
-    @height.deleter
-    def height(self):
-        del self._height
 
     def to_string(self):
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
