@@ -11,55 +11,7 @@ reference point (centre) of the arc.
 
 class Arc:
     def __init__(self, start, end, centre, direction):
-        self._start = start
-        self._end = end
-        self._centre = centre
-        self._direction = direction
-
-    @property
-    def start(self):
-        return self._start
-
-    @start.setter
-    def start(self, coordinate_object):
-        self._start = coordinate_object
-
-    @start.deleter
-    def start(self):
-        del self._start
-
-    @property
-    def end(self):
-        return self._end
-
-    @end.setter
-    def end(self, coordinate_object):
-        self._end = coordinate_object
-
-    @end.deleter
-    def end(self):
-        del self._end
-
-    @property
-    def centre(self):
-        return self._centre
-
-    @centre.setter
-    def centre(self, coordinate_object):
-        self._centre = coordinate_object
-
-    @centre.deleter
-    def centre(self):
-        del self._centre
-
-    @property
-    def direction(self):
-        return self._direction
-
-    @direction.setter
-    def direction(self, clockwise_or_anticlockwise):
-        self._direction = clockwise_or_anticlockwise
-
-    @direction.deleter
-    def direction(self):
-        del self._direction
+        self.start = start
+        self.end = end
+        self.centre = centre
+        self.direction = direction
