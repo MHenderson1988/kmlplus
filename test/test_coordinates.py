@@ -6,24 +6,30 @@ from kmlplus.coordinates import Coordinate
 class TestCoordinates(TestCase):
     @classmethod
     def setUpClass(cls):
+        # Create classes
         cls._c1 = Coordinate(55.38327, -4.32723, 0)
         cls._c2 = Coordinate(0, 0, 0)
         cls._c3 = Coordinate(554323, -47543, 0)
 
     def setUp(self):
+        # Populate data sets for use with the tests
         self.decimal_coordinates_1 = [(55.11, -4.11), (55.22, -4.22), (54.11, 4.11), (54.22, 4.22)]
         self.decimal_coordinates_2 = [(52.32, -4.45), (55.75, -4.11), (53.453, -4.8587), (56.2832, -2.4893)]
         self.dms_coordinates_1 = [(546512, -25545), (556545, -45210), (505425, 42215), (540012, 40214)]
 
     def test_coordinate(self):
         for coordinate_pair in self.decimal_coordinates_1:
+            # Change the coordinates of the instance
             self._c1.latitude = coordinate_pair[0]
             self._c1.longitude = coordinate_pair[1]
+            # Check the coordinates have changed, as expected
             self.assertEqual(self._c1.latitude, coordinate_pair[0])
             self.assertEqual(self._c1.longitude, coordinate_pair[1])
+            # Check the to_string test works
             self.assertEqual(self._c1.to_string(), "{}, {}, {}".format(coordinate_pair[0], coordinate_pair[1], 0))
 
     def test_get_bearing(self):
+        # Populate the expected results from online calculators
         expected_results = [184.15, 6.39, 266.34, 301.04]
         i = 0
         while i < len(self.decimal_coordinates_1):
@@ -33,15 +39,18 @@ class TestCoordinates(TestCase):
             i += 1
 
     def test_decimal_to_dms(self):
+        # Populate the expected results from online calculators
         expected = [(55636, -4636), (551312, -41312), (54636, 4636), (541312, 41312)]
         i = 0
         while i < len(self.dms_coordinates_1):
-            self._c1.latitude = self.decimal_coordinates_1[i][0]
-            self._c1.longitude = self.decimal_coordinates_1[i][1]
+            # Change the coordinates to the next pair in the data set
+            self._c1.latitude, self._c1.longitude = self.decimal_coordinates_1[i][0], self.decimal_coordinates_1[i][1]
+            # Attempt to convert the coordinates from decimal to degrees minutes seconds
             self._c1.convert_to_dms()
+            # Check that the coordinates have been converted as expected
             self.assertEqual(self._c1.latitude, expected[i][0])
             self.assertEqual(self._c1.longitude, expected[i][1])
-            # Check coordinate type of dms raises a type error
+            # Check that passing a coordinate type of dms to the conversion method raises a type error
             with self.assertRaises(TypeError):
                 self._c3.convert_to_dms()
             i += 1
@@ -51,8 +60,14 @@ class TestCoordinates(TestCase):
         expected = [(55.08667, -2.92916), (56.095833, -4.86944), (50.90694, 4.37083),
                     (54.00333, 4.03722)]
         while i < len(self.dms_coordinates_1):
+            # Change the coordinates to the next pair in the data set
             self._c3.latitude, self._c3.longitude = self.dms_coordinates_1[i][0], self.dms_coordinates_1[i][1]
+            # Attempt to convert the coordinates from degrees minutes seconds to decimal
             self._c3.convert_to_decimal()
-            self.assertAlmostEqual(self._c3.latitude, expected[i][0], delta=1)
-            self.assertAlmostEqual(self._c3.longitude, expected[i][1], delta=1)
+            # Check that the coordinates have been converted as expected
+            self.assertAlmostEqual(self._c3.latitude, expected[i][0], delta=0.1)
+            self.assertAlmostEqual(self._c3.longitude, expected[i][1], delta=0.1)
+            # Check that passing a coordinate type of decimal to the conversion method raises a type error
+            with self.assertRaises(TypeError):
+                self._c3.convert_to_decimal()
             i += 1
