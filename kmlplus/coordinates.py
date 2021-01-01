@@ -1,8 +1,9 @@
 from geographiclib.geodesic import Geodesic
+from typing import Union
 
 
 class Coordinate:
-    def __init__(self, lat, long, height):
+    def __init__(self, lat: int or float, long: int or float, height: float):
         self._latitude = lat
         self._longitude = long
         self._height = height
@@ -13,7 +14,7 @@ class Coordinate:
         return self._latitude
 
     @latitude.setter
-    def latitude(self, a_latitude):
+    def latitude(self, a_latitude: int or float):
         self._latitude = a_latitude
         self.coordinate_type = self.detect_coordinate_type(self._latitude)
 
@@ -22,7 +23,7 @@ class Coordinate:
         return self._longitude
 
     @longitude.setter
-    def longitude(self, a_longitude):
+    def longitude(self, a_longitude: int or float):
         self._longitude = a_longitude
         self.coordinate_type = self.detect_coordinate_type(self._latitude)
 
@@ -31,7 +32,7 @@ class Coordinate:
         return self._height
 
     @height.setter
-    def height(self, a_height):
+    def height(self, a_height: int or float):
         if a_height.isinstance(float) or a_height.isinstance(int):
             self._height = a_height
         else:
@@ -41,7 +42,7 @@ class Coordinate:
     an int"""
 
     @staticmethod
-    def decimal_to_dms(coordinate_to_convert):
+    def decimal_to_dms(coordinate_to_convert: float or int) -> int:
         degrees = int(coordinate_to_convert)
         minutes = abs((coordinate_to_convert - degrees) * 60)
         seconds = minutes % 1 * 60
@@ -51,7 +52,7 @@ class Coordinate:
     """Takes one argument of type int and returns a float representing a decimal coordinate"""
 
     @staticmethod
-    def dms_to_decimal(coordinate_to_convert):
+    def dms_to_decimal(coordinate_to_convert: int) -> float:
         degrees = int(str(coordinate_to_convert)[0:-4])
         minutes = float(str(coordinate_to_convert)[-4:-2]) / 60
         seconds = float(str(coordinate_to_convert)[-2:]) / 3600
@@ -66,7 +67,7 @@ class Coordinate:
     dms or decimal"""
 
     @staticmethod
-    def detect_coordinate_type(a_coordinate):
+    def detect_coordinate_type(a_coordinate: float or int) -> str:
         string_of_coordinate = str(a_coordinate)
         if string_of_coordinate.find('.') == -1:
             return 'dms'
@@ -75,7 +76,7 @@ class Coordinate:
 
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
-    def to_string(self):
+    def to_string(self) -> str:
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
 
@@ -116,7 +117,7 @@ class Coordinate:
     """This takes an instance of the Coordinate class as its argument.  It returns the bearing (of type float) from the
     instance which is calling the function to the instance provided in the argument"""
 
-    def get_bearing(self, another_coordinate):
+    def get_bearing(self, another_coordinate) -> float:
         geo_dict = Geodesic.WGS84.Inverse(self._latitude, self._longitude,
                                           another_coordinate.latitude, another_coordinate.longitude)
 
