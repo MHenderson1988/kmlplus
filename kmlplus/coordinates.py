@@ -37,6 +37,9 @@ class Coordinate:
         else:
             print(ValueError("Height must be a valid floating point number eg -5.3"))
 
+    """This converts a given float from a decimal coordinate to a degrees minutes seconds coordinate.  It returns 
+    an int"""
+
     @staticmethod
     def decimal_to_dms(coordinate_to_convert):
         degrees = int(coordinate_to_convert)
@@ -44,6 +47,8 @@ class Coordinate:
         seconds = minutes % 1 * 60
         dms_string = str(degrees) + str(int(minutes)) + str(round(seconds))
         return int(dms_string)
+
+    """Takes one argument of type int and returns a float representing a decimal coordinate"""
 
     @staticmethod
     def dms_to_decimal(coordinate_to_convert):
@@ -57,6 +62,9 @@ class Coordinate:
             decimal_degrees = round(float(degrees - (minutes + seconds)), 5)
         return decimal_degrees
 
+    """Takes an argument of type float or int.  Returns a string indicating whether the given coordinate is of type
+    dms or decimal"""
+
     @staticmethod
     def detect_coordinate_type(a_coordinate):
         string_of_coordinate = str(a_coordinate)
@@ -65,9 +73,15 @@ class Coordinate:
         else:
             return 'decimal'
 
+    """Takes argument of self and returns a string representation of the coordinates and height"""
+
     def to_string(self):
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
+
+    """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (dms).  If not it
+    returns a TypeError.  If successful, the function calls the decimal coordinate to dms coordinate conversion
+    function and updates the instance accordingly"""
 
     def convert_to_dms(self):
         if self.coordinate_type == 'dms':
@@ -81,6 +95,10 @@ class Coordinate:
 
             except TypeError:
                 print("Something went wrong while converting from decimal to dms")
+
+    """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (decimal).  If not it
+        returns a TypeError.  If successful, the function calls the decimal coordinate to dms coordinate conversion
+        function and updates the instance accordingly"""
 
     def convert_to_decimal(self):
         if self.coordinate_type == 'decimal':
