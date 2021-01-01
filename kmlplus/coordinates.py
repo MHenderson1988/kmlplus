@@ -2,11 +2,11 @@ from geographiclib.geodesic import Geodesic
 
 
 class Coordinate:
-    def __init__(self, lat, long, height, coordinate_type):
+    def __init__(self, lat, long, height):
         self._latitude = lat
         self._longitude = long
         self._height = height
-        self.coordinate_type = coordinate_type
+        self.coordinate_type = self.detect_coordinate_type(self._latitude)
 
     @property
     def latitude(self):
@@ -15,6 +15,7 @@ class Coordinate:
     @latitude.setter
     def latitude(self, a_latitude):
         self._latitude = a_latitude
+        self.coordinate_type = self.detect_coordinate_type(self._latitude)
 
     @property
     def longitude(self):
@@ -23,6 +24,7 @@ class Coordinate:
     @longitude.setter
     def longitude(self, a_longitude):
         self._longitude = a_longitude
+        self.coordinate_type = self.detect_coordinate_type(self._latitude)
 
     @property
     def height(self):
@@ -45,11 +47,23 @@ class Coordinate:
 
     @staticmethod
     def dms_to_decimal(coordinate_to_convert):
-        degrees = int(str(coordinate_to_convert)[0:2])
-        minutes = float(str(coordinate_to_convert)[2:4]) / 60
-        seconds = float(str(coordinate_to_convert)[4:]) / 3600
-        decimal_degrees = float(degrees + (minutes + seconds))
+        degrees = int(str(coordinate_to_convert)[0:-4])
+        minutes = float(str(coordinate_to_convert)[-4:-2]) / 60
+        seconds = float(str(coordinate_to_convert)[-2:]) / 3600
+
+        if degrees >= 0:
+            decimal_degrees = round(float(degrees + (minutes + seconds)), 5)
+        else:
+            decimal_degrees = round(float(degrees - (minutes + seconds)), 5)
         return decimal_degrees
+
+    @staticmethod
+    def detect_coordinate_type(a_coordinate):
+        string_of_coordinate = str(a_coordinate)
+        if string_of_coordinate.find('.') == -1:
+            return 'dms'
+        else:
+            return 'decimal'
 
     def to_string(self):
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
@@ -60,16 +74,26 @@ class Coordinate:
             raise TypeError("The coordinates provided are already in the degrees, minutes, seconds format.  You need "
                             "to call the convert_to_decimal function instead")
         else:
-            self._latitude = self.decimal_to_dms(self._latitude)
-            self._longitude = self.decimal_to_dms(self._longitude)
+            try:
+                self._latitude = self.decimal_to_dms(self._latitude)
+                self._longitude = self.decimal_to_dms(self._longitude)
+                self.coordinate_type = 'dms'
+
+            except TypeError:
+                print("Something went wrong while converting from decimal to dms")
 
     def convert_to_decimal(self):
         if self.coordinate_type == 'decimal':
             raise TypeError("The coordinates are already decimal format.  Either call the convert to dms function OR"
                             "check you have the correct coordinates set")
         else:
-            self._latitude = self.dms_to_decimal(self._latitude)
-            self._longitude = self.dms_to_decimal(self._longitude)
+            try:
+                self._latitude = self.dms_to_decimal(self._latitude)
+                self._longitude = self.dms_to_decimal(self._longitude)
+                self.coordinate_type = 'decimal'
+
+            except TypeError:
+                print("Something went wrong while converting from dms to decimal")
 
     """This takes an instance of the Coordinate class as its argument.  It returns the bearing (of type float) from the
     instance which is calling the function to the instance provided in the argument"""

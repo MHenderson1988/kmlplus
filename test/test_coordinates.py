@@ -6,9 +6,9 @@ from kmlplus.coordinates import Coordinate
 class TestCoordinates(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls._c1 = Coordinate(55.38327, -4.32723, 0, coordinate_type="decimal")
-        cls._c2 = Coordinate(0, 0, 0, coordinate_type="decimal")
-        cls._c3 = Coordinate(554323, -47543, 0, coordinate_type="dms")
+        cls._c1 = Coordinate(55.38327, -4.32723, 0)
+        cls._c2 = Coordinate(0, 0, 0)
+        cls._c3 = Coordinate(554323, -47543, 0)
 
     def setUp(self):
         self.decimal_coordinates_1 = [(55.11, -4.11), (55.22, -4.22), (54.11, 4.11), (54.22, 4.22)]
@@ -33,13 +33,14 @@ class TestCoordinates(TestCase):
             i += 1
 
     def test_decimal_to_dms(self):
+        expected = [(55636, -4636), (551312, -41312), (54636, 4636), (541312, 41312)]
         i = 0
         while i < len(self.dms_coordinates_1):
             self._c1.latitude = self.decimal_coordinates_1[i][0]
             self._c1.longitude = self.decimal_coordinates_1[i][1]
             self._c1.convert_to_dms()
-            self.assertEqual(self._c1.latitude, self.dms_coordinates_1[i][0])
-            self.assertEqual(self._c1.longitude, self.dms_coordinates_1[i][1])
+            self.assertEqual(self._c1.latitude, expected[i][0])
+            self.assertEqual(self._c1.longitude, expected[i][1])
             # Check coordinate type of dms raises a type error
             with self.assertRaises(TypeError):
                 self._c3.convert_to_dms()
@@ -47,11 +48,11 @@ class TestCoordinates(TestCase):
 
     def test_dms_to_decimal(self):
         i = 0
-        expected = [(55.08667, -2.929167), (56.09583333, -4.8694444), (55.90694444, 4.37083333),
-                    (54.00333333, 4.03722222)]
+        expected = [(55.08667, -2.92916), (56.095833, -4.86944), (50.90694, 4.37083),
+                    (54.00333, 4.03722)]
         while i < len(self.dms_coordinates_1):
             self._c3.latitude, self._c3.longitude = self.dms_coordinates_1[i][0], self.dms_coordinates_1[i][1]
             self._c3.convert_to_decimal()
-            print(self._c3.to_string())
-            self.assertAlmostEqual(self._c3.latitude, expected[i][0])
-            self.assertAlmostEqual(self._c3.longitude, expected[i][1])
+            self.assertAlmostEqual(self._c3.latitude, expected[i][0], delta=1)
+            self.assertAlmostEqual(self._c3.longitude, expected[i][1], delta=1)
+            i += 1
