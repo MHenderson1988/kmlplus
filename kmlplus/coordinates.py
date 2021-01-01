@@ -36,10 +36,12 @@ class Coordinate:
             print(ValueError("Height must be a valid floating point number eg -5.3"))
 
     @staticmethod
-    def find_decimal_point(a_float):
-        string_to_index = str(a_float)
-        an_index = string_to_index.index('.')
-        return an_index
+    def decimal_to_dms(coordinate_to_convert):
+        degrees = int(coordinate_to_convert)
+        minutes = abs((coordinate_to_convert - degrees) * 60)
+        seconds = minutes % 1 * 60
+        dms_string = str(degrees) + str(int(minutes)) + str(round(seconds))
+        return int(dms_string)
 
     def to_string(self):
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
@@ -51,12 +53,8 @@ class Coordinate:
                              "to call the convert_to_decimal function instead")
         else:
             # Convert latitude
-            latitude_string = str(self._latitude)
-            degrees = latitude_string[0:self.find_decimal_point(latitude_string)]
-            minutes = float(latitude_string[self.find_decimal_point(latitude_string):-1]) * 60
-            seconds = round(float(str(minutes)[self.find_decimal_point(minutes):-1]) * 60, 2)
-            degrees, minutes, seconds = str(degrees), str(minutes), str(seconds)
-            pass
+            self._latitude = self.decimal_to_dms(self._latitude)
+            self._longitude = self.decimal_to_dms(self._longitude)
 
     """This takes an instance of the Coordinate class as its argument.  It returns the bearing (of type float) from the
     instance which is calling the function to the instance provided in the argument"""
