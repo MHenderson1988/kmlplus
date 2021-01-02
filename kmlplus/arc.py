@@ -30,13 +30,11 @@ class Arc:
 
     def generate_coordinates(self):
         coordinate_list = []
-        if self._heading_increments == "Clockwise":
-            while coordinate_list.__len__() < self._amount_of_points:
-                coordinate_list.append(coordinates.generate_coordinates(self._centre, self._radius, self._start))
+        while coordinate_list.__len__() < self._amount_of_points:
+            coordinate_list.append(coordinates.generate_coordinates(self._centre, self._radius, self._start))
+            if self._heading_increments == "Clockwise":
                 self._start = (self._start + self._heading_increments) % 360
-        else:
-            while coordinate_list.__len__() < self._amount_of_points:
-                coordinate_list.append(coordinates.generate_coordinates(self._centre, self._radius, self._start))
+            else:
                 self._start = (self._start - self._heading_increments) % 360
         return coordinate_list
 
