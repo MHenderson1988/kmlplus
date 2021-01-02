@@ -15,3 +15,16 @@ class Arc:
         self.end = end
         self.centre = centre
         self.direction = direction
+
+    def list_of_coordinates(self, number_of_points):
+        coordinate_list = []
+
+    @staticmethod
+    def calculate_increments(start, end, steps):
+        if end > start:
+            difference = (end - start) % 360
+        else:
+            difference = (start - end) % 360
+
+        incremental_hdg_value = difference / steps
+        return incremental_hdg_value

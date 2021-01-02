@@ -1,9 +1,9 @@
 from geographiclib.geodesic import Geodesic
-from typing import Union
+from geopy import distance as gp
 
 
 class Coordinate:
-    def __init__(self, lat: int or float, long: int or float, height: float):
+    def __init__(self, lat: int or float, long: int or float, height=0.0):
         self._latitude = lat
         self._longitude = long
         self._height = height
@@ -76,8 +76,12 @@ class Coordinate:
 
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
-    def to_string(self) -> str:
+    def to_string_xyz(self) -> str:
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
+        return the_string
+
+    def to_string_xy(self) -> str:
+        the_string = "{}, {}".format(self._latitude, self._longitude)
         return the_string
 
     """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (dms).  If not it
@@ -123,3 +127,19 @@ class Coordinate:
 
         bearing = geo_dict['azi1'] % 360
         return round(bearing, 2)
+
+
+"""
+Takes 3 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 - 359 degrees
+and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance of the Coordinate class
+which is the desired bearing and distance from the lat/long string provided.
+"""
+
+
+def generate_coordinates(lat_long_string, distance_km, a_bearing, **kwargs):
+    point = gp.Point.from_string(lat_long_string)
+    decimal_lat_lon_string = gp.distance(kilometers=distance_km).destination(point=point,
+                                                                             bearing=a_bearing).format_decimal()
+    decimal_lat_lon_string = decimal_lat_lon_string.split(',')
+    new_coordinate_instance = Coordinate(decimal_lat_lon_string[0], decimal_lat_lon_string[1], **kwargs)
+    return new_coordinate_instance

@@ -1,15 +1,15 @@
 from unittest import TestCase
 
-from kmlplus.coordinates import Coordinate
+from kmlplus import coordinates
 
 
 class TestCoordinates(TestCase):
     @classmethod
     def setUpClass(cls):
         # Create classes
-        cls._c1 = Coordinate(55.38327, -4.32723, 0)
-        cls._c2 = Coordinate(0, 0, 0)
-        cls._c3 = Coordinate(554323, -47543, 0)
+        cls._c1 = coordinates.Coordinate(55.38327, -4.32723, 0)
+        cls._c2 = coordinates.Coordinate(0, 0, 0)
+        cls._c3 = coordinates.Coordinate(554323, -47543, 0)
 
     def setUp(self):
         # Populate data sets for use with the tests
@@ -26,7 +26,7 @@ class TestCoordinates(TestCase):
             self.assertEqual(self._c1.latitude, coordinate_pair[0])
             self.assertEqual(self._c1.longitude, coordinate_pair[1])
             # Check the to_string test works
-            self.assertEqual(self._c1.to_string(), "{}, {}, {}".format(coordinate_pair[0], coordinate_pair[1], 0))
+            self.assertEqual(self._c1.to_string_xyz(), "{}, {}, {}".format(coordinate_pair[0], coordinate_pair[1], 0))
 
     def test_get_bearing(self):
         # Populate the expected results from online calculators
@@ -71,3 +71,10 @@ class TestCoordinates(TestCase):
             with self.assertRaises(TypeError):
                 self._c3.convert_to_decimal()
             i += 1
+
+    def test_generate_coordinates(self):
+        self._c1.latitude, self._c1.longitude = 55.2372, -4.5837
+        new_instance = coordinates.generate_coordinates(self._c1.to_string_xy(), 10, 350)
+        print(new_instance.to_string_xy())
+        print(new_instance.coordinate_type)
+        print(new_instance.__dict__)
