@@ -121,12 +121,13 @@ class Coordinate:
     """This takes an instance of the Coordinate class as its argument.  It returns the bearing (of type float) from the
     instance which is calling the function to the instance provided in the argument"""
 
-    def get_bearing(self, another_coordinate) -> float:
+    def get_bearing_and_distance(self, another_coordinate) -> float:
         geo_dict = Geodesic.WGS84.Inverse(self._latitude, self._longitude,
                                           another_coordinate.latitude, another_coordinate.longitude)
 
-        bearing = geo_dict['azi1'] % 360
-        return round(bearing, 2)
+        bearing, distance = geo_dict['azi1'] % 360, geo_dict['s12'] / 1000  # converts metres to kilometres for distance
+        return round(bearing, 2), distance
+
 
 
 """

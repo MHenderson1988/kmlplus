@@ -7,9 +7,10 @@ class TestArc(TestCase):
     @classmethod
     def setUpClass(cls):
         # Create classes
-        cls._c1 = coordinates.Coordinate(55.38327, -4.32723, 0)
-        cls._c2 = coordinates.Coordinate(0, 0, 0)
-        cls._arc1 = arc.Arc(55)
+        cls._c1 = coordinates.Coordinate(55.38327, -4.32723)
+        cls._c2 = coordinates.Coordinate(55.74623, -4.37365)
+        cls._c3 = coordinates.Coordinate(55.54645, -4.34564)
+        cls._arc1 = arc.Arc(100, 180, cls._c3, "Clockwise")
 
     def test_calculate_increments(self):
-        print()
+        print(self._arc1.calculate_increments())
