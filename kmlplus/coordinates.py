@@ -129,7 +129,6 @@ class Coordinate:
         return round(bearing, 2), distance
 
 
-
 """
 Takes 3 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 - 359 degrees
 and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance of the Coordinate class
