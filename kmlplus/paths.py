@@ -9,26 +9,52 @@ The paths class has two parameters - points and height which default to 50 point
 """
 
 
-class Paths:
-    def __init__(self, points=50, height=0):
+class LinePath:
+    def __init__(self, origin, points=50, height=0):
+        self._origin = origin
         self._amount_of_points = points
         self._height = height
         self._points_list = self.generate_coordinates()
+
+    @property
+    def origin(self):
+        return self._origin
+
+    @origin.setter
+    def origin(self, coordinate_instance):
+        assert isinstance(coordinate_instance, coordinates.Coordinate), "Error: LinePath origin must be an instance " \
+                                                                        "of type Coordinate "
+        self._origin = coordinate_instance
+
+    @property
+    def amount_of_points(self):
+        return self._amount_of_points
+
+    @amount_of_points.setter
+    def amount_of_points(self, a_int: int):
+        assert type(a_int) is int, "Amount of points attribute only accepts whole numbers (int)"
+        self._amount_of_points = a_int
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, a_value: float or int):
+        assert type(a_value) is float or type(a_value) is int, "Height value only accepts type float or int"
+        self._height = a_value
 
     """
     Generates a list of coordinate instances representing the points between the start and end heading as projected
     from the central point and radius.  Returns a list of coordinate class instances.
     """
 
-    def generate_coordinates(self):
+    def generate_coordinates(self, a_destination_string, final_height):
+        assert type(a_destination_string) is str, "Error: Coordinates for must be a string eg - '''55.2123, " \
+                                                  "-4.43783''' or an instance of the Coordinate class "
         coordinate_list = []
 
         return coordinate_list
-
-
-class LinePath(Paths):
-    def __init__(self, _amount_of_points, _height):
-        super(Paths, self).__init__()
 
 
 """
@@ -44,13 +70,15 @@ returns - a list of y, x, z tuples.
 """
 
 
-class ArcPath(Paths):
-    def __init__(self, origin, start_hdg, end_hdg, radius, _amount_of_points, _height):
-        super(Paths, self).__init__()
+class ArcPath(LinePath):
+    def __init__(self, origin, start_hdg, end_hdg, radius, direction, points=50, height=0):
         self._origin = origin
         self._start_hdg = start_hdg
         self._end_hdg = end_hdg
         self._radius = radius
+        self._direction = direction
+        self._points = points
+        self._height = height
         self._heading_increments = self.calculate_increments()
 
     """
@@ -58,13 +86,14 @@ class ArcPath(Paths):
     """
 
     def generate_coordinates(self):
-        coordinate_list = []
-        while coordinate_list.__len__() < self._amount_of_points:
-            coordinate_list.append(coordinates.generate_coordinates(self._origin, self._radius, self._origin))
-            if self._heading_increments == "Clockwise":
-                self._start_hdg = (self._start_hdg + self._heading_increments) % 360
-            elif self._heading_increments == "Anticlockwise":
-                self._start_hdg = (self._start_hdg - self._heading_increments) % 360
+        coordinate_list = [self._origin]
+        heading = self._start_hdg
+        while coordinate_list.__len__() < self._points:
+            coordinate_list.append(self._origin.generate_coordinates(self._radius, heading))
+            if self._direction == "Clockwise":
+                heading = (heading + self._heading_increments) % 360
+            elif self._direction == "Anticlockwise":
+                heading = (heading - self._heading_increments) % 360
         return coordinate_list
 
     """
@@ -72,10 +101,10 @@ class ArcPath(Paths):
     """
 
     def calculate_increments(self):
-        if self._end_hdg > self._start:
-            difference = (self._end_hdg - self._start) % 360
+        if self._end_hdg > self._start_hdg:
+            difference = (self._end_hdg - self._start_hdg) % 360
         else:
-            difference = (self._start - self._end_hdg) % 360
+            difference = (self._start_hdg - self._end_hdg) % 360
 
-        incremental_hdg_value = difference / self._amount_of_points
+        incremental_hdg_value = difference / self._points
         return incremental_hdg_value

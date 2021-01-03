@@ -74,7 +74,11 @@ class TestCoordinates(TestCase):
             i += 1
 
     def test_generate_coordinates(self):
-        self._c1.latitude, self._c1.longitude = 55.2372, -4.5837
-        new_instance = coordinates.generate_coordinates(self._c1.to_string_xy(), 10, 350)
-        print(new_instance.to_string_xy())
-        print(new_instance.coordinate_type)
+        self._c1.latitude, self._c1.longitude = 55.123, -4.321
+        new_instance = self._c1.generate_coordinates(10, 350)
+        lat_lon_tuple = (float(new_instance.latitude), float(new_instance.longitude))
+        expected_tuple = (55.211575, -4.348375)
+        i = 0
+        while i < len(lat_lon_tuple):
+            self.assertAlmostEqual(lat_lon_tuple[i], expected_tuple[i], delta=0.001)
+            i += 1
