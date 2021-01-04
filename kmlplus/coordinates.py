@@ -3,10 +3,11 @@ from geopy import distance as gp
 
 
 class Coordinate:
-    def __init__(self, lat: int or float, long: int or float, height=0.0):
+    def __init__(self, lat, long, **kwargs):
+        self.__dict__.update(kwargs)
         self._latitude = lat
         self._longitude = long
-        self._height = height
+        self._height = kwargs.pop('height', 0)
         self.coordinate_type = self.detect_coordinate_type(self._latitude)
 
     @property
@@ -14,41 +15,50 @@ class Coordinate:
         return self._latitude
 
     @latitude.setter
-    def latitude(self, a_latitude: int or float):
+    def latitude(self, a_latitude):
         if type(a_latitude) is float or int:
             self._latitude = round(a_latitude, 6)
             self.coordinate_type = self.detect_coordinate_type(self._latitude)
         else:
-            TypeError("Latitudes must be int or float")
+            try:
+                float(a_latitude)
+            except(ValueError):
+                print("Latitudes must be int or float")
 
     @property
     def longitude(self):
         return self._longitude
 
     @longitude.setter
-    def longitude(self, a_longitude: int or float):
+    def longitude(self, a_longitude):
         if type(a_longitude) is float or int:
             self._longitude = round(a_longitude, 6)
             self.coordinate_type = self.detect_coordinate_type(self._latitude)
         else:
-            TypeError("Latitudes must be int or float")
+            try:
+                float(a_longitude)
+            except(ValueError):
+                print("Latitudes must be int or float")
 
     @property
     def height(self):
         return self._height
 
     @height.setter
-    def height(self, a_height: int or float):
+    def height(self, a_height):
         if type(a_height) is float or int:
             self._height = a_height
         else:
-            print(ValueError("Height must be a valid floating point number eg -5.3"))
+            try:
+                float(a_height)
+            except(ValueError):
+                print(ValueError("Height must be a valid floating point number eg -5.3"))
 
     """This converts a given float from a decimal coordinate to a degrees minutes seconds coordinate.  It returns 
     an int"""
 
     @staticmethod
-    def decimal_to_dms(coordinate_to_convert: float or int) -> int:
+    def decimal_to_dms(coordinate_to_convert):
         degrees = int(coordinate_to_convert)
         minutes = abs((coordinate_to_convert - degrees) * 60)
         seconds = minutes % 1 * 60
@@ -58,7 +68,7 @@ class Coordinate:
     """Takes one argument of type int and returns a float representing a decimal coordinate"""
 
     @staticmethod
-    def dms_to_decimal(coordinate_to_convert: int) -> float:
+    def dms_to_decimal(coordinate_to_convert):
         degrees = int(str(coordinate_to_convert)[0:-4])
         minutes = float(str(coordinate_to_convert)[-4:-2]) / 60
         seconds = float(str(coordinate_to_convert)[-2:]) / 3600
@@ -73,7 +83,7 @@ class Coordinate:
     dms or decimal"""
 
     @staticmethod
-    def detect_coordinate_type(a_coordinate: float or int) -> str:
+    def detect_coordinate_type(a_coordinate):
         string_of_coordinate = str(a_coordinate)
         if string_of_coordinate.find('.') == -1:
             return 'dms'
@@ -82,11 +92,11 @@ class Coordinate:
 
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
-    def to_string_xyz(self) -> str:
+    def to_string_xyz(self):
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
 
-    def to_string_xy(self) -> str:
+    def to_string_xy(self):
         the_string = "{}, {}".format(self._latitude, self._longitude)
         return the_string
 
@@ -141,7 +151,7 @@ class Coordinate:
     """This takes an instance of the Coordinate class as its argument.  It returns the bearing (of type float) from the
     instance which is calling the function to the instance provided in the argument"""
 
-    def get_bearing_and_distance(self, another_coordinate) -> float:
+    def get_bearing_and_distance(self, another_coordinate):
         geo_dict = Geodesic.WGS84.Inverse(self._latitude, self._longitude,
                                           another_coordinate.latitude, another_coordinate.longitude)
 
