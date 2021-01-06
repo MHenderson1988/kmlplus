@@ -22,7 +22,7 @@ class Coordinate:
         else:
             try:
                 float(a_latitude)
-            except(ValueError):
+            except ValueError:
                 print("Latitudes must be int or float")
 
     @property
@@ -37,7 +37,7 @@ class Coordinate:
         else:
             try:
                 float(a_longitude)
-            except(ValueError):
+            except ValueError:
                 print("Latitudes must be int or float")
 
     @property
@@ -51,7 +51,7 @@ class Coordinate:
         else:
             try:
                 float(a_height)
-            except(ValueError):
+            except ValueError:
                 print(ValueError("Height must be a valid floating point number eg -5.3"))
 
     """This converts a given float from a decimal coordinate to a degrees minutes seconds coordinate.  It returns 
@@ -92,14 +92,15 @@ class Coordinate:
 
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
-    def to_string_xyz(self):
+    def to_string_yxz(self):
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
 
-    def to_string_xy(self):
+    def to_string_yx(self):
         the_string = "{}, {}".format(self._latitude, self._longitude)
         return the_string
 
+    #  Gives an xyz tuple which is readable by kml
     def kml_tuple(self):
         return (self._longitude, self._latitude, self._height)
 
@@ -108,7 +109,7 @@ class Coordinate:
     of the Coordinate class which is the desired bearing and distance from the lat/long string provided. """
 
     def generate_coordinates(self, distance_km, a_bearing, a_height):
-        point = gp.Point.from_string(self.to_string_xy())
+        point = gp.Point.from_string(self.to_string_yx())
         decimal_lat_lon_string = gp.distance(kilometers=distance_km).destination(point=point,
                                                                                  bearing=a_bearing).format_decimal()
         decimal_lat_lon_string = decimal_lat_lon_string.split(',')

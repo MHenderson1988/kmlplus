@@ -1,3 +1,22 @@
+from kmlplus.coordinates import Coordinate
+
+"""
+LinePath is a basic class which returns a path of straight lines between the arguments passed.  It returns a tuple of
+kml readable coordinates which can be used to generate the path in google earth.
+"""
+
+
+class LinePath:
+    def __init__(self, *args):
+        self.coordinate_list = args
+
+    def kml_format(self):
+        tuple_list = [(x.longitude, x.latitude, x.height) for x in self.coordinate_list]
+        return tuple_list
+
+
+
+
 """
 The ArcPath class is used to return a tuple list of coordinates in .kml readable format ie - y, x, z.  It accepts the 
 following parameters - 
@@ -7,7 +26,7 @@ start_hdg - a heading/bearing relative to the origin from which the arc will com
 end_hdg - a heading/bearing relative to the origin at which the arc will end
 radius - the distance from the origin the arc points will be plotted.  Accepts an int or float representing metres.
 
-returns - a list of y, x, z tuples.
+returns - a list of x, y, z tuples.
 """
 
 
@@ -22,7 +41,18 @@ class ArcPath:
         self.height = kwargs.pop('height', self.origin.height)
         self.direction = kwargs.pop('direction', 'Clockwise')
         self.points = kwargs.pop('points', 50)
-        self.kml_coordinates = self.coordinates_to_kml_format()
+        self.kml_coordinates = self.coordinates_kml_format()
+
+    @property
+    def origin(self):
+        return self._origin
+
+    @origin.setter
+    def origin(self, a_origin):
+        if isinstance(a_origin, Coordinate):
+            self._origin = a_origin
+        else:
+            TypeError("Error: origin MUST be an instance of the Coordinate class")
 
     def calculate_heading_increments(self):
         if self.end_bearing > self.start_bearing:
@@ -45,7 +75,7 @@ class ArcPath:
                 self.start_bearing = (self.start_bearing + increments) % 360
         return coordinates_list
 
-    def coordinates_to_kml_format(self):
+    def coordinates_kml_format(self):
         coordinate_list = self.populate_path_list()
         kml_format_list = []
         for coordinate_instance in coordinate_list:
