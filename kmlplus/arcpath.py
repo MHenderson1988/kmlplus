@@ -22,7 +22,7 @@ class ArcPath:
         self.height = kwargs.pop('height', self.origin.height)
         self.direction = kwargs.pop('direction', 'Clockwise')
         self.points = kwargs.pop('points', 50)
-        self.coordinates = self.populate_path_list()
+        self.kml_coordinates = self.coordinates_to_kml_format()
 
     def calculate_heading_increments(self):
         if self.end_bearing > self.start_bearing:
@@ -44,3 +44,10 @@ class ArcPath:
             else:
                 self.start_bearing = (self.start_bearing + increments) % 360
         return coordinates_list
+
+    def coordinates_to_kml_format(self):
+        coordinate_list = self.populate_path_list()
+        kml_format_list = []
+        for coordinate_instance in coordinate_list:
+            kml_format_list.append(coordinate_instance.kml_tuple())
+        return kml_format_list

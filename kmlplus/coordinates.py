@@ -100,6 +100,9 @@ class Coordinate:
         the_string = "{}, {}".format(self._latitude, self._longitude)
         return the_string
 
+    def kml_tuple(self):
+        return (self._longitude, self._latitude, self._height)
+
     """Takes 2 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
     - 359 degrees and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance 
     of the Coordinate class which is the desired bearing and distance from the lat/long string provided. """
