@@ -8,13 +8,26 @@ kml readable coordinates which can be used to generate the path in google earth.
 
 class LinePath:
     def __init__(self, *args):
-        self.coordinate_list = args
+        self.all_coordinates = True
+
+        # Check all args are instances of the Coordinate class
+        for arg in args:
+            try:
+                if isinstance(arg, Coordinate):
+                    continue
+                else:
+                    self.all_coordinates = False
+                    break
+            except TypeError:
+                self.all_coordinates = False
+
+        if self.all_coordinates:
+            self.coordinate_list = args
+            self.kml_coordinate_list = self.kml_format()
 
     def kml_format(self):
         tuple_list = [(x.longitude, x.latitude, x.height) for x in self.coordinate_list]
         return tuple_list
-
-
 
 
 """
