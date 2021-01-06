@@ -100,18 +100,18 @@ class Coordinate:
         the_string = "{}, {}".format(self._latitude, self._longitude)
         return the_string
 
-    """Takes 3 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
+    """Takes 2 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
     - 359 degrees and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance 
     of the Coordinate class which is the desired bearing and distance from the lat/long string provided. """
 
-    def generate_coordinates(self, distance_km, a_bearing, **kwargs):
+    def generate_coordinates(self, distance_km, a_bearing, a_height):
         point = gp.Point.from_string(self.to_string_xy())
         decimal_lat_lon_string = gp.distance(kilometers=distance_km).destination(point=point,
                                                                                  bearing=a_bearing).format_decimal()
         decimal_lat_lon_string = decimal_lat_lon_string.split(',')
         lat_float, long_float = round(float(decimal_lat_lon_string[0]), 6), round(float(decimal_lat_lon_string[1]), 6)
 
-        new_coordinate_instance = Coordinate(lat_float, long_float, **kwargs)
+        new_coordinate_instance = Coordinate(lat_float, long_float, height=a_height)
         return new_coordinate_instance
 
     """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (dms).  If not it

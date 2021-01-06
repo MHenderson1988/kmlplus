@@ -1,14 +1,10 @@
 from unittest import TestCase
-from kmlplus import paths, coordinates
+
+from kmlplus import arcpath, coordinates
 
 
 class TestPaths(TestCase):
-    def test_linepath(self):
-        c1 = coordinates.Coordinate(55.2222, -4.1111)
-        l1 = paths.LinePath(c1)
-        print(l1)
-
     def test_arcpath(self):
-        c1 = coordinates.Coordinate(55.2222, -4.1111)
-        a1 = paths.ArcPath(c1)
+        c1 = coordinates.Coordinate(55.2222, -4.1111, height=55)
+        a1 = arcpath.ArcPath(c1, start_bearing=100, end_bearing=180, radius=10)
         print(a1)
