@@ -3,10 +3,13 @@ from geopy import distance as gp
 
 
 class Coordinate:
-    def __init__(self, lat: int or float, long: int or float, height=0.0):
+    def __init__(self, lat, long, **kwargs):
+        self.__dict__.update(kwargs)
         self._latitude = lat
         self._longitude = long
-        self._height = height
+        self._height = kwargs.pop('height', 0)
+        assert self.detect_coordinate_type(self._latitude) == self.detect_coordinate_type(self._longitude), \
+            "Latitude and Longitude must be the same type.  Either both dms or decimal format"
         self.coordinate_type = self.detect_coordinate_type(self._latitude)
 
     @property
@@ -14,35 +17,50 @@ class Coordinate:
         return self._latitude
 
     @latitude.setter
-    def latitude(self, a_latitude: int or float):
-        self._latitude = a_latitude
-        self.coordinate_type = self.detect_coordinate_type(self._latitude)
+    def latitude(self, a_latitude):
+        if type(a_latitude) is float or int:
+            self._latitude = round(a_latitude, 6)
+            self.coordinate_type = self.detect_coordinate_type(self._latitude)
+        else:
+            try:
+                float(a_latitude)
+            except ValueError:
+                print("Latitudes must be int or float")
 
     @property
     def longitude(self):
         return self._longitude
 
     @longitude.setter
-    def longitude(self, a_longitude: int or float):
-        self._longitude = a_longitude
-        self.coordinate_type = self.detect_coordinate_type(self._latitude)
+    def longitude(self, a_longitude):
+        if type(a_longitude) is float or int:
+            self._longitude = round(a_longitude, 6)
+            self.coordinate_type = self.detect_coordinate_type(self._latitude)
+        else:
+            try:
+                float(a_longitude)
+            except ValueError:
+                print("Latitudes must be int or float")
 
     @property
     def height(self):
         return self._height
 
     @height.setter
-    def height(self, a_height: int or float):
-        if a_height.isinstance(float) or a_height.isinstance(int):
+    def height(self, a_height):
+        if type(a_height) is float or int:
             self._height = a_height
         else:
-            print(ValueError("Height must be a valid floating point number eg -5.3"))
+            try:
+                float(a_height)
+            except ValueError:
+                print(ValueError("Height must be a valid floating point number eg -5.3"))
 
     """This converts a given float from a decimal coordinate to a degrees minutes seconds coordinate.  It returns 
     an int"""
 
     @staticmethod
-    def decimal_to_dms(coordinate_to_convert: float or int) -> int:
+    def decimal_to_dms(coordinate_to_convert):
         degrees = int(coordinate_to_convert)
         minutes = abs((coordinate_to_convert - degrees) * 60)
         seconds = minutes % 1 * 60
@@ -52,7 +70,7 @@ class Coordinate:
     """Takes one argument of type int and returns a float representing a decimal coordinate"""
 
     @staticmethod
-    def dms_to_decimal(coordinate_to_convert: int) -> float:
+    def dms_to_decimal(coordinate_to_convert):
         degrees = int(str(coordinate_to_convert)[0:-4])
         minutes = float(str(coordinate_to_convert)[-4:-2]) / 60
         seconds = float(str(coordinate_to_convert)[-2:]) / 3600
@@ -67,7 +85,7 @@ class Coordinate:
     dms or decimal"""
 
     @staticmethod
-    def detect_coordinate_type(a_coordinate: float or int) -> str:
+    def detect_coordinate_type(a_coordinate):
         string_of_coordinate = str(a_coordinate)
         if string_of_coordinate.find('.') == -1:
             return 'dms'
@@ -76,13 +94,31 @@ class Coordinate:
 
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
-    def to_string_xyz(self) -> str:
-        the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
+    def __str__(self):
+        the_string = "({}, {}, {})".format(self._latitude, self._longitude, self._height)
         return the_string
 
-    def to_string_xy(self) -> str:
+    def to_string_yx(self):
         the_string = "{}, {}".format(self._latitude, self._longitude)
         return the_string
+
+    #  Gives an xyz tuple which is readable by kml
+    def kml_tuple(self):
+        return self._longitude, self._latitude, self._height
+
+    """Takes 2 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
+    - 359 degrees and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance 
+    of the Coordinate class which is the desired bearing and distance from the lat/long string provided. """
+
+    def generate_coordinates(self, distance_km, a_bearing, a_height):
+        point = gp.Point.from_string(self.to_string_yx())
+        decimal_lat_lon_string = gp.distance(kilometers=distance_km).destination(point=point,
+                                                                                 bearing=a_bearing).format_decimal()
+        decimal_lat_lon_string = decimal_lat_lon_string.split(',')
+        lat_float, long_float = round(float(decimal_lat_lon_string[0]), 6), round(float(decimal_lat_lon_string[1]), 6)
+
+        new_coordinate_instance = Coordinate(lat_float, long_float, height=a_height)
+        return new_coordinate_instance
 
     """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (dms).  If not it
     returns a TypeError.  If successful, the function calls the decimal coordinate to dms coordinate conversion
@@ -121,26 +157,9 @@ class Coordinate:
     """This takes an instance of the Coordinate class as its argument.  It returns the bearing (of type float) from the
     instance which is calling the function to the instance provided in the argument"""
 
-    def get_bearing_and_distance(self, another_coordinate) -> float:
+    def get_bearing_and_distance(self, another_coordinate):
         geo_dict = Geodesic.WGS84.Inverse(self._latitude, self._longitude,
                                           another_coordinate.latitude, another_coordinate.longitude)
 
         bearing, distance = geo_dict['azi1'] % 360, geo_dict['s12'] / 1000  # converts metres to kilometres for distance
         return round(bearing, 2), distance
-
-
-
-"""
-Takes 3 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 - 359 degrees
-and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance of the Coordinate class
-which is the desired bearing and distance from the lat/long string provided.
-"""
-
-
-def generate_coordinates(lat_long_string, distance_km, a_bearing, **kwargs):
-    point = gp.Point.from_string(lat_long_string)
-    decimal_lat_lon_string = gp.distance(kilometers=distance_km).destination(point=point,
-                                                                             bearing=a_bearing).format_decimal()
-    decimal_lat_lon_string = decimal_lat_lon_string.split(',')
-    new_coordinate_instance = Coordinate(decimal_lat_lon_string[0], decimal_lat_lon_string[1], **kwargs)
-    return new_coordinate_instance
