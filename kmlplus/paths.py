@@ -37,6 +37,9 @@ class LinePath:
         return "LinePath instance containing {} kml readable Coordinate instances - {}".format(
             len(self.kml_coordinate_list), [str(x) for x in self.kml_coordinate_list])
 
+    def __len__(self):
+        return len(self.coordinate_list)
+
 
 """
 The ArcPath class is used to return a tuple list of coordinates in .kml readable format ie - y, x, z.  It accepts the 

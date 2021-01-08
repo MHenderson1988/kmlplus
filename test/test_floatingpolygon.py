@@ -19,5 +19,4 @@ class TestFloatingpolygon(TestCase):
 
     def test_same_length(self):
         floating_poly = floatingpolygon.FloatingPolygon(self.lp1, self.lp2)
-        for x in floating_poly:
-            print(x)
+        print(floating_poly)
