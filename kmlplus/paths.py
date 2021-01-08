@@ -26,8 +26,16 @@ class LinePath:
             self.kml_coordinate_list = self.kml_format()
 
     def kml_format(self):
-        tuple_list = [(x.longitude, x.latitude, x.height) for x in self.coordinate_list]
+        assert self.coordinate_list.__len__() > 0
+        tuple_list = [x.kml_tuple() for x in self.coordinate_list]
         return tuple_list
+
+    def __getitem__(self, index):
+        return self.kml_coordinate_list[index]
+
+    def __str__(self):
+        return "LinePath instance containing {} kml readable Coordinate instances - {}".format(
+            len(self.kml_coordinate_list), [str(x) for x in self.kml_coordinate_list])
 
 
 """
@@ -55,6 +63,10 @@ class ArcPath:
         self.direction = kwargs.pop('direction', 'Clockwise')
         self.points = kwargs.pop('points', 50)
         self.kml_coordinates = self.coordinates_kml_format()
+
+    def __str__(self):
+        return "ArcPath instance containing {} kml readable Coordinate instances - {}".format(
+            len(self.kml_coordinates), [str(x) for x in self.kml_coordinates])
 
     @property
     def origin(self):

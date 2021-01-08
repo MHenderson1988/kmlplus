@@ -26,7 +26,7 @@ class TestCoordinates(TestCase):
             self.assertEqual(self._c1.latitude, coordinate_pair[0])
             self.assertEqual(self._c1.longitude, coordinate_pair[1])
             # Check the to_string test works
-            self.assertEqual(self._c1.to_string_yxz(), "{}, {}, {}".format(coordinate_pair[0], coordinate_pair[1], 0))
+            self.assertEqual(self._c1.__str__(), "{}, {}, {}".format(coordinate_pair[0], coordinate_pair[1], 0))
 
     def test_get_bearing_and_distance(self):
         # Populate the expected results from online calculators
@@ -75,7 +75,7 @@ class TestCoordinates(TestCase):
 
     def test_generate_coordinates(self):
         self._c1.latitude, self._c1.longitude = 55.123, -4.321
-        new_instance = self._c1.generate_coordinates(10, 350)
+        new_instance = self._c1.generate_coordinates(10, 350, 20)
         lat_lon_tuple = (float(new_instance.latitude), float(new_instance.longitude))
         expected_tuple = (55.211575, -4.348375)
         i = 0

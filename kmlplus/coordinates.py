@@ -8,6 +8,8 @@ class Coordinate:
         self._latitude = lat
         self._longitude = long
         self._height = kwargs.pop('height', 0)
+        assert self.detect_coordinate_type(self._latitude) == self.detect_coordinate_type(self._longitude), \
+            "Latitude and Longitude must be the same type.  Either both dms or decimal format"
         self.coordinate_type = self.detect_coordinate_type(self._latitude)
 
     @property
@@ -92,8 +94,8 @@ class Coordinate:
 
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
-    def to_string_yxz(self):
-        the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
+    def __str__(self):
+        the_string = "({}, {}, {})".format(self._latitude, self._longitude, self._height)
         return the_string
 
     def to_string_yx(self):
@@ -102,7 +104,7 @@ class Coordinate:
 
     #  Gives an xyz tuple which is readable by kml
     def kml_tuple(self):
-        return (self._longitude, self._latitude, self._height)
+        return self._longitude, self._latitude, self._height
 
     """Takes 2 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
     - 359 degrees and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance 
