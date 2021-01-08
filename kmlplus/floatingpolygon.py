@@ -12,9 +12,6 @@ class FloatingPolygon:
                                                                                                         self.upper_face,
                                                                                                         self.sides)
 
-    def __getitem__(self, item):
-        return self.sides[item]
-
     def test_same_length(self):
         if len(self.lower_face) != len(self.upper_face):
             return False
