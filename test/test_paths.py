@@ -18,4 +18,7 @@ class TestPaths(TestCase):
     def test_arcpath(self):
         a1 = paths.ArcPath(self._c1, start_bearing=100, end_bearing=180, radius=10)
         print(a1)
+        print(a1[0])
         self.assertIsInstance(a1, paths.ArcPath)
+        lp = paths.LinePath(self._c1, *a1)
+        print(lp)

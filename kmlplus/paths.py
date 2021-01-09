@@ -65,11 +65,14 @@ class ArcPath:
         self.height = kwargs.pop('height', self.origin.height)
         self.direction = kwargs.pop('direction', 'Clockwise')
         self.points = kwargs.pop('points', 50)
-        self.kml_coordinates = self.coordinates_kml_format()
+        self.coordinates = self.populate_path_list()
+
+    def __getitem__(self, item):
+        return self.coordinates[item]
 
     def __str__(self):
-        return "ArcPath instance containing {} kml readable Coordinate instances - {}".format(
-            len(self.kml_coordinates), [str(x) for x in self.kml_coordinates])
+        return "ArcPath instance containing {} Coordinate instances - {}".format(
+            len(self.coordinates), [str(x) for x in self.coordinates])
 
     @property
     def origin(self):
@@ -103,9 +106,20 @@ class ArcPath:
                 self.start_bearing = (self.start_bearing + increments) % 360
         return coordinates_list
 
-    def coordinates_kml_format(self):
+
+"""    def coordinates_kml_format(self):
         coordinate_list = self.populate_path_list()
         kml_format_list = []
         for coordinate_instance in coordinate_list:
             kml_format_list.append(coordinate_instance.kml_tuple())
-        return kml_format_list
+        return kml_format_list"""
+
+"""
+SlopedArcPath class is a subclass of ArcPath.  It it used to create an ArcPath which ends at 
+a different height from which it originally started.
+"""
+
+
+class SlopedArcPath(ArcPath):
+    def __init__(self, **kwargs):
+        super().__init__(self, **kwargs)
