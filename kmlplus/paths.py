@@ -1,8 +1,12 @@
 from kmlplus.coordinates import Coordinate
 
 """
-LinePath is a basic class which returns a path of straight lines between the arguments passed.  It returns a tuple of
-kml readable coordinates which can be used to generate the path in google earth.
+LinePath is used to create polygons by combining Coordinate objects.  LinePath objects connect coordinate objects via
+straight lines when used in conjunction with polygon classes such as the 'floatingpolygon' class.  If a circle or 'arc'
+is required, you can first use the ArcPath class and provide it as a * argument to the LinePath class.
+
+If the Coordinate instances provided are not yet in decimal format, the LinePath class will convert it to decimal
+automatically.
 """
 
 
