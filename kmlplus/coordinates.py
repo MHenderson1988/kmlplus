@@ -96,7 +96,7 @@ class Coordinate:
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
     def __str__(self):
-        the_string = "({}, {}, {})".format(self._latitude, self._longitude, self._height)
+        the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
 
     def to_string_yx(self):
