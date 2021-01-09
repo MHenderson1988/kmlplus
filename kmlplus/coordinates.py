@@ -7,8 +7,8 @@ class Coordinate:
         self.__dict__.update(kwargs)
         self._latitude = lat
         self._longitude = long
-        self._height = kwargs.pop('height', 0)
-        self.name = kwargs.pop('name', 0)
+        self.height = kwargs.pop('height', 0)
+        self.name = kwargs.pop('name', None)
         assert self.detect_coordinate_type(self._latitude) == self.detect_coordinate_type(self._longitude), \
             "Latitude and Longitude must be the same type.  Either both dms or decimal format"
         self.coordinate_type = self.detect_coordinate_type(self._latitude)
@@ -97,6 +97,10 @@ class Coordinate:
 
     def __str__(self):
         the_string = "({}, {}, {})".format(self._latitude, self._longitude, self._height)
+        return the_string
+
+    def to_string_yx(self):
+        the_string = "{}, {}".format(self._latitude, self._longitude)
         return the_string
 
     #  Gives an xyz tuple which is readable by kml

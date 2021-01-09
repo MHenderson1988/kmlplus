@@ -10,11 +10,15 @@ class LinePath:
     def __init__(self, *args):
         self.all_coordinates = True
 
-        # Check all args are instances of the Coordinate class
+        # Check all args are instances of the Coordinate class in decimal form
         for arg in args:
             try:
                 if isinstance(arg, Coordinate):
-                    continue
+                    # Convert to decimal format if dms
+                    if arg.coordinate_type != 'decimal':
+                        arg.convert_to_decimal()
+                    else:
+                        continue
                 else:
                     self.all_coordinates = False
                     break
