@@ -1,5 +1,4 @@
 from kmlplus.coordinates import Coordinate
-from math import atan2
 
 """
 LinePath is used to create polygons by combining Coordinate objects.  LinePath objects connect coordinate objects via
@@ -12,8 +11,11 @@ automatically.
 
 
 class LinePath:
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
+        self.__dict__.update(kwargs)
         self.all_coordinates = True
+        self.centroid = None
+        self.sort = kwargs.pop('sort', False)
 
         # Check all args are instances of the Coordinate class in decimal form
         for arg in args:
@@ -30,9 +32,13 @@ class LinePath:
             except TypeError:
                 self.all_coordinates = False
 
+        # If user wants coordinates sorted counter clockwise then call the sort vertices method which will change
+        # the order of the Coordinate instances in the coordinate_list attribute.  It will sort in descending order
+        # of the 'bearing from centroid' attribute.
         if self.all_coordinates:
             self.coordinate_list = args
-            self.centroid = self.find_centroid()
+            if self.sort is True:
+                self.sort_vertices()
             self.kml_coordinate_list = self.kml_format()
 
     def kml_format(self):
@@ -68,7 +74,13 @@ class LinePath:
         for coordinate in self.coordinate_list:
             bearing, distance = self.centroid.get_bearing_and_distance(coordinate)
             setattr(coordinate, 'bearing_from_centroid', bearing)
-            print(coordinate.bearing_from_centroid)
+
+    def sort_vertices(self):
+        self.centroid = self.find_centroid()
+        self.calculate_bearings_from_centroid()
+        self.coordinate_list = sorted(self.coordinate_list, key=lambda x: x.bearing_from_centroid, reverse=True)
+
+
 """
 The ArcPath class is used to return a tuple list of coordinates in .kml readable format ie - y, x, z.  It accepts the 
 following parameters - 
