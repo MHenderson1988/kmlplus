@@ -1,4 +1,5 @@
 from kmlplus.coordinates import Coordinate
+from math import atan2
 
 """
 LinePath is used to create polygons by combining Coordinate objects.  LinePath objects connect coordinate objects via
@@ -63,7 +64,11 @@ class LinePath:
                                               longitude_total / len(self.coordinate_list)
         return Coordinate(latitude_average, longitude_average)
 
-
+    def calculate_bearings_from_centroid(self):
+        for coordinate in self.coordinate_list:
+            bearing, distance = self.centroid.get_bearing_and_distance(coordinate)
+            setattr(coordinate, 'bearing_from_centroid', bearing)
+            print(coordinate.bearing_from_centroid)
 """
 The ArcPath class is used to return a tuple list of coordinates in .kml readable format ie - y, x, z.  It accepts the 
 following parameters - 
