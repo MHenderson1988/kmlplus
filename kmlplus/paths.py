@@ -31,6 +31,7 @@ class LinePath:
 
         if self.all_coordinates:
             self.coordinate_list = args
+            self.centroid = self.find_centroid()
             self.kml_coordinate_list = self.kml_format()
 
     def kml_format(self):
@@ -47,6 +48,20 @@ class LinePath:
 
     def __len__(self):
         return len(self.coordinate_list)
+
+    """
+    Find the centroid of the linepath.  This will be used for ordering the coordinates
+    to be counter clockwise so as to be best displayed by kml rendering.
+    """
+
+    def find_centroid(self):
+        latitude_total, longitude_total = 0, 0
+        for coordinate_instance in self.coordinate_list:
+            latitude_total += coordinate_instance.latitude
+            longitude_total += coordinate_instance.longitude
+        latitude_average, longitude_average = latitude_total / len(self.coordinate_list), \
+                                              longitude_total / len(self.coordinate_list)
+        return Coordinate(latitude_average, longitude_average)
 
 
 """
