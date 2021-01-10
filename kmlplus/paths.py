@@ -1,28 +1,44 @@
 from kmlplus.coordinates import Coordinate
 
 """
-LinePath is a basic class which returns a path of straight lines between the arguments passed.  It returns a tuple of
-kml readable coordinates which can be used to generate the path in google earth.
+LinePath is used to create polygons by combining Coordinate objects.  LinePath objects connect coordinate objects via
+straight lines when used in conjunction with polygon classes such as the 'floatingpolygon' class.  If a circle or 'arc'
+is required, you can first use the ArcPath class and provide it as a * argument to the LinePath class.
+
+If the Coordinate instances provided are not yet in decimal format, the LinePath class will convert it to decimal
+automatically.
 """
 
 
 class LinePath:
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
+        self.__dict__.update(kwargs)
         self.all_coordinates = True
+        self.centroid = None
+        self.sort = kwargs.pop('sort', False)
 
-        # Check all args are instances of the Coordinate class
+        # Check all args are instances of the Coordinate class in decimal form
         for arg in args:
             try:
                 if isinstance(arg, Coordinate):
-                    continue
+                    # Convert to decimal format if dms
+                    if arg.coordinate_type != 'decimal':
+                        arg.convert_to_decimal()
+                    else:
+                        continue
                 else:
                     self.all_coordinates = False
                     break
             except TypeError:
                 self.all_coordinates = False
 
+        # If user wants coordinates sorted counter clockwise then call the sort vertices method which will change
+        # the order of the Coordinate instances in the coordinate_list attribute.  It will sort in descending order
+        # of the 'bearing from centroid' attribute.
         if self.all_coordinates:
             self.coordinate_list = args
+            if self.sort is True:
+                self.sort_vertices()
             self.kml_coordinate_list = self.kml_format()
 
     def kml_format(self):
@@ -39,6 +55,30 @@ class LinePath:
 
     def __len__(self):
         return len(self.coordinate_list)
+
+    """
+    Find the centroid of the linepath.  This will be used for ordering the coordinates
+    to be counter clockwise so as to be best displayed by kml rendering.
+    """
+
+    def find_centroid(self):
+        latitude_total, longitude_total = 0, 0
+        for coordinate_instance in self.coordinate_list:
+            latitude_total += coordinate_instance.latitude
+            longitude_total += coordinate_instance.longitude
+        latitude_average, longitude_average = latitude_total / len(self.coordinate_list), \
+                                              longitude_total / len(self.coordinate_list)
+        return Coordinate(latitude_average, longitude_average)
+
+    def calculate_bearings_from_centroid(self):
+        for coordinate in self.coordinate_list:
+            bearing, distance = self.centroid.get_bearing_and_distance(coordinate)
+            setattr(coordinate, 'bearing_from_centroid', bearing)
+
+    def sort_vertices(self):
+        self.centroid = self.find_centroid()
+        self.calculate_bearings_from_centroid()
+        self.coordinate_list = sorted(self.coordinate_list, key=lambda x: x.bearing_from_centroid, reverse=True)
 
 
 """
@@ -65,11 +105,14 @@ class ArcPath:
         self.height = kwargs.pop('height', self.origin.height)
         self.direction = kwargs.pop('direction', 'Clockwise')
         self.points = kwargs.pop('points', 50)
-        self.kml_coordinates = self.coordinates_kml_format()
+        self.coordinates = self.populate_path_list()
+
+    def __getitem__(self, item):
+        return self.coordinates[item]
 
     def __str__(self):
-        return "ArcPath instance containing {} kml readable Coordinate instances - {}".format(
-            len(self.kml_coordinates), [str(x) for x in self.kml_coordinates])
+        return "ArcPath instance containing {} Coordinate instances - {}".format(
+            len(self.coordinates), [str(x) for x in self.coordinates])
 
     @property
     def origin(self):
@@ -103,9 +146,20 @@ class ArcPath:
                 self.start_bearing = (self.start_bearing + increments) % 360
         return coordinates_list
 
-    def coordinates_kml_format(self):
+
+"""    def coordinates_kml_format(self):
         coordinate_list = self.populate_path_list()
         kml_format_list = []
         for coordinate_instance in coordinate_list:
             kml_format_list.append(coordinate_instance.kml_tuple())
-        return kml_format_list
+        return kml_format_list"""
+
+"""
+SlopedArcPath class is a subclass of ArcPath.  It it used to create an ArcPath which ends at 
+a different height from which it originally started.
+"""
+
+
+class SlopedArcPath(ArcPath):
+    def __init__(self, **kwargs):
+        super().__init__(self, **kwargs)
