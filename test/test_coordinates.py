@@ -8,8 +8,8 @@ class TestCoordinates(TestCase):
     def setUpClass(cls):
         # Create classes
         cls._c1 = coordinates.Coordinate(55.38327, -4.32723)
-        cls._c2 = coordinates.Coordinate(0, 0)
-        cls._c3 = coordinates.Coordinate(554323, -47543, height=20)
+        cls._c2 = coordinates.Coordinate(10, 10)
+        cls._c3 = coordinates.Coordinate(554323, -47543, height=20, coordinate_type='dms')
 
     def setUp(self):
         # Populate data sets for use with the tests

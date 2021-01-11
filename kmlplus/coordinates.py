@@ -9,9 +9,7 @@ class Coordinate:
         self._longitude = long
         self.height = kwargs.pop('height', 0)
         self.name = kwargs.pop('name', None)
-        assert self.detect_coordinate_type(self._latitude) == self.detect_coordinate_type(self._longitude), \
-            "Latitude and Longitude must be the same type.  Either both dms or decimal format"
-        self.coordinate_type = self.detect_coordinate_type(self._latitude)
+        self.coordinate_type = kwargs.pop('coordinate_type', 'decimal')
 
     @property
     def latitude(self):
@@ -21,12 +19,12 @@ class Coordinate:
     def latitude(self, a_latitude):
         if type(a_latitude) is float or int:
             self._latitude = round(a_latitude, 6)
-            self.coordinate_type = self.detect_coordinate_type(self._latitude)
         else:
             try:
                 float(a_latitude)
-            except ValueError:
-                print("Latitudes must be int or float")
+            except TypeError:
+                print("Could not convert latitude value of type {} to string, define latitude and longitude as int or \
+                float".format(type(a_latitude)))
 
     @property
     def longitude(self):
@@ -40,8 +38,9 @@ class Coordinate:
         else:
             try:
                 float(a_longitude)
-            except ValueError:
-                print("Latitudes must be int or float")
+            except TypeError:
+                print("Could not convert longitude of type {} to string.  Latitude and longitude should be specified as\
+                type int or float".format(type(a_longitude)))
 
     @property
     def height(self):
