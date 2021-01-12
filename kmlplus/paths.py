@@ -32,7 +32,6 @@ class LinePath:
         self.kml_coordinate_list = self.kml_format()
         self.sides = None
 
-
     def __getitem__(self, index):
         return self.kml_coordinate_list[index]
 
@@ -78,7 +77,7 @@ class LinePath:
                 "Sides can only be generated for LinePaths of equal length"
             i = 0
             side_list = []
-            # TODO: create separate code for LinePath and ArcPath.  Current code will be for Arc Path
+            # TODO: create separate code for LinePath and ArcPath.  Current code will be for line Path
             # This if condition creates the sides up to the last coordinate, else then creates the last side back
             # to the first coordinate
             while i < len(self.coordinate_list):
@@ -149,6 +148,11 @@ class ArcPath:
         self.direction = kwargs.pop('direction', 'Clockwise')
         self.points = kwargs.pop('points', 50)
         self.coordinates = self.populate_path_list()
+
+        # If user passes a height value, change altitude values for all coordinate instances passed as arguments
+        if self.height is not None:
+            for coordinate in self.coordinates:
+                coordinate.height = self.height
 
     def __getitem__(self, item):
         return self.coordinates[item]

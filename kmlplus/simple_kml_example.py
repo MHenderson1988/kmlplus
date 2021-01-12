@@ -8,6 +8,14 @@ lower_surface, upper_surface = paths.LinePath(*instance_list, height=8000, sort=
                                paths.LinePath(*instance_list_higher, height=15000, sort=True)
 lower_surface.create_sides(upper_surface)
 
+origin_coordinate = coordinates.Coordinate(55.66, -4.55)
+
+arc_path_lower = paths.ArcPath(origin_coordinate, start_bearing=1, end_bearing=359, radius=2, height=200)
+arc_path_higher = paths.ArcPath(origin_coordinate, start_bearing=1, end_bearing=359, radius=2, height=5000)
+circle_line_path_low = paths.LinePath(*arc_path_lower)
+circle_line_path_high = paths.LinePath(*arc_path_higher)
+circle_line_path_low.create_sides(circle_line_path_high)
+
 
 def create_kml():
     kml = simplekml.Kml()
@@ -25,6 +33,21 @@ def create_kml():
     for coord_lists in lower_surface.sides:
         pol = fol.newpolygon()
         pol.outerboundaryis = coord_lists
+        pol.altitudemode = simplekml.AltitudeMode.relativetoground
+        i += 1
+
+    pol = fol.newpolygon()
+    pol.outerboundaryis = circle_line_path_low.kml_coordinate_list
+    pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+    pol = fol.newpolygon()
+    pol.outerboundaryis = circle_line_path_high.kml_coordinate_list
+    pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+    i = 0
+    for x in circle_line_path_low.sides:
+        pol = fol.newpolygon()
+        pol.outerboundaryis = x
         pol.altitudemode = simplekml.AltitudeMode.relativetoground
         i += 1
 
