@@ -29,7 +29,7 @@ def create_kml():
     kml = simplekml.Kml()
     fol = kml.newfolder(name="Example polygon")
 
-    pol = fol.newpolygon()
+    pol = fol.newpolygon(name='lower face of polygon')
     pol.outerboundaryis = lower_surface.kml_coordinate_list
     pol.altitudemode = simplekml.AltitudeMode.relativetoground
 

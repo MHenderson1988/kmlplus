@@ -71,56 +71,56 @@ class LinePath:
         tuple_list = [x.kml_tuple() for x in self.coordinate_list]
         return tuple_list
 
-    def create_sides(self, another_line_path_instance, **kwargs):
-        if isinstance(another_line_path_instance, LinePath):
-            assert len(self.coordinate_list) == len(another_line_path_instance.coordinate_list),\
-                "Sides can only be generated for LinePaths of equal length"
-            i = 0
-            side_list = []
-            # TODO: create separate code for LinePath and ArcPath.  Current code will be for line Path
-            # This if condition creates the sides up to the last coordinate, else then creates the last side back
-            # to the first coordinate
-            while i < len(self.coordinate_list):
-                if i < len(self.coordinate_list) - 1:
-                    side_list.append(
-                        [
-                            (self.coordinate_list[i].longitude, self.coordinate_list[i].latitude,
-                             self.coordinate_list[i].height),
-                            (self.coordinate_list[i+1].longitude, self.coordinate_list[i+1].latitude,
-                             self.coordinate_list[i+1].height),
-                            (another_line_path_instance.coordinate_list[i+1].longitude,
-                             another_line_path_instance.coordinate_list[i+1].latitude,
-                            another_line_path_instance.coordinate_list[i+1].height),
-                            (another_line_path_instance.coordinate_list[i].longitude,
-                             another_line_path_instance.coordinate_list[i].latitude,
-                            another_line_path_instance.coordinate_list[i].height)
-                        ]
-                    )
-                    i += 1
+    def create_sides(self, *args, **kwargs):
+        for args in args:
+            if isinstance(args, LinePath):
+                assert len(self.coordinate_list) == len(args.coordinate_list), \
+                    "Sides can only be generated for LinePaths of equal length"
+                i = 0
+                side_list = []
+                # TODO: create separate code for LinePath and ArcPath.  Current code will be for line Path
+                # This if condition creates the sides up to the last coordinate, else then creates the last side back
+                # to the first coordinate
+                while i < len(self.coordinate_list):
+                    if i < len(self.coordinate_list) - 1:
+                        side_list.append(
+                            [
+                                (self.coordinate_list[i].longitude, self.coordinate_list[i].latitude,
+                                 self.coordinate_list[i].height),
+                                (self.coordinate_list[i + 1].longitude, self.coordinate_list[i + 1].latitude,
+                                 self.coordinate_list[i + 1].height),
+                                (args.coordinate_list[i + 1].longitude,
+                                 args.coordinate_list[i + 1].latitude,
+                                 args.coordinate_list[i + 1].height),
+                                (args.coordinate_list[i].longitude,
+                                 args.coordinate_list[i].latitude,
+                                 args.coordinate_list[i].height)
+                            ]
+                        )
+                        i += 1
 
-                # When you get to the final coordinate and need to create side back to the first coordinate, do this
-                else:
-                    side_list.append(
-                        [
-                            (self.coordinate_list[i].longitude, self.coordinate_list[i].latitude,
-                             self.coordinate_list[i].height),
-                            (self.coordinate_list[0].longitude, self.coordinate_list[0].latitude,
-                             self.coordinate_list[0].height),
-                            (another_line_path_instance.coordinate_list[0].longitude,
-                             another_line_path_instance.coordinate_list[0].latitude,
-                             another_line_path_instance.coordinate_list[0].height),
-                            (another_line_path_instance.coordinate_list[i].longitude,
-                             another_line_path_instance.coordinate_list[i].latitude,
-                             another_line_path_instance.coordinate_list[i].height)
-                        ]
-                    )
-                    i += 1
+                    # When you get to the final coordinate and need to create side back to the first coordinate, do this
+                    else:
+                        side_list.append(
+                            [
+                                (self.coordinate_list[i].longitude, self.coordinate_list[i].latitude,
+                                 self.coordinate_list[i].height),
+                                (self.coordinate_list[0].longitude, self.coordinate_list[0].latitude,
+                                 self.coordinate_list[0].height),
+                                (args.coordinate_list[0].longitude,
+                                 args.coordinate_list[0].latitude,
+                                 args.coordinate_list[0].height),
+                                (args.coordinate_list[i].longitude,
+                                 args.coordinate_list[i].latitude,
+                                 args.coordinate_list[i].height)
+                            ]
+                        )
+                        i += 1
 
-            self.sides = side_list
+                self.sides = side_list
 
-        else:
-            raise Exception('create_sides() function only accepts LinePath instances or that of its subclasses')
-
+            else:
+                raise Exception('create_sides() function only accepts LinePath instances or that of its subclasses')
 
 
 """
