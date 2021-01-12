@@ -17,34 +17,15 @@ class LinePath:
         self.centroid = None
         self.sort = kwargs.pop('sort', False)
 
-        # Check all args are instances of the Coordinate class in decimal form
-        for arg in args:
-            try:
-                if isinstance(arg, Coordinate):
-                    # Convert to decimal format if dms
-                    if arg.coordinate_type != 'decimal':
-                        arg.convert_to_decimal()
-                    else:
-                        continue
-                else:
-                    self.all_coordinates = False
-                    break
-            except TypeError:
-                self.all_coordinates = False
-
         # If user wants coordinates sorted counter clockwise then call the sort vertices method which will change
         # the order of the Coordinate instances in the coordinate_list attribute.  It will sort in descending order
         # of the 'bearing from centroid' attribute.
-        if self.all_coordinates:
-            self.coordinate_list = args
-            if self.sort is True:
-                self.sort_vertices()
-            self.kml_coordinate_list = self.kml_format()
 
-    def kml_format(self):
-        assert self.coordinate_list.__len__() > 0
-        tuple_list = [x.kml_tuple() for x in self.coordinate_list]
-        return tuple_list
+        self.coordinate_list = args
+        if self.sort is True:
+            self.sort_vertices()
+        self.kml_coordinate_list = self.kml_format()
+        self.sides = None
 
     def __getitem__(self, index):
         return self.kml_coordinate_list[index]
@@ -79,6 +60,62 @@ class LinePath:
         self.centroid = self.find_centroid()
         self.calculate_bearings_from_centroid()
         self.coordinate_list = sorted(self.coordinate_list, key=lambda x: x.bearing_from_centroid, reverse=True)
+
+    def kml_format(self):
+        assert self.coordinate_list.__len__() > 0
+        tuple_list = [x.kml_tuple() for x in self.coordinate_list]
+        return tuple_list
+
+    def create_sides(self, another_line_path_instance, **kwargs):
+        if isinstance(another_line_path_instance, LinePath):
+            assert len(self.coordinate_list) == len(another_line_path_instance.coordinate_list),\
+                "Sides can only be generated for LinePaths of equal length"
+            i = 0
+            side_list = []
+            # TODO: create separate code for LinePath and ArcPath.  Current code will be for Arc Path
+            # This if condition creates the sides up to the last coordinate, else then creates the last side back
+            # to the first coordinate
+            while i < len(self.coordinate_list):
+                if i < len(self.coordinate_list) - 1:
+                    side_list.append(
+                        [
+                            (self.coordinate_list[i].longitude, self.coordinate_list[i].latitude,
+                             self.coordinate_list[i].height),
+                            (self.coordinate_list[i+1].longitude, self.coordinate_list[i+1].latitude,
+                             self.coordinate_list[i+1].height),
+                            (another_line_path_instance.coordinate_list[i+1].longitude,
+                             another_line_path_instance.coordinate_list[i+1].latitude,
+                            another_line_path_instance.coordinate_list[i+1].height),
+                            (another_line_path_instance.coordinate_list[i].longitude,
+                             another_line_path_instance.coordinate_list[i].latitude,
+                            another_line_path_instance.coordinate_list[i].height)
+                        ]
+                    )
+                    i += 1
+
+                # When you get to the final coordinate and need to create side back to the first coordinate, do this
+                else:
+                    side_list.append(
+                        [
+                            (self.coordinate_list[i].longitude, self.coordinate_list[i].latitude,
+                             self.coordinate_list[i].height),
+                            (self.coordinate_list[0].longitude, self.coordinate_list[0].latitude,
+                             self.coordinate_list[0].height),
+                            (another_line_path_instance.coordinate_list[0].longitude,
+                             another_line_path_instance.coordinate_list[0].latitude,
+                             another_line_path_instance.coordinate_list[0].height),
+                            (another_line_path_instance.coordinate_list[i].longitude,
+                             another_line_path_instance.coordinate_list[i].latitude,
+                             another_line_path_instance.coordinate_list[i].height)
+                        ]
+                    )
+                    i += 1
+
+            self.sides = side_list
+
+        else:
+            raise Exception('create_sides() function only accepts LinePath instances or that of its subclasses')
+
 
 
 """
