@@ -10,12 +10,13 @@ lower_surface.create_sides(upper_surface)
 
 origin_coordinate = coordinates.Coordinate(55.66, -4.55)
 
-# Warning: Do not use height kwarg when making a second arc path of the same coordinates.  The height kwarg will
+# Warning: Do not use height kwarg when making a second LinePath of the same coordinates.  The height kwarg will
 # override both coordinates as they share the same instance.  You will end up with all sides starting and ending
 # on the same altitude and therefore appearing not to render.
 
-# Specify all height kwargs for identical arcpaths in their arc path instance creation as seen below.  This will be
-# corrected in future releases.  
+# Specify all height kwargs for identical LinePaths in their instance creation as seen below alternatively
+# create two sets of coordinate instances of different heights as seen above.  This will be corrected in future
+# releases.
 
 arc_path_lower = paths.ArcPath(origin_coordinate, start_bearing=1, end_bearing=359, radius=2, height=200)
 arc_path_higher = paths.ArcPath(origin_coordinate, start_bearing=1, end_bearing=359, radius=2, height=5000)
