@@ -4,8 +4,8 @@ from kmlplus import paths, coordinates
 a_list = [(55.11, -4.11), (55.22, -4.11), (55.22, -4.22), (55.11, -4.22)]
 instance_list = [coordinates.Coordinate(x[0], x[1], height=2000) for x in a_list]
 instance_list_higher = [coordinates.Coordinate(x[0], x[1], height=6000) for x in a_list]
-lower_surface, upper_surface = paths.LinePath(*instance_list, sort=True), paths.LinePath(*instance_list_higher,
-                                                                                         sort=True)
+lower_surface, upper_surface = paths.LinePath(*instance_list, height=8000, sort=True),\
+                               paths.LinePath(*instance_list_higher, height=15000, sort=True)
 lower_surface.create_sides(upper_surface)
 
 

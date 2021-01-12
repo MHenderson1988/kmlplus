@@ -8,7 +8,7 @@
                     <altitudeMode>relativeToGround</altitudeMode>
                     <outerBoundaryIs>
                         <LinearRing id="7">
-                            <coordinates>-4.22,55.22,2000 -4.22,55.11,2000 -4.11,55.11,2000 -4.11,55.22,2000</coordinates>
+                            <coordinates>-4.22,55.22,8000 -4.22,55.11,8000 -4.11,55.11,8000 -4.11,55.22,8000</coordinates>
                         </LinearRing>
                     </outerBoundaryIs>
                 </Polygon>
@@ -18,7 +18,7 @@
                     <altitudeMode>relativeToGround</altitudeMode>
                     <outerBoundaryIs>
                         <LinearRing id="13">
-                            <coordinates>-4.22,55.22,6000 -4.22,55.11,6000 -4.11,55.11,6000 -4.11,55.22,6000</coordinates>
+                            <coordinates>-4.22,55.22,15000 -4.22,55.11,15000 -4.11,55.11,15000 -4.11,55.22,15000</coordinates>
                         </LinearRing>
                     </outerBoundaryIs>
                 </Polygon>
@@ -28,7 +28,7 @@
                     <altitudeMode>relativeToGround</altitudeMode>
                     <outerBoundaryIs>
                         <LinearRing id="19">
-                            <coordinates>-4.22,55.22,2000 -4.22,55.11,2000 -4.22,55.11,6000 -4.22,55.22,6000</coordinates>
+                            <coordinates>-4.22,55.22,8000 -4.22,55.11,8000 -4.22,55.11,15000 -4.22,55.22,15000</coordinates>
                         </LinearRing>
                     </outerBoundaryIs>
                 </Polygon>
@@ -38,7 +38,7 @@
                     <altitudeMode>relativeToGround</altitudeMode>
                     <outerBoundaryIs>
                         <LinearRing id="25">
-                            <coordinates>-4.22,55.11,2000 -4.11,55.11,2000 -4.11,55.11,6000 -4.22,55.11,6000</coordinates>
+                            <coordinates>-4.22,55.11,8000 -4.11,55.11,8000 -4.11,55.11,15000 -4.22,55.11,15000</coordinates>
                         </LinearRing>
                     </outerBoundaryIs>
                 </Polygon>
@@ -48,7 +48,7 @@
                     <altitudeMode>relativeToGround</altitudeMode>
                     <outerBoundaryIs>
                         <LinearRing id="31">
-                            <coordinates>-4.11,55.11,2000 -4.11,55.22,2000 -4.11,55.22,6000 -4.11,55.11,6000</coordinates>
+                            <coordinates>-4.11,55.11,8000 -4.11,55.22,8000 -4.11,55.22,15000 -4.11,55.11,15000</coordinates>
                         </LinearRing>
                     </outerBoundaryIs>
                 </Polygon>
@@ -58,7 +58,7 @@
                     <altitudeMode>relativeToGround</altitudeMode>
                     <outerBoundaryIs>
                         <LinearRing id="37">
-                            <coordinates>-4.11,55.22,2000 -4.22,55.22,2000 -4.22,55.22,6000 -4.11,55.22,6000</coordinates>
+                            <coordinates>-4.11,55.22,8000 -4.22,55.22,8000 -4.22,55.22,15000 -4.11,55.22,15000</coordinates>
                         </LinearRing>
                     </outerBoundaryIs>
                 </Polygon>
