@@ -17,29 +17,14 @@ class LinePath:
         self.centroid = None
         self.sort = kwargs.pop('sort', False)
 
-        # Check all args are instances of the Coordinate class in decimal form
-        for arg in args:
-            try:
-                if isinstance(arg, Coordinate):
-                    # Convert to decimal format if dms
-                    if arg.coordinate_type != 'decimal':
-                        arg.convert_to_decimal()
-                    else:
-                        continue
-                else:
-                    self.all_coordinates = False
-                    break
-            except TypeError:
-                self.all_coordinates = False
-
         # If user wants coordinates sorted counter clockwise then call the sort vertices method which will change
         # the order of the Coordinate instances in the coordinate_list attribute.  It will sort in descending order
         # of the 'bearing from centroid' attribute.
-        if self.all_coordinates:
-            self.coordinate_list = args
-            if self.sort is True:
-                self.sort_vertices()
-            self.kml_coordinate_list = self.kml_format()
+
+        self.coordinate_list = args
+        if self.sort is True:
+            self.sort_vertices()
+        self.kml_coordinate_list = self.kml_format()
 
     def kml_format(self):
         assert self.coordinate_list.__len__() > 0
