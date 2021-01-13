@@ -69,9 +69,9 @@ my_circle = paths.ArcPath(my_origin_coordinate, start_bearing=1, end_bearing=359
 ```
 
 #### The Kwargs
-- points -> int - how many points to render between the start and end bearings.  Default = 50 \
+- points -> int - how many points to render between the start and end bearings.  Default = 50 
 - height -> int or float - Specifies the height attribute of the Coordinate points to be created.  Defaults to the height 
-of the origin Coordinate instance. \
+of the origin Coordinate instance. 
 - direction -> str - accepts 'Clockwise' and 'Anticlockwise'.  Default - 'Clockwise'
 
 ```
@@ -111,6 +111,57 @@ Default 'None'
 
 ```
 my_linepath_lower_surface = paths.LinePath(coordinate_1, coordinate_2, *my_arc_path_instance, sort=True, height=500)
+```
+
+### Your first floating polygon
+
+```
+import simplekml
+
+from kmlplus import paths, coordinates
+
+# Create a list of tuples in the coordinate format you wish.  DMS coordinates should be provided in DDMMSS format
+# without any decimal places.  All coordinates should be presented in the Y, X or latitude, longitude format.
+
+a_list = [(55.11, -4.11), (55.22, -4.11), (55.22, -4.22), (55.11, -4.22)]
+
+# You can iterate through your list of tuples and create instances of the Coordinate object.  The coordinate object
+# will accept a 'height' kwarg.
+
+instance_list_lower = [coordinates.Coordinate(x[0], x[1], height=2000) for x in a_list]
+instance_list_higher = [coordinates.Coordinate(x[0], x[1], height=6000) for x in a_list]
+
+# Using your list of Coordinate instances, you can create instances of the LinePath object.  The LinePath argument
+# will overwrite ALL coordinate instance height information if the LinePath takes a 'height' kwarg.  When the 'sort'
+# kwarg is given as True (Default, False), the coordinates will be rearranged in anticlockwise order.  This is to allow
+# for correct rendering by the Google Earth engine which needs vertices to be drawn anticlockwise.
+
+lower_surface, upper_surface = paths.LinePath(*instance_list_lower, height=8000, sort=True), \
+                               paths.LinePath(*instance_list_higher, height=15000, sort=True)
+lower_surface.create_sides(upper_surface)
+
+# You can then use your LinePath instances to render your polygons using SimpleKML.
+
+def create_kml():
+    kml = simplekml.Kml()
+    fol = kml.newfolder(name="Example polygon")
+
+    pol = fol.newpolygon(name='lower face of polygon')
+    pol.outerboundaryis = lower_surface.kml_coordinate_list
+    pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+    pol = fol.newpolygon()
+    pol.outerboundaryis = upper_surface.kml_coordinate_list
+    pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+    i = 0
+    for coord_lists in lower_surface.sides:
+        pol = fol.newpolygon()
+        pol.outerboundaryis = coord_lists
+        pol.altitudemode = simplekml.AltitudeMode.relativetoground
+        i += 1
+
+    kml.save('..\Floating polygon example.kml')
 ```
 
 
