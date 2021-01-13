@@ -36,6 +36,8 @@ If you're providing a coordinate in DMS format, tell the object so that it can c
 my_coordinate = coordinates.Coordinate(552343, -45432, height=50, coordinate_type='dms'
 ```
 
+#### Coordinate.get_bearing
+
 ### The ArcPath class
 
 The ArcPath class can be used to create arcs and circular polygons.  It takes a central 'origin' point and will create
@@ -47,7 +49,7 @@ from kmlplus import paths
 my_circle = paths.ArcPath(my_origin_coordinate, start_bearing=1, end_bearing=359, radius=10, **kwargs)
 ```
 
-####**Kwargs
+###**Kwargs
 - points -> int - how many points to render between the start and end bearings.  Default = 50 \
 - height -> int or float - Specifies the height attribute of the Coordinate points to be created.  Defaults to the height 
 of the origin Coordinate instance. \
@@ -70,7 +72,7 @@ from kmlplus import paths
 my_linepath_lower_surface = paths.LinePath(coordinate_1, coordinate_2, *my_arc_path_instance)
 ```
 
-#### LinePath.create_sides()
+### LinePath.create_sides()
 
 create_sides() is the most important function for creating floating 3D polygons.  It takes two LinePath instances of
 equal length and creates the polygons required to create the sides between two LinePath instances.  This is what creates
@@ -84,7 +86,7 @@ my_linepath_lower_surface.create_sides(my_linepath_upper_surface)
 print(my_linepath_lower_surface.sides)
 ```
 
-####**Kwargs
+###**Kwargs
 - sort -> str - If 'True' the linepath will reorder it's vertices to be rendered anticlockwise around the polygon's centroid.
   Default 'False'
 - height -> int or float.  When given, will override the height attributes of all the coordinate instances provided.
