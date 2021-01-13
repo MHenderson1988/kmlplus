@@ -10,6 +10,7 @@ class Coordinate:
         self.height = kwargs.pop('height', 0)
         self.name = kwargs.pop('name', None)
         self.coordinate_type = kwargs.pop('coordinate_type', 'decimal')
+        self.point_of_arc = kwargs.pop('start_of_arc', None)
         if self.coordinate_type == 'dms':
             self.coordinate_type = self.convert_to_decimal()
 

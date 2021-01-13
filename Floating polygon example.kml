@@ -4,6 +4,7 @@
         <Folder id="2">
             <name>Example polygon</name>
             <Placemark id="4">
+                <name>lower face of polygon</name>
                 <Polygon id="3">
                     <altitudeMode>relativeToGround</altitudeMode>
                     <outerBoundaryIs>
