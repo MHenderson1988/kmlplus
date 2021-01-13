@@ -87,3 +87,7 @@ def create_kml():
         i += 1
 
     kml.save('..\Floating polygon example.kml')
+
+
+if __name__ == "__main__":
+    create_kml()
