@@ -56,20 +56,40 @@ class LinePath:
                                               longitude_total / len(self.coordinate_list)
         return Coordinate(latitude_average, longitude_average)
 
+    """
+    This method takes each vertices and calculates it's bearing from the centroid.  This is then used to sort the 
+    vertices into anticlockwise ordering.
+    """
+
     def calculate_bearings_from_centroid(self):
         for coordinate in self.coordinate_list:
             bearing, distance = self.centroid.get_bearing_and_distance(coordinate)
             setattr(coordinate, 'bearing_from_centroid', bearing)
+
+    """
+    This method sorts the vertices into anticlockwise ordering
+    """
 
     def sort_vertices(self):
         self.centroid = self.find_centroid()
         self.calculate_bearings_from_centroid()
         self.coordinate_list = sorted(self.coordinate_list, key=lambda x: x.bearing_from_centroid, reverse=True)
 
+    """
+    kml_format takes self as it's only argument and returns a list of tuples or coordinate information in x,y format.
+    ie - a .kml readable format
+    """
+
     def kml_format(self):
         assert self.coordinate_list.__len__() > 0
         tuple_list = [x.kml_tuple() for x in self.coordinate_list]
         return tuple_list
+
+    """
+    Create_sides takes args and kwargs as it's arguments.  Args must be valid LinePath instances containing coordinate
+    instances.  Both LinePath instance must be of equal length.  It does not return anything however it updates the 
+    self.sides attribute to a list of kml readable tuples which are used to draw the 'sides' of the polygons.
+    """
 
     def create_sides(self, *args, **kwargs):
         for args in args:

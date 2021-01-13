@@ -44,6 +44,9 @@ arc_path_higher = paths.ArcPath(origin_coordinate, start_bearing=1, end_bearing=
 
 circle_line_path_low = paths.LinePath(*arc_path_lower)
 circle_line_path_high = paths.LinePath(*arc_path_higher)
+
+# To use the 'create_sides(LinePath instance here) method, both LinePath MUST be of identical length.  The method
+# will create individual polygons between the 'square' vertices ie lower i, lower i+1, higher i+1, higher i.
 circle_line_path_low.create_sides(circle_line_path_high)
 
 
