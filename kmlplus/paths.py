@@ -13,7 +13,8 @@ automatically.
 class LinePath:
     def __init__(self, *args, **kwargs):
         self.__dict__.update(kwargs)
-        self.coordinate_list = args
+        self.args_list = args
+        self.coordinate_list = self.check_args()
         self.all_coordinates = True
         self.centroid = None
         self.sort = kwargs.pop('sort', False)
@@ -24,9 +25,10 @@ class LinePath:
             for coordinate in self.coordinate_list:
                 coordinate.height = self.height
 
-        # If user wants coordinates sorted counter clockwise then call the sort vertices method which will change
-        # the order of the Coordinate instances in the coordinate_list attribute.  It will sort in descending order
-        # of the 'bearing from centroid' attribute.
+        """If user wants coordinates sorted counter clockwise then call the sort vertices method which will change
+        the order of the Coordinate instances in the coordinate_list attribute.  It will sort in descending order
+        of the 'bearing from centroid' attribute."""
+
         if self.sort is True:
             self.sort_vertices()
         self.kml_coordinate_list = self.kml_format()
@@ -41,6 +43,37 @@ class LinePath:
 
     def __len__(self):
         return len(self.coordinate_list)
+
+    """
+    Check each coordinate.  If it has a kwarg identifying it as the start of an arc path, create said path and return
+    it with the other coordinates.
+    """
+
+    def check_args(self):
+        a_list_to_return = []
+        i = 0
+        while i < len(self.args_list):
+            if self.args_list[i].point_of_arc is True:
+                start_bearing, start_distance = self.args_list[i].get_bearing_and_distance(self.args_list[i].arc_origin)
+
+                # Evaluates True if not the last coordinate in the arguments passed
+                if i < len(self.args_list) - 1:
+                    end_bearing, end_distance = self.args_list[i + 1].get_bearing_and_distance(
+                        self.args_list[i].arc_origin)
+
+                # Evaluates True if this is the last coordinate in the list
+                else:
+                    end_bearing, end_distance = self.args_list[0].get_bearing_and_distance(self.args_list[i].arc_origin)
+                new_arc = ArcPath(self.args_list[i].arc_origin, start_bearing=start_bearing, end_bearing=end_bearing,
+                                  radius=start_distance, direction=self.args_list[i].arc_direction)
+
+                # Unpack the ArcPath's coordinates into the LinePath's coordinate list
+                for coordinate in new_arc:
+                    a_list_to_return.append(coordinate)
+            else:
+                a_list_to_return.append(self.args_list[i])
+            i += 1
+        return a_list_to_return
 
     """
     Find the centroid of the linepath.  This will be used for ordering the coordinates
@@ -98,7 +131,6 @@ class LinePath:
                     "Sides can only be generated for LinePaths of equal length"
                 i = 0
                 side_list = []
-                # TODO: create separate code for LinePath and ArcPath.  Current code will be for line Path
                 # This if condition creates the sides up to the last coordinate, else then creates the last side back
                 # to the first coordinate
                 while i < len(self.coordinate_list):
