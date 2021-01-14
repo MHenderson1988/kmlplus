@@ -1,4 +1,4 @@
-import simplekml
+# import simplekml
 
 from kmlplus import paths, coordinates
 
