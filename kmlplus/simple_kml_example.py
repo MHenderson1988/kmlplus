@@ -1,7 +1,6 @@
 """
 To run this example, uncomment the simple kml code at the bottom and also import simplekml to this file
 """
-
 from kmlplus import paths, coordinates
 
 # Create a list of tuples in the coordinate format you wish.  DMS coordinates should be provided in DDMMSS format
