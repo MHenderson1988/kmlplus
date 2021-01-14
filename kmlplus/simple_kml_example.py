@@ -1,4 +1,6 @@
-import simplekml
+"""
+To run this example, uncomment the simple kml code at the bottom and also import simplekml to this file
+"""
 
 from kmlplus import paths, coordinates
 
@@ -49,8 +51,7 @@ circle_line_path_high = paths.LinePath(*arc_path_higher)
 # will create individual polygons between the 'square' vertices ie lower i, lower i+1, higher i+1, higher i.
 circle_line_path_low.create_sides(circle_line_path_high)
 
-
-# You can then use your LinePath instances to render your polygons using SimpleKML.
+"""# You can then use your LinePath instances to render your polygons using SimpleKML.
 
 def create_kml():
     kml = simplekml.Kml()
@@ -90,4 +91,4 @@ def create_kml():
 
 
 if __name__ == "__main__":
-    create_kml()
+    create_kml()"""
