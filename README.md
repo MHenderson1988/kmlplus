@@ -1,4 +1,4 @@
-#KML+
+# KML+
 
 KML+ (KMLPlus) is library of code for Python which allows the user to easily create standard and 'floating' Polygons, Circles
 and Arcs.
@@ -96,6 +96,6 @@ many or as few 'points' as desired.
 #### Acknowledgements
 
 - [Simplekml](https://pypi.org/project/simplekml/) - for creating an awesome library which has helped me create many
-things and also inspiring me to write this library.
+things and also inspiring me to write this library.`
 
 
