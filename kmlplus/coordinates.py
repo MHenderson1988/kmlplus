@@ -163,7 +163,7 @@ class Coordinate:
     instance which is calling the function to the instance provided in the argument"""
 
     def get_bearing_and_distance(self, another_coordinate):
-        geo_dict = Geodesic.WGS84.Inverse(self._latitude, self._longitude,
+        geo_dict = Geodesic.WGS84.Direct(self._latitude, self._longitude,
                                           another_coordinate.latitude, another_coordinate.longitude)
 
         bearing, distance = geo_dict['azi1'] % 360, geo_dict['s12'] / 1000  # converts metres to kilometres for distance
