@@ -41,6 +41,15 @@ def create_kml():
     pol.outerboundaryis = cta_1_lower
     pol.altitudemode = simplekml.AltitudeMode.relativetoground
 
+    pol = fol.newpolygon(name='Upper face of polygon')
+    pol.outerboundaryis = cta_1_lower
+    pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+    pol = fol.newpolygon(name='Sides')
+    for item in cta_1_lower.sides:
+        pol.outerboundaryis = item
+        pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
     kml.save('Floating polygon example.kml')
 
 
