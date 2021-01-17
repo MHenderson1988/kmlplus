@@ -164,7 +164,7 @@ class Coordinate:
 
     def get_bearing_and_distance(self, another_coordinate):
         geo_dict = Geodesic.WGS84.Inverse(another_coordinate.latitude, another_coordinate.longitude, self._latitude,
-                                          self._longitude,)
+                                          self._longitude, )
 
         bearing, distance = geo_dict['azi1'] % 360, geo_dict['s12'] / 1000  # converts metres to kilometres for distance
         return round(bearing, 2), distance
