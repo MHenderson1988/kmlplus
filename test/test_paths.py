@@ -24,4 +24,3 @@ class TestPaths(TestCase):
     def test_arcpath(self):
         self.assertIsInstance(self._a1, paths.ArcPath)
         lp = paths.LinePath(self._c1, *self._a1)
-
