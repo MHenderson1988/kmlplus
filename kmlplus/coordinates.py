@@ -39,6 +39,19 @@ class Coordinate:
         if type(a_longitude) is float or int:
             self._longitude = round(a_longitude, 6)
             self.coordinate_type = self.detect_coordinate_type(self._latitude)
+        elif type(a_longitude) is str:
+            if a_longitude[-1] == 'a':
+                self.arc_direction = 'anticlockwise'
+                try:
+                    self._longitude = float(a_longitude[0:-1])
+                except TypeError:
+                    print("Couldn't convert string to float")
+            elif a_longitude[-1] == 'c':
+                self.arc_direction = 'clockwise'
+                try:
+                    self._longitude = float(a_longitude[0:-1])
+                except TypeError:
+                    print("Couldn't convert string to float")
         else:
             try:
                 float(a_longitude)

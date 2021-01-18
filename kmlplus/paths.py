@@ -16,7 +16,7 @@ class LinePath:
         self.args_list = args
         self.coordinate_list = self.check_args()
         self.all_coordinates = True
-        self.centroid = None
+        self.centroid = self.find_centroid()
         self.sort = kwargs.pop('sort', False)
         self.height = kwargs.pop('height', None)
 
@@ -54,7 +54,14 @@ class LinePath:
         i = 0
         while i < len(self.args_list):
             if self.args_list[i].arc_direction == 'clockwise' or self.args_list[i].arc_direction == 'anticlockwise':
-                start_bearing, start_distance = self.args_list[i].get_bearing_and_distance(self.args_list[i].arc_origin)
+
+                # If the coordinate has an arc directional value but no origin designated, make the origin the centroid
+                # of the polygon.
+                if self.args_list[i].arc_origin is None:
+                    self.args_list[i].arc_origin = self.find_centroid()
+
+                # Set the start bearing and distance
+                a_start_bearing, a_start_distance = self.args_list[i].get_bearing_and_distance(self.args_list[i].arc_origin)
 
                 # Evaluates True if not the last coordinate in the arguments passed
                 if i < len(self.args_list) - 1:
@@ -64,8 +71,9 @@ class LinePath:
                 # Evaluates True if this is the last coordinate in the list
                 else:
                     end_bearing, end_distance = self.args_list[0].get_bearing_and_distance(self.args_list[i].arc_origin)
-                new_arc = ArcPath(self.args_list[i].arc_origin, start_bearing=start_bearing, end_bearing=end_bearing,
-                                  radius=start_distance, direction=self.args_list[i].arc_direction)
+
+                new_arc = ArcPath(self.args_list[i].arc_origin, start_bearing=a_start_bearing, end_bearing=end_bearing,
+                                  radius=a_start_distance, direction=self.args_list[i].arc_direction)
 
                 # Unpack the ArcPath's coordinates into the LinePath's coordinate list
                 for coordinate in new_arc:
