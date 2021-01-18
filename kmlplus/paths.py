@@ -197,7 +197,7 @@ class ArcPath:
         self.radius = radius
         # if no height provided, defaults to the height of the origin coordinate
         self.height = kwargs.pop('height', self.origin.height)
-        self.direction = kwargs.pop('direction', 'Clockwise')
+        self.direction = kwargs.pop('direction', 'clockwise')
         self.points = kwargs.pop('points', 50)
         self.coordinates = self.populate_path_list()
 
@@ -239,7 +239,7 @@ class ArcPath:
 
         while coordinates_list.__len__() < self.points:
             coordinates_list.append(self.origin.generate_coordinates(self.radius, self.start_bearing, self.height))
-            if self.direction == 'Clockwise':
+            if self.direction == 'clockwise':
                 self.start_bearing = (self.start_bearing + increments) % 360
             else:
                 self.start_bearing = (self.start_bearing - increments) % 360

@@ -72,43 +72,63 @@ cta_2 = [
     "553044,-44945", "552703,-43902", "552518,-44044", "552811,-44906c", "553044,-44945"
 ]
 
+cta_3 = [
+    "552703,-43902", "552150,-42400c", "552040,-42722", "552518,-44044",
+    "552703,-43902"
+]
+
+cta_4 = [
+    "552838,-41639", "552658,-41154c", "552010,-41916", "552150,-42400a", "552838,-41639"
+]
+
+cta_5 = [
+    "553124,-45830", "552040,-42722", "551848,-44702", "553124,-45830"
+]
+
+cta_6 = [
+    "552658,-41154", "552521,-40716c", "551710,-41723", "552040,-42722a", "552150,-42400", "552010,-41916a",
+    "552658,-41154"
+]
+
 cta_1_lower, cta_1_higher = read_coordinates(*cta_1, origin=frz_ref_point, lower_height=1500, upper_height=5500)
 cta_2_lower, cta_2_higher = read_coordinates(*cta_2, origin=frz_ref_point, lower_height=2000, upper_height=5500)
+cta_3_lower, cta_3_higher = read_coordinates(*cta_3, origin=frz_ref_point, lower_height=3000, upper_height=5500)
+cta_4_lower, cta_4_higher = read_coordinates(*cta_4, origin=frz_ref_point, lower_height=3000, upper_height=5500)
+cta_5_lower, cta_5_higher = read_coordinates(*cta_5, origin=frz_ref_point, lower_height=3500, upper_height=5500)
+cta_6_lower, cta_6_higher = read_coordinates(*cta_6, origin=frz_ref_point, lower_height=4000, upper_height=5500)
 cta_1_lower.create_sides(cta_1_higher)
 cta_2_lower.create_sides(cta_2_higher)
+cta_3_lower.create_sides(cta_3_higher)
+cta_4_lower.create_sides(cta_4_higher)
+cta_5_lower.create_sides(cta_5_higher)
+cta_6_lower.create_sides(cta_6_higher)
+
+
+def create_polygon(a_folder, cta_lower, cta_higher, sides):
+    pol = a_folder.newpolygon()
+    pol.outerboundaryis = cta_lower
+    pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+    pol = a_folder.newpolygon()
+    pol.outerboundaryis = cta_higher
+    pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+    for item in sides:
+        pol = a_folder.newpolygon()
+        pol.outerboundaryis = item
+        pol.altitudemode = simplekml.AltitudeMode.relativetoground
 
 
 def create_kml():
     kml = simplekml.Kml()
-    fol = kml.newfolder(name="CTA1")
+    fol = kml.newfolder(name='Example')
 
-    pol = fol.newpolygon(name='lower face of polygon')
-    pol.outerboundaryis = cta_1_lower
-    pol.altitudemode = simplekml.AltitudeMode.relativetoground
-
-    pol = fol.newpolygon(name='Upper face of polygon')
-    pol.outerboundaryis = cta_1_higher
-    pol.altitudemode = simplekml.AltitudeMode.relativetoground
-
-    for item in cta_1_lower.sides:
-        pol = fol.newpolygon()
-        pol.outerboundaryis = item
-        pol.altitudemode = simplekml.AltitudeMode.relativetoground
-
-    fol = kml.newfolder(name="CTA2")
-
-    pol = fol.newpolygon(name='lower face of polygon')
-    pol.outerboundaryis = cta_2_lower
-    pol.altitudemode = simplekml.AltitudeMode.relativetoground
-
-    pol = fol.newpolygon(name='Upper face of polygon')
-    pol.outerboundaryis = cta_2_higher
-    pol.altitudemode = simplekml.AltitudeMode.relativetoground
-
-    for item in cta_2_lower.sides:
-        pol = fol.newpolygon()
-        pol.outerboundaryis = item
-        pol.altitudemode = simplekml.AltitudeMode.relativetoground
+    create_polygon(fol, cta_1_lower, cta_1_higher, cta_1_lower.sides)
+    create_polygon(fol, cta_2_lower, cta_2_higher, cta_2_lower.sides)
+    create_polygon(fol, cta_3_lower, cta_3_higher, cta_3_lower.sides)
+    create_polygon(fol, cta_4_lower, cta_4_higher, cta_4_lower.sides)
+    create_polygon(fol, cta_5_lower, cta_5_higher, cta_5_lower.sides)
+    create_polygon(fol, cta_6_lower, cta_6_higher, cta_6_lower.sides)
 
     kml.save('Floating polygon example.kml')
 
