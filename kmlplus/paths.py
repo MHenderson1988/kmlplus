@@ -53,7 +53,7 @@ class LinePath:
         a_list_to_return = []
         i = 0
         while i < len(self.args_list):
-            if self.args_list[i].point_of_arc is True:
+            if self.args_list[i].arc_direction == 'clockwise' or self.args_list[i].arc_direction == 'anticlockwise':
                 start_bearing, start_distance = self.args_list[i].get_bearing_and_distance(self.args_list[i].arc_origin)
 
                 # Evaluates True if not the last coordinate in the arguments passed

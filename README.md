@@ -10,9 +10,9 @@ This is for anyone who wishes to easily render polygons, especially 'floating' o
 I work in the aviation industry and needed a reliable way to create models of our airspace.  It its useful for creating
 models of airways and controlled airspace.  It can be used for anything that takes your fancy!
 
-![Floating polygon example](img/floating_polygon_1.jpg)
-
 ![Prestwick airspace example](img/egpk_airspace_sideon.png)
+
+![Floating polygon example](img/floating_polygon_1.jpg)
 
 ## Installation
 ###pip
@@ -25,7 +25,10 @@ pip install kmlplus
 ###Recommendations
 
 KML+ easily integrates with the fantastic [Simplekml](https://pypi.org/project/simplekml/) library and I highly
-recommend using it in conjunction with KML+ for the best experience.  
+recommend using it in conjunction with KML+ for the best experience.
+
+Take a look at the example .py file provided to see how KML+ integrates with SimpleKML to create airspace representations
+from CAA AIP supplied data.
 
 ### Classes
 
@@ -38,8 +41,7 @@ KML+ is comprised of three classes -
 
 #### Coordinate
 
-Coordinate(*lat, long, height=0, name=None, coordinate_type='decimal', start_of_arc=None, arc_direction=None,
-arc_origin=None*)
+Coordinate(*lat, long, height=0, name=None, coordinate_type='decimal', arc_direction=None, arc_origin=None*)
 
 ```
 from kmlplus import coordinates
@@ -52,12 +54,12 @@ You can also use Degrees Minutes Seconds (DMS) however you must state this on cr
 my_dms_coordinate = coordinates.Coordinate(552233, -43212, coordinate_type='dms')
 ```
 
-Coordinates Objects can automatically create an ArcPath when passed to the LinePath class using the *start_of_arc=None, arc_direction=None,
+Coordinates Objects can automatically create an ArcPath when passed to the LinePath class using the *arc_direction=None,
 arc_origin=None* kwargs.  When doing so, the ArcPath bearing and radius will be calculated between the Coordinate and the Origin.
 The ArcPath will end at the next argument or will return the first if it is the last argument passed.
 
 ```
-coordinate_arc_start = (55.22, -4.11, start_of_arc=True, arc_direction='Clockwise', arc_origin=an_origin_coordinate
+coordinate_arc_start = (55.22, -4.11, arc_direction='Clockwise', arc_origin=an_origin_coordinate
 lp = paths.LinePath(c1, c2, coordinate_arc_start, c4)
 ```
 

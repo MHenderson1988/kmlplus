@@ -10,9 +10,46 @@ The example requires the installation of simple kml which can be achieved via -
 """
 
 import copy
+
 import simplekml
 
 from kmlplus import paths, coordinates
+
+"""
+Make lists of the EGPK CTA areas, as provided on the CAA AIP.  Suffix a denotes the start of an anticlockwise arc
+and c denotes the start of a clockwise arc.  Both arcs are based upon the FRZ reference point.
+"""
+frz_ref_point = coordinates.Coordinate(55.509392, -4.594581)
+cta_1 = [
+    "554023,-45040", "553734,-44227a", "552811,-44906", "553124,-45830", "554023,-45040"
+]
+
+cta_2 = [
+    "553044,-44945", "552703,-43902", "552518,-44044", "552811,-44906c", "553044,-44945"
+]
+
+cta_3 = [
+    "552703,-43902", "552150,-42400c", "552040,-42722", "552518,-44044",
+    "552703,-43902"
+]
+
+cta_4 = [
+    "552838,-41639", "552658,-41154c", "552010,-41916", "552150,-42400a", "552838,-41639"
+]
+
+cta_5 = [
+    "553124,-45830", "552040,-42722", "551848,-44702", "553124,-45830"
+]
+
+cta_6 = [
+    "552658,-41154", "552521,-40716c", "551710,-41723", "552040,-42722a", "552150,-42400", "552010,-41916a",
+    "552658,-41154"
+]
+
+"""
+Iterate through the coordinates.  Takes upper and lower heights and will return two LinePath objects representing the 
+upper and lower boundaries of the airspace.  Accepts kwargs lower_height and upper_height.
+"""
 
 
 def read_coordinates(*args, **kwargs):
@@ -62,33 +99,6 @@ def create_upper_lower(a_list, lower_height, upper_height):
     upper = paths.LinePath(*a_list_copy, height=upper_height)
     return lower, upper
 
-
-frz_ref_point = coordinates.Coordinate(55.509392, -4.594581)
-cta_1 = [
-    "554023,-45040", "553734,-44227a", "552811,-44906", "553124,-45830", "554023,-45040"
-]
-
-cta_2 = [
-    "553044,-44945", "552703,-43902", "552518,-44044", "552811,-44906c", "553044,-44945"
-]
-
-cta_3 = [
-    "552703,-43902", "552150,-42400c", "552040,-42722", "552518,-44044",
-    "552703,-43902"
-]
-
-cta_4 = [
-    "552838,-41639", "552658,-41154c", "552010,-41916", "552150,-42400a", "552838,-41639"
-]
-
-cta_5 = [
-    "553124,-45830", "552040,-42722", "551848,-44702", "553124,-45830"
-]
-
-cta_6 = [
-    "552658,-41154", "552521,-40716c", "551710,-41723", "552040,-42722a", "552150,-42400", "552010,-41916a",
-    "552658,-41154"
-]
 
 cta_1_lower, cta_1_higher = read_coordinates(*cta_1, origin=frz_ref_point, lower_height=1500, upper_height=5500)
 cta_2_lower, cta_2_higher = read_coordinates(*cta_2, origin=frz_ref_point, lower_height=2000, upper_height=5500)
