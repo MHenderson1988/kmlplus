@@ -87,14 +87,17 @@ class Coordinate:
     @staticmethod
     def detect_coordinate_type(a_coordinate):
         string_of_coordinate = str(a_coordinate)
-        if string_of_coordinate.find('.') == -1:
-            return 'dms'
-        else:
-            position_of_decimal = string_of_coordinate.find('.')
-            if position_of_decimal >= 5:
+        try:
+            if string_of_coordinate.find('.') == -1:
                 return 'dms'
             else:
-                return 'decimal'
+                position_of_decimal = string_of_coordinate.find('.')
+                if position_of_decimal >= 5:
+                    return 'dms'
+                else:
+                    return 'decimal'
+        except TypeError:
+            print("A coordinate must be type decimal or dms")
 
     """Takes one argument of type string and returns a string object stripped of whitespace"""
 

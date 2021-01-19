@@ -19,7 +19,6 @@ class TestPaths(TestCase):
     def test_linepath(self):
         self.assertIsInstance(self._lp, paths.LinePath)
         self._lp.create_sides(self._lp2)
-        print(self._lp.sides)
 
     def test_arcpath(self):
         self.assertIsInstance(self._a1, paths.ArcPath)
