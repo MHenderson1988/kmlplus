@@ -132,7 +132,7 @@ class LinePath:
     self.sides attribute to a list of kml readable tuples which are used to draw the 'sides' of the polygons.
     """
 
-    def create_sides(self, *args, **kwargs):
+    def create_sides(self, *args):
         for args in args:
             if isinstance(args, LinePath):
                 assert len(self.coordinate_list) == len(args.coordinate_list), \
@@ -181,6 +181,8 @@ class LinePath:
 
             else:
                 raise Exception('create_sides() function only accepts LinePath instances or that of its subclasses')
+
+    def side_polygon_coordinates(self, list_to_add_to, current_index, next_index):
 
 
 """

@@ -38,6 +38,8 @@ KML+ is comprised of three classes -
 - LinePath class
 - ArcPath class
 
+The user should be able to create simple floating polygons without touching the ArcPath class however it is documented
+here in case you should wish to use it in other ways.
 
 #### Coordinate
 

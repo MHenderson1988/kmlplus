@@ -3,10 +3,9 @@ from geopy import distance as gp
 
 
 class Coordinate:
-    def __init__(self, lat, long, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.__dict__.update(kwargs)
-        self._latitude = lat
-        self._longitude = long
+        self.lat_long_arguments(args)
         self.height = kwargs.pop('height', 0)
         self.name = kwargs.pop('name', None)
         self.coordinate_type = kwargs.pop('coordinate_type', 'decimal')
@@ -39,19 +38,6 @@ class Coordinate:
         if type(a_longitude) is float or int:
             self._longitude = round(a_longitude, 6)
             self.coordinate_type = self.detect_coordinate_type(self._latitude)
-        elif type(a_longitude) is str:
-            if a_longitude[-1] == 'a':
-                self.arc_direction = 'anticlockwise'
-                try:
-                    self._longitude = float(a_longitude[0:-1])
-                except TypeError:
-                    print("Couldn't convert string to float")
-            elif a_longitude[-1] == 'c':
-                self.arc_direction = 'clockwise'
-                try:
-                    self._longitude = float(a_longitude[0:-1])
-                except TypeError:
-                    print("Couldn't convert string to float")
         else:
             try:
                 float(a_longitude)
@@ -114,6 +100,31 @@ class Coordinate:
     def __str__(self):
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
+
+    def lat_long_arguments(self, args):
+        if len(args) == 2:
+            self._latitude = args[0]
+            self._longitude = args[1]
+        elif len(args) == 1:
+            try:
+                lat_string, long_string = args[0].split(',')
+            except TypeError:
+                Exception("Latitude and Longitude must be given as a single string OR as individual int/floats")
+            if long_string[-1].isalpha():
+                self.set_direction_from_letter(long_string[-1])
+                self._latitude = float(lat_string)
+                self._longitude = float(long_string[0:-1])
+            else:
+                self._longitude = float(long_string)
+
+
+    def set_direction_from_letter(self, aCharacter):
+        if aCharacter == 'a':
+            self.arc_direction = 'anticlockwise'
+        elif aCharacter == 'c':
+            self.arc_direction = 'clockwise'
+        else:
+            Exception("Longitude strings should be suffixed with either 'a' or 'c'")
 
     def to_string_yx(self):
         the_string = "{}, {}".format(self._latitude, self._longitude)
