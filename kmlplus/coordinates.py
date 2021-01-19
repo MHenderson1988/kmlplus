@@ -5,10 +5,11 @@ from geopy import distance as gp
 class Coordinate:
     def __init__(self, *args, **kwargs):
         self.__dict__.update(kwargs)
-        self.lat_long_arguments(args)
-        self.height = kwargs.pop('height', 0)
+        self._latitude = None
+        self._longitude = None
+        self._height = 0
+        self.lat_long_height_arguments(args)
         self.name = kwargs.pop('name', None)
-        self.coordinate_type = None
         self.check_coordinates_same_type()
         self.arc_direction = kwargs.pop('arc_direction', None)
         self.arc_origin = kwargs.pop('arc_origin', None)
@@ -24,9 +25,10 @@ class Coordinate:
         if type(a_latitude) is float or int:
             self._latitude = round(a_latitude, 6)
             self.detect_coordinate_type(self._latitude)
-        else:
+        elif type(a_latitude) is str:
             try:
-                float(a_latitude)
+                stripped_string = self.strip_whitespace(a_latitude)
+                float(stripped_string)
             except TypeError:
                 print("Could not convert latitude value of type {} to string, define latitude and longitude as int or \
                 float".format(type(a_latitude)))
@@ -40,9 +42,10 @@ class Coordinate:
         if type(a_longitude) is float or int:
             self._longitude = round(a_longitude, 6)
             self.detect_coordinate_type(self._longitude)
-        else:
+        elif type(a_longitude) is str:
             try:
-                float(a_longitude)
+                stripped_string = self.strip_whitespace(a_longitude)
+                float(stripped_string)
             except TypeError:
                 print("Could not convert longitude of type {} to string.  Latitude and longitude should be specified as\
                 type int or float".format(type(a_longitude)))
@@ -94,6 +97,10 @@ class Coordinate:
                 return 'dms'
             else:
                 return 'decimal'
+
+    @staticmethod
+    def strip_whitespace(a_string):
+        return a_string.strip()
 
     """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (dms).  If not it
     returns a TypeError.  If successful, the function calls the decimal coordinate to dms coordinate conversion
@@ -195,21 +202,34 @@ class Coordinate:
         the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
         return the_string
 
-    def lat_long_arguments(self, args):
-        if len(args) == 2:
+    def lat_long_height_arguments(self, args):
+        if len(args) == 3:
             self._latitude = args[0]
             self._longitude = args[1]
+            self._height = args[2]
+        elif len(args) == 2:
+            self._latitude = args[0]
+            self._longitude = args[1]
+            self._height = 0
         elif len(args) == 1:
             try:
-                lat_string, long_string = args[0].split(',')
+                split_string = args[0].split(',')
+                if len(split_string) == 3:
+                    self._latitude = float(split_string[0])
+                    self._longitude = float(split_string[1])
+                    self._height = float(split_string[2])
+                elif len(split_string) == 2:
+                    self._latitude = float(split_string[0])
+                    self._longitude = float(split_string[1])
             except TypeError:
-                Exception("Latitude and Longitude must be given as a single string OR as individual int/floats")
-            if long_string[-1].isalpha():
-                self.set_direction_from_letter(long_string[-1])
-                self._latitude = float(lat_string)
-                self._longitude = float(long_string[0:-1])
-            else:
-                self._longitude = float(long_string)
+                Exception("Something went wrong initialising the latitude, longitude and height values.")
+
+    def check_for_direction(self, a_longitude_string):
+        if a_longitude_string[-1].isalpha():
+            self.set_direction_from_letter(a_longitude_string[-1])
+            return float(a_longitude_string[0:-1])
+        else:
+            return float(a_longitude_string)
 
     def set_direction_from_letter(self, aCharacter):
         if aCharacter == 'a':
