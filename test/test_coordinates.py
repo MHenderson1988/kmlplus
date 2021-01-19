@@ -31,7 +31,7 @@ class TestCoordinates(TestCase):
         c2.longitude = "-1200203"
         c2.height = "53.23"
         self.assertEqual(c2.latitude, 55.1111)
-        self.assertEqual(c2.longitude, -120.0342)
+        self.assertEqual(c2.longitude, -120.03417)
         self.assertEqual(c2.height, 53.23)
 
         # Check c3 initialises correctly

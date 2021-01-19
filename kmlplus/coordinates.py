@@ -14,7 +14,7 @@ class Coordinate:
         self.arc_direction = kwargs.pop('arc_direction', None)
         self.arc_origin = kwargs.pop('arc_origin', None)
 
-        # Convert coordinates to decimal degrees if given as DMS
+        # Convert coordinates to decimal degrees if given as DMS, on init
         if self.detect_coordinate_type(self.latitude) == 'dms':
             self.latitude = self.convert_to_decimal(self.latitude)
         if self.detect_coordinate_type(self.longitude) == 'dms':
@@ -29,7 +29,7 @@ class Coordinate:
     def latitude(self, a_latitude):
         self._latitude = self.validate_attribute_input(a_latitude)
         if self.detect_coordinate_type(self.latitude) == 'dms':
-            self._latitude = round(self.convert_to_decimal(self.latitude), 4)
+            self._latitude = round(self.convert_to_decimal(self.latitude), 5)
 
     @property
     def longitude(self):
@@ -39,7 +39,7 @@ class Coordinate:
     def longitude(self, a_longitude):
         self._longitude = self.validate_attribute_input(a_longitude)
         if self.detect_coordinate_type(self.longitude) == 'dms':
-            self._longitude = round(self.convert_to_decimal(self.longitude), 4)
+            self._longitude = round(self.convert_to_decimal(self.longitude), 5)
 
     @property
     def height(self):
@@ -58,6 +58,9 @@ class Coordinate:
                 return float(stripped_string)
             except TypeError:
                 print("Couldn't convert to string")
+
+    """Takes one argument of type int or float and returns True if the number is a negative (less than zero)
+    number.  Returns False if it is positive"""
 
     @staticmethod
     def is_negative(aNumber):
@@ -93,6 +96,8 @@ class Coordinate:
             else:
                 return 'decimal'
 
+    """Takes one argument of type string and returns a string object stripped of whitespace"""
+
     @staticmethod
     def strip_whitespace(a_string):
         return a_string.strip()
@@ -107,8 +112,8 @@ class Coordinate:
                             "to call the convert_to_decimal function instead")
         else:
             try:
-                self._latitude = self.decimal_to_dms(self._latitude)
-                self._longitude = self.decimal_to_dms(self._longitude)
+                self.latitude = self.decimal_to_dms(self.latitude)
+                self.longitude = self.decimal_to_dms(self.longitude)
 
             except TypeError:
                 print("Something went wrong while converting from decimal to dms")
@@ -139,6 +144,9 @@ class Coordinate:
         else:
             decimal_degrees = round(float(degrees - (minutes + seconds)), 5)
         return decimal_degrees
+
+    """Takes one argument of type int or float and returns three strings representing degrees, minutes and seconds
+    of the DMS coordinate provided"""
 
     def split_dms_for_calc(self, coordinate_to_convert):
         is_negative = self.is_negative(coordinate_to_convert)
@@ -180,30 +188,38 @@ class Coordinate:
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
     def __str__(self):
-        the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
+        the_string = "{}, {}, {}".format(self.latitude, self.longitude, self.height)
         return the_string
+
+    """Takes multiple arguments and returns nothing.  Initialises the latitude, longitude and height attributes
+    of the object when initialised."""
 
     def lat_long_height_arguments(self, args):
         if len(args) == 3:
-            self._latitude = args[0]
-            self._longitude = args[1]
-            self._height = args[2]
+            self.latitude = args[0]
+            self.longitude = args[1]
+            self.height = args[2]
         elif len(args) == 2:
-            self._latitude = args[0]
-            self._longitude = args[1]
-            self._height = 0
+            self.latitude = args[0]
+            self.longitude = args[1]
+            self.height = 0
         elif len(args) == 1:
             try:
                 split_string = args[0].split(',')
                 if len(split_string) == 3:
-                    self._latitude = float(split_string[0])
-                    self._longitude = float(split_string[1])
-                    self._height = float(split_string[2])
+                    self.latitude = float(split_string[0])
+                    self.longitude = float(split_string[1])
+                    self.height = float(split_string[2])
                 elif len(split_string) == 2:
-                    self._latitude = float(split_string[0])
-                    self._longitude = float(split_string[1])
+                    self.latitude = float(split_string[0])
+                    self.longitude = float(split_string[1])
             except TypeError:
                 Exception("Something went wrong initialising the latitude, longitude and height values.")
+
+    """
+    Takes one argument of type string.  Checks to see if string is suffixed with a letter denoting arc direction.
+    If so calls the set_direction_from_letter function and returns the coordinate without it's suffix.
+    """
 
     def check_for_direction(self, a_longitude_string):
         if a_longitude_string[-1].isalpha():
@@ -211,6 +227,11 @@ class Coordinate:
             return float(a_longitude_string[0:-1])
         else:
             return float(a_longitude_string)
+
+    """
+    Takes one argument of type char and sets the object's arc_direction attribute accordingly.  If the char is not valid
+    throws an Exception.
+    """
 
     def set_direction_from_letter(self, aCharacter):
         if aCharacter == 'a':
@@ -220,13 +241,21 @@ class Coordinate:
         else:
             Exception("Longitude strings should be suffixed with either 'a' or 'c'")
 
+    """
+    Takes no arguments and returns a string of 'Latitude, Longitude'
+    """
+
     def to_string_yx(self):
-        the_string = "{}, {}".format(self._latitude, self._longitude)
+        the_string = "{}, {}".format(self.latitude, self.longitude)
         return the_string
+
+    """
+    Takes zero arguments and returns a .kml readable tuple in the xyz format.
+    """
 
     #  Gives an xyz tuple which is readable by kml
     def kml_tuple(self):
-        return self._longitude, self._latitude, self._height
+        return self.longitude, self.latitude, self.height
 
     """Takes 2 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
     - 359 degrees and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance 
@@ -246,8 +275,8 @@ class Coordinate:
     instance which is calling the function to the instance provided in the argument"""
 
     def get_bearing_and_distance(self, another_coordinate):
-        geo_dict = Geodesic.WGS84.Inverse(another_coordinate.latitude, another_coordinate.longitude, self._latitude,
-                                          self._longitude, )
+        geo_dict = Geodesic.WGS84.Inverse(another_coordinate.latitude, another_coordinate.longitude, self.latitude,
+                                          self.longitude, )
 
         bearing, distance = geo_dict['azi1'] % 360, geo_dict['s12'] / 1000  # converts metres to kilometres for distance
         return round(bearing, 2), distance
