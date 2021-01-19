@@ -8,13 +8,18 @@ class Coordinate:
         self._latitude = None
         self._longitude = None
         self._height = 0
+        self.coordinate_type = None
         self.lat_long_height_arguments(args)
         self.name = kwargs.pop('name', None)
-        self.check_coordinates_same_type()
         self.arc_direction = kwargs.pop('arc_direction', None)
         self.arc_origin = kwargs.pop('arc_origin', None)
-        if self.coordinate_type == 'dms':
-            self.coordinate_type = self.convert_to_decimal()
+
+        # Convert coordinates to decimal degrees if given as DMS
+        if self.detect_coordinate_type(self.latitude) == 'dms':
+            self.latitude = self.convert_to_decimal(self.latitude)
+        if self.detect_coordinate_type(self.longitude) == 'dms':
+            self.longitude = self.convert_to_decimal(self.longitude)
+        self.coordinate_type = 'decimal'
 
     @property
     def latitude(self):
@@ -22,16 +27,9 @@ class Coordinate:
 
     @latitude.setter
     def latitude(self, a_latitude):
-        if type(a_latitude) is float or int:
-            self._latitude = round(a_latitude, 6)
-            self.detect_coordinate_type(self._latitude)
-        elif type(a_latitude) is str:
-            try:
-                stripped_string = self.strip_whitespace(a_latitude)
-                float(stripped_string)
-            except TypeError:
-                print("Could not convert latitude value of type {} to string, define latitude and longitude as int or \
-                float".format(type(a_latitude)))
+        self._latitude = self.validate_attribute_input(a_latitude)
+        if self.detect_coordinate_type(self.latitude) == 'dms':
+            self._latitude = round(self.convert_to_decimal(self.latitude), 4)
 
     @property
     def longitude(self):
@@ -39,16 +37,9 @@ class Coordinate:
 
     @longitude.setter
     def longitude(self, a_longitude):
-        if type(a_longitude) is float or int:
-            self._longitude = round(a_longitude, 6)
-            self.detect_coordinate_type(self._longitude)
-        elif type(a_longitude) is str:
-            try:
-                stripped_string = self.strip_whitespace(a_longitude)
-                float(stripped_string)
-            except TypeError:
-                print("Could not convert longitude of type {} to string.  Latitude and longitude should be specified as\
-                type int or float".format(type(a_longitude)))
+        self._longitude = self.validate_attribute_input(a_longitude)
+        if self.detect_coordinate_type(self.longitude) == 'dms':
+            self._longitude = round(self.convert_to_decimal(self.longitude), 4)
 
     @property
     def height(self):
@@ -56,13 +47,17 @@ class Coordinate:
 
     @height.setter
     def height(self, a_height):
-        if type(a_height) is float or int:
-            self._height = a_height
-        else:
+        self._height = self.validate_attribute_input(a_height)
+
+    def validate_attribute_input(self, a_value):
+        if isinstance(a_value, int) or isinstance(a_value, float):
+            return a_value
+        elif isinstance(a_value, str):
             try:
-                float(a_height)
-            except ValueError:
-                print(ValueError("Height must be a valid floating point number eg -5.3"))
+                stripped_string = self.strip_whitespace(a_value)
+                return float(stripped_string)
+            except TypeError:
+                print("Couldn't convert to string")
 
     @staticmethod
     def is_negative(aNumber):
@@ -114,7 +109,6 @@ class Coordinate:
             try:
                 self._latitude = self.decimal_to_dms(self._latitude)
                 self._longitude = self.decimal_to_dms(self._longitude)
-                self.coordinate_type = 'dms'
 
             except TypeError:
                 print("Something went wrong while converting from decimal to dms")
@@ -123,16 +117,12 @@ class Coordinate:
         returns a TypeError.  If successful, the function calls the decimal coordinate to dms coordinate conversion
         function and updates the instance accordingly"""
 
-    def convert_to_decimal(self):
-        if self.coordinate_type == 'decimal':
-            raise TypeError("The coordinates are already decimal format.  Either call the convert to dms function OR"
-                            "check you have the correct coordinates set")
+    def convert_to_decimal(self, a_value):
+        if self.detect_coordinate_type(a_value) == 'decimal':
+            raise TypeError("Coordinate is already a decimal value")
         else:
             try:
-                self._latitude = self.dms_to_decimal(self._latitude)
-                self._longitude = self.dms_to_decimal(self._longitude)
-                self.coordinate_type = 'decimal'
-
+                return self.dms_to_decimal(a_value)
             except TypeError:
                 print("Something went wrong while converting from dms to decimal")
 
@@ -160,15 +150,15 @@ class Coordinate:
 
         if is_negative:
             if length == 8:
-                degrees = before_decimal[1:4]
+                degrees = before_decimal[0:4]
                 minutes = before_decimal[4:6]
                 seconds = coordinate_string[6:]
             elif length == 7:
-                degrees = before_decimal[1:3]
+                degrees = before_decimal[0:3]
                 minutes = before_decimal[3:5]
                 seconds = coordinate_string[5:]
             elif length == 6:
-                degrees = before_decimal[1:2]
+                degrees = before_decimal[0:2]
                 minutes = before_decimal[2:4]
                 seconds = coordinate_string[4:]
         else:
@@ -186,15 +176,6 @@ class Coordinate:
                 seconds = coordinate_string[3:]
 
         return degrees, minutes, seconds
-
-    def check_coordinates_same_type(self):
-        lat_type = self.detect_coordinate_type(self._latitude)
-        long_type = self.detect_coordinate_type(self._longitude)
-        if lat_type == long_type:
-            self.coordinate_type = lat_type
-        else:
-            TypeError("Latitude and Longitude are different projection types, both must be either dms or decimal "
-                      "degrees")
 
     """Takes argument of self and returns a string representation of the coordinates and height"""
 
