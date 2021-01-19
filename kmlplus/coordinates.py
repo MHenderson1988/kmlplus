@@ -8,7 +8,8 @@ class Coordinate:
         self.lat_long_arguments(args)
         self.height = kwargs.pop('height', 0)
         self.name = kwargs.pop('name', None)
-        self.coordinate_type = kwargs.pop('coordinate_type', 'decimal')
+        self.coordinate_type = None
+        self.check_coordinates_same_type()
         self.arc_direction = kwargs.pop('arc_direction', None)
         self.arc_origin = kwargs.pop('arc_origin', None)
         if self.coordinate_type == 'dms':
@@ -22,6 +23,7 @@ class Coordinate:
     def latitude(self, a_latitude):
         if type(a_latitude) is float or int:
             self._latitude = round(a_latitude, 6)
+            self.detect_coordinate_type(self._latitude)
         else:
             try:
                 float(a_latitude)
@@ -37,7 +39,7 @@ class Coordinate:
     def longitude(self, a_longitude):
         if type(a_longitude) is float or int:
             self._longitude = round(a_longitude, 6)
-            self.coordinate_type = self.detect_coordinate_type(self._latitude)
+            self.detect_coordinate_type(self._longitude)
         else:
             try:
                 float(a_longitude)
@@ -59,6 +61,13 @@ class Coordinate:
             except ValueError:
                 print(ValueError("Height must be a valid floating point number eg -5.3"))
 
+    @staticmethod
+    def is_negative(aNumber):
+        if aNumber < 0:
+            return True
+        else:
+            return False
+
     """This converts a given float from a decimal coordinate to a degrees minutes seconds coordinate.  It returns 
     an int"""
 
@@ -67,25 +76,12 @@ class Coordinate:
         degrees = int(coordinate_to_convert)
         minutes = abs((coordinate_to_convert - degrees) * 60)
         seconds = minutes % 1 * 60
-        dms_string = str(degrees) + str(int(minutes)) + str(round(seconds))
-        return int(dms_string)
+        dms_string = str(degrees) + str(int(minutes)) + str(round(seconds, 2))
+        return float(dms_string)
 
-    """Takes one argument of type int and returns a float representing a decimal coordinate"""
-
-    @staticmethod
-    def dms_to_decimal(coordinate_to_convert):
-        degrees = int(str(coordinate_to_convert)[0:-4])
-        minutes = float(str(coordinate_to_convert)[-4:-2]) / 60
-        seconds = float(str(coordinate_to_convert)[-2:]) / 3600
-
-        if degrees >= 0:
-            decimal_degrees = round(float(degrees + (minutes + seconds)), 5)
-        else:
-            decimal_degrees = round(float(degrees - (minutes + seconds)), 5)
-        return decimal_degrees
-
-    """Takes an argument of type float or int.  Returns a string indicating whether the given coordinate is of type
-    dms or decimal"""
+    """Takes an argument of type float or int.  Logically a coordinate of dms will not have a decimal place until at
+    least six positions in eg - 552312.374, -45643.2 or 824512, -1795212.548 whereas decimal coordinates will have a
+    decimal occur earlier.  Returns a string indicating whether the given coordinate is of type dms or decimal"""
 
     @staticmethod
     def detect_coordinate_type(a_coordinate):
@@ -93,60 +89,11 @@ class Coordinate:
         if string_of_coordinate.find('.') == -1:
             return 'dms'
         else:
-            return 'decimal'
-
-    """Takes argument of self and returns a string representation of the coordinates and height"""
-
-    def __str__(self):
-        the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
-        return the_string
-
-    def lat_long_arguments(self, args):
-        if len(args) == 2:
-            self._latitude = args[0]
-            self._longitude = args[1]
-        elif len(args) == 1:
-            try:
-                lat_string, long_string = args[0].split(',')
-            except TypeError:
-                Exception("Latitude and Longitude must be given as a single string OR as individual int/floats")
-            if long_string[-1].isalpha():
-                self.set_direction_from_letter(long_string[-1])
-                self._latitude = float(lat_string)
-                self._longitude = float(long_string[0:-1])
+            position_of_decimal = string_of_coordinate.find('.')
+            if position_of_decimal >= 5:
+                return 'dms'
             else:
-                self._longitude = float(long_string)
-
-
-    def set_direction_from_letter(self, aCharacter):
-        if aCharacter == 'a':
-            self.arc_direction = 'anticlockwise'
-        elif aCharacter == 'c':
-            self.arc_direction = 'clockwise'
-        else:
-            Exception("Longitude strings should be suffixed with either 'a' or 'c'")
-
-    def to_string_yx(self):
-        the_string = "{}, {}".format(self._latitude, self._longitude)
-        return the_string
-
-    #  Gives an xyz tuple which is readable by kml
-    def kml_tuple(self):
-        return self._longitude, self._latitude, self._height
-
-    """Takes 2 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
-    - 359 degrees and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance 
-    of the Coordinate class which is the desired bearing and distance from the lat/long string provided. """
-
-    def generate_coordinates(self, distance_km, a_bearing, a_height):
-        point = gp.Point.from_string(self.to_string_yx())
-        decimal_lat_lon_string = gp.distance(kilometers=distance_km).destination(point=point,
-                                                                                 bearing=a_bearing).format_decimal()
-        decimal_lat_lon_string = decimal_lat_lon_string.split(',')
-        lat_float, long_float = round(float(decimal_lat_lon_string[0]), 6), round(float(decimal_lat_lon_string[1]), 6)
-
-        new_coordinate_instance = Coordinate(lat_float, long_float, height=a_height)
-        return new_coordinate_instance
+                return 'decimal'
 
     """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (dms).  If not it
     returns a TypeError.  If successful, the function calls the decimal coordinate to dms coordinate conversion
@@ -181,6 +128,118 @@ class Coordinate:
 
             except TypeError:
                 print("Something went wrong while converting from dms to decimal")
+
+    """Takes one argument of type int and returns a float representing a decimal coordinate"""
+
+    def dms_to_decimal(self, coordinate_to_convert):
+        degrees, split_minutes, split_seconds = self.split_dms_for_calc(coordinate_to_convert)
+        degrees = float(degrees)
+        minutes = float(split_minutes) / 60
+        seconds = float(split_seconds) / 3600
+
+        if degrees >= 0:
+            decimal_degrees = round(float(degrees + (minutes + seconds)), 5)
+        else:
+            decimal_degrees = round(float(degrees - (minutes + seconds)), 5)
+        return decimal_degrees
+
+    def split_dms_for_calc(self, coordinate_to_convert):
+        is_negative = self.is_negative(coordinate_to_convert)
+        coordinate_string = str(coordinate_to_convert)
+        # Split string to isolate DDMMSS without decimal places
+        split_string = coordinate_string.split('.')
+        before_decimal = split_string[0]
+        length = len(before_decimal)
+
+        if is_negative:
+            if length == 8:
+                degrees = before_decimal[1:4]
+                minutes = before_decimal[4:6]
+                seconds = coordinate_string[6:]
+            elif length == 7:
+                degrees = before_decimal[1:3]
+                minutes = before_decimal[3:5]
+                seconds = coordinate_string[5:]
+            elif length == 6:
+                degrees = before_decimal[1:2]
+                minutes = before_decimal[2:4]
+                seconds = coordinate_string[4:]
+        else:
+            if length == 7:
+                degrees = before_decimal[0:3]
+                minutes = before_decimal[3:5]
+                seconds = coordinate_string[5:]
+            elif length == 6:
+                degrees = before_decimal[0:2]
+                minutes = before_decimal[2:4]
+                seconds = coordinate_string[4:]
+            elif length == 5:
+                degrees = before_decimal[0:1]
+                minutes = before_decimal[1:3]
+                seconds = coordinate_string[3:]
+
+        return degrees, minutes, seconds
+
+    def check_coordinates_same_type(self):
+        lat_type = self.detect_coordinate_type(self._latitude)
+        long_type = self.detect_coordinate_type(self._longitude)
+        if lat_type == long_type:
+            self.coordinate_type = lat_type
+        else:
+            TypeError("Latitude and Longitude are different projection types, both must be either dms or decimal "
+                      "degrees")
+
+    """Takes argument of self and returns a string representation of the coordinates and height"""
+
+    def __str__(self):
+        the_string = "{}, {}, {}".format(self._latitude, self._longitude, self._height)
+        return the_string
+
+    def lat_long_arguments(self, args):
+        if len(args) == 2:
+            self._latitude = args[0]
+            self._longitude = args[1]
+        elif len(args) == 1:
+            try:
+                lat_string, long_string = args[0].split(',')
+            except TypeError:
+                Exception("Latitude and Longitude must be given as a single string OR as individual int/floats")
+            if long_string[-1].isalpha():
+                self.set_direction_from_letter(long_string[-1])
+                self._latitude = float(lat_string)
+                self._longitude = float(long_string[0:-1])
+            else:
+                self._longitude = float(long_string)
+
+    def set_direction_from_letter(self, aCharacter):
+        if aCharacter == 'a':
+            self.arc_direction = 'anticlockwise'
+        elif aCharacter == 'c':
+            self.arc_direction = 'clockwise'
+        else:
+            Exception("Longitude strings should be suffixed with either 'a' or 'c'")
+
+    def to_string_yx(self):
+        the_string = "{}, {}".format(self._latitude, self._longitude)
+        return the_string
+
+    #  Gives an xyz tuple which is readable by kml
+    def kml_tuple(self):
+        return self._longitude, self._latitude, self._height
+
+    """Takes 2 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
+    - 359 degrees and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance 
+    of the Coordinate class which is the desired bearing and distance from the lat/long string provided. """
+
+    def generate_coordinates(self, distance_km, a_bearing, a_height):
+        point = gp.Point.from_string(self.to_string_yx())
+        decimal_lat_lon_string = gp.distance(kilometers=distance_km).destination(point=point,
+                                                                                 bearing=a_bearing).format_decimal()
+        decimal_lat_lon_string = decimal_lat_lon_string.split(',')
+        lat_float, long_float = round(float(decimal_lat_lon_string[0]), 6), round(float(decimal_lat_lon_string[1]), 6)
+
+        new_coordinate_instance = Coordinate(lat_float, long_float, height=a_height)
+        return new_coordinate_instance
 
     """This takes an instance of the Coordinate class as its argument.  It returns the bearing (of type float) from the
     instance which is calling the function to the instance provided in the argument"""

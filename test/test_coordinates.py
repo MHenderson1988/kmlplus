@@ -7,8 +7,8 @@ class TestCoordinates(TestCase):
     @classmethod
     def setUpClass(cls):
         # Create classes
-        cls._c1 = coordinates.Coordinate("553542, -45265c")
-        cls._c2 = coordinates.Coordinate(10, 10)
+        cls._c1 = coordinates.Coordinate(55.38327, -4.32723)
+        cls._c2 = coordinates.Coordinate(100000, 100000)
         cls._c3 = coordinates.Coordinate(554323, -47543, height=20, coordinate_type='dms')
 
     def setUp(self):
@@ -16,6 +16,8 @@ class TestCoordinates(TestCase):
         self.decimal_coordinates_1 = [(55.11, -4.11), (55.22, -4.22), (54.11, 4.11), (54.22, 4.22)]
         self.decimal_coordinates_2 = [(52.32, -4.45), (55.75, -4.11), (53.453, -4.8587), (56.2832, -2.4893)]
         self.dms_coordinates_1 = [(546512, -25545), (556545, -45210), (505425, 42215), (540012, 40214)]
+        self.dms_coordinates_2 = ["546512, -25545", (556545, -45210), "505425, 42215a", (540012, 40214)]
+        self.height_values = [3848, 311, 99.37443, 10, 0]
 
     def test_coordinate(self):
         for coordinate_pair in self.decimal_coordinates_1:
@@ -27,31 +29,19 @@ class TestCoordinates(TestCase):
             self.assertEqual(self._c1.longitude, coordinate_pair[1])
             # Check the to_string test works
             self.assertEqual(self._c1.__str__(), "{}, {}, {}".format(coordinate_pair[0], coordinate_pair[1], 0))
-
-    def test_get_bearing_and_distance(self):
-        # Populate the expected results from online calculators
-        expected_results = [184.15, 6.39, 266.34, 301.04]
-        i = 0
-        while i < len(self.decimal_coordinates_1):
-            self._c1.latitude, self._c1.longitude = self.decimal_coordinates_1[i][0], self.decimal_coordinates_1[i][1]
-            self._c2.latitude, self._c2.longitude = self.decimal_coordinates_2[i][0], self.decimal_coordinates_2[i][1]
-            bearing, distance = self._c1.get_bearing_and_distance(self._c2)
-            """self.assertAlmostEqual(self._c1.get_bearing_and_distance(self._c2), expected_results[i], delta=0.3)"""
-            i += 1
+            # Check heights setter works
+            for heights in self.height_values:
+                self._c1.height = heights
+                self.assertEqual(self._c1.height, heights)
 
     def test_decimal_to_dms(self):
         # Populate the expected results from online calculators
-        expected = [(55636, -4636), (551312, -41312), (54636, 4636), (541312, 41312)]
-        i = 0
-        while i < len(self.dms_coordinates_1):
-            # Change the coordinates to the next pair in the data set
-            self._c1.latitude, self._c1.longitude = self.decimal_coordinates_1[i][0], self.decimal_coordinates_1[i][1]
-            # Attempt to convert the coordinates from decimal to degrees minutes seconds
-            self._c1.convert_to_dms()
-            # Check that the coordinates have been converted as expected
-            self.assertEqual(self._c1.latitude, expected[i][0])
-            self.assertEqual(self._c1.longitude, expected[i][1])
-            i += 1
+        expected = (552259.77, -41938.03)
+        self._c1._latitude, self._c1._longitude = 55.38327, -4.32723
+        self._c1._latitude = self._c1.decimal_to_dms(self._c1._latitude)
+        self._c1._longitude = self._c1.decimal_to_dms(self._c1._longitude)
+        self.assertEqual(expected[0], self._c1._latitude)
+        self.assertEqual(expected[1], self._c1._longitude)
 
     def test_dms_to_decimal(self):
         i = 0
@@ -63,11 +53,26 @@ class TestCoordinates(TestCase):
             # Attempt to convert the coordinates from degrees minutes seconds to decimal
             self._c3.convert_to_decimal()
             # Check that the coordinates have been converted as expected
-            self.assertAlmostEqual(self._c3.latitude, expected[i][0], delta=0.1)
-            self.assertAlmostEqual(self._c3.longitude, expected[i][1], delta=0.1)
+            self.assertAlmostEqual(self._c3.latitude, expected[i][0])
+            self.assertAlmostEqual(self._c3.longitude, expected[i][1])
             # Check that passing a coordinate type of decimal to the conversion method raises a type error
             with self.assertRaises(TypeError):
                 self._c3.convert_to_decimal()
+            i += 1
+
+    def test_detect_coordinate_type(self):
+        self._c1.detect_coordinate_type(self._c1._longitude)
+        self.assertEqual(self._c1.coordinate_type, 'dms')
+
+    def test_get_bearing_and_distance(self):
+        # Populate the expected results from online calculators
+        expected_results = [184.15, 6.39, 266.34, 301.04]
+        i = 0
+        while i < len(self.decimal_coordinates_1):
+            self._c1.latitude, self._c1.longitude = self.decimal_coordinates_1[i][0], self.decimal_coordinates_1[i][1]
+            self._c2.latitude, self._c2.longitude = self.decimal_coordinates_2[i][0], self.decimal_coordinates_2[i][1]
+            bearing, distance = self._c1.get_bearing_and_distance(self._c2)
+            """self.assertAlmostEqual(self._c1.get_bearing_and_distance(self._c2), expected_results[i], delta=0.3)"""
             i += 1
 
     def test_generate_coordinates(self):

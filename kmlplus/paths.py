@@ -61,7 +61,8 @@ class LinePath:
                     self.args_list[i].arc_origin = self.find_centroid()
 
                 # Set the start bearing and distance
-                a_start_bearing, a_start_distance = self.args_list[i].get_bearing_and_distance(self.args_list[i].arc_origin)
+                a_start_bearing, a_start_distance = self.args_list[i].get_bearing_and_distance(
+                    self.args_list[i].arc_origin)
 
                 # Evaluates True if not the last coordinate in the arguments passed
                 if i < len(self.args_list) - 1:
@@ -181,8 +182,6 @@ class LinePath:
 
             else:
                 raise Exception('create_sides() function only accepts LinePath instances or that of its subclasses')
-
-    def side_polygon_coordinates(self, list_to_add_to, current_index, next_index):
 
 
 """
