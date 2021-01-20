@@ -200,11 +200,11 @@ class Coordinate:
         try:
             if len(args) == 3:
                 self.latitude = args[0]
-                self.longitude = self.check_for_direction(args[1])
+                self.longitude = self.check_for_direction(str(args[1]))
                 self.height = args[2]
             elif len(args) == 2:
                 self.latitude = args[0]
-                self.longitude = self.check_for_direction(args[1])
+                self.longitude = self.check_for_direction(str(args[1]))
                 self.height = 0
             elif len(args) == 1:
                 try:

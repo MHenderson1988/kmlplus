@@ -43,36 +43,51 @@ KML+ is comprised of three classes -
 The user should be able to create simple floating polygons without touching the ArcPath class however it is documented
 here in case you should wish to use it in other ways.
 
+***
+
 #### Coordinate
 
-Coordinate(*lat, long, height=0, name=None, coordinate_type='decimal', arc_direction=None, arc_origin=None*)
+```Coordinate(**args, name=None, arc_direction=None, arc_origin=None*)```
+
+The Coordinate class accepts up to three arguments - latitude, longitude and height.  This can be given as either
+one string or three separate arguments.  Latitude and longitude must be either decimal coordinates or degrees minutes seconds (DMS).
+The coordinate object will auto-detect the coordinate type and will automatically convert DMS coordinates to kml readable decimal coordinates.
+
+Coordinate instances can also be designated as the start point of a clockwise or anti-clockwise arc/circle.  This is achieved by 
+appending either 'a' or 'c' to end of the latitude or longitude value.
+
+Examples -
 
 ```
 from kmlplus import coordinates
-my_new_coordinate = coordinates.Coordinate(55.22, -4.12432)
+
+# A standard coordinate object with a default height of 0
+c1 = coordinates.Coordinate(55.123, -4.1234)
+
+# The same coordinate initialised with a height of 50m
+c1 = coordinates.Coordinate(55.123, -4.1234, 50)
+
+# Now with a string
+c1 = coordinates.Coordinate("55.123, -4.1234")
+
+# Specifying that this coordinate is the start of a clockwise 'arc'
+c1 = coordinates.Coordinate(55.123, '-4.1234c')
+
+# You can combine coordinate types
+c1 = coordinates.Coordinate(55.123, '-41232.327847834c')
 ```
 
-You can also use Degrees Minutes Seconds (DMS) however you must state this on creation.
+A note on arcs - 
 
-```
-my_dms_coordinate = coordinates.Coordinate(552233, -43212, coordinate_type='dms')
-```
+* Values must be passed as a String eg - "55.22132c" is valid, 55.22132c will throw an error
 
-Coordinates Objects can automatically create an ArcPath when passed to the LinePath class using the *arc_direction=None,
-arc_origin=None* kwargs. When doing so, the ArcPath bearing and radius will be calculated between the Coordinate and the
-Origin. The ArcPath will end at the next argument or will return the first if it is the last argument passed.
+* If kwarg arc_origin is not passed, it will default to the centroid of the LineString created later on.
 
-```
-coordinate_arc_start = (55.22, -4.11, arc_direction='Clockwise', arc_origin=an_origin_coordinate
-lp = paths.LinePath(c1, c2, coordinate_arc_start, c4)
-```
-
-In the above example the coordinate_arc_start instance will prompt the creation of an arc in a clockwise direction to
-the next argument - c4. If it was the last argument passed, the arc would end at c1, thereby 'closing' the polygon.
+***
 
 #### LinePath
 
-LinePath(*args, sort=False, height=None*)
+```LinePath(*args, sort=False, height=None*)```
 
 LinePath args MUST be Coordinate objects.
 
@@ -90,9 +105,11 @@ Sides of polygons are generated using the LinePath.create_sides(*another_linepat
 
 ArcPath objects must be passed as iterable arguments by using the * operator.
 
+***
+
 #### ArcPath
 
-ArcPath(*origin, start_bearing, end_bearing, radius, height=self.origin.height, direction='Clockwise', points=50*)
+```ArcPath(*origin, start_bearing, end_bearing, radius, height=self.origin.height, direction='Clockwise', points=50*)```
 
 ArcPath objects are used to create a series of Coordinate objects to simulate a circle or arc which starts and ends on a
 specified bearing from a specified origin at a given radius. They can be 'Clockwise' or 'Anticlockwise' and return as
