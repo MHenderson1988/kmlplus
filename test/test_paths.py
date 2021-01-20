@@ -40,8 +40,8 @@ class TestPaths(TestCase):
         i = 0
         # Assert linepath calling sorted is arranged in anticlockwise order
         self.assertTrue(all(sorted_line_path.coordinate_list[i].bearing_from_centroid >=
-                            sorted_line_path.coordinate_list[i+1].bearing_from_centroid
-                            for i in range(len(sorted_line_path.coordinate_list)-1)))
+                            sorted_line_path.coordinate_list[i + 1].bearing_from_centroid
+                            for i in range(len(sorted_line_path.coordinate_list) - 1)))
         # Assert unsorted line path is ordered in the same order they were passed as arguments
         while i < len(a_list):
             self.assertEqual(a_list[i], unsorted_line_path.coordinate_list[i].to_string_yx())
@@ -85,8 +85,8 @@ class TestPaths(TestCase):
     def test_calculate_heading_increments(self):
         ap = paths.ArcPath(self._origin, 150, 250, 10)
         ap2 = paths.ArcPath(self._origin, 250, 180, 10)
-        self.assertEqual(ap.calculate_heading_increments(100, 200), 100/50)
-        self.assertEqual(ap2.calculate_heading_increments(270, 180), 270/50)
+        self.assertEqual(ap.calculate_heading_increments(100, 200), 100 / 50)
+        self.assertEqual(ap2.calculate_heading_increments(270, 180), 270 / 50)
 
     def test_populate_path_list(self):
         ap = paths.ArcPath(self._origin, 150, 250, 10, points=200)

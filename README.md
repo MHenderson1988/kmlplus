@@ -49,12 +49,13 @@ here in case you should wish to use it in other ways.
 
 ```Coordinate(**args, name=None, arc_direction=None, arc_origin=None*)```
 
-The Coordinate class accepts up to three arguments - latitude, longitude and height.  This can be given as either
-one string or three separate arguments.  Latitude and longitude must be either decimal coordinates or degrees minutes seconds (DMS).
-The coordinate object will auto-detect the coordinate type and will automatically convert DMS coordinates to kml readable decimal coordinates.
+The Coordinate class accepts up to three arguments - latitude, longitude and height. This can be given as either one
+string or three separate arguments. Latitude and longitude must be either decimal coordinates or degrees minutes
+seconds (DMS). The coordinate object will auto-detect the coordinate type and will automatically convert DMS coordinates
+to kml readable decimal coordinates.
 
-Coordinate instances can also be designated as the start point of a clockwise or anti-clockwise arc/circle.  This is achieved by 
-appending either 'a' or 'c' to end of the latitude or longitude value.
+Coordinate instances can also be designated as the start point of a clockwise or anti-clockwise arc/circle. This is
+achieved by appending either 'a' or 'c' to end of the latitude or longitude value.
 
 Examples -
 
@@ -77,7 +78,7 @@ c1 = coordinates.Coordinate(55.123, '-4.1234c')
 c1 = coordinates.Coordinate(55.123, '-41232.327847834c')
 ```
 
-A note on arcs - 
+A note on arcs -
 
 * Values must be passed as a String eg - "55.22132c" is valid, 55.22132c will throw an error
 
@@ -87,7 +88,11 @@ A note on arcs -
 
 #### LinePath
 
-```LinePath(*args, sort=False, height=None*)```
+The LinePath class takes Coordinate objects or lists of Coordinate objects as its arguments. If a Coordinate object
+defines itself as the start of a clockwise or anticlockwise arc, the LinePath class will call an ArcPath instance. This
+will automatically create the required arc as part of the LinePath objects coordinates.
+
+```LinePath(*args, sort=False, height=None, points=50*)```
 
 *args must all be instances of Type Coordinate.
 
@@ -96,6 +101,7 @@ correct rendering by Google Earth. This is experimental and is highly unlikely t
 
 *height=float or int* will override all height values in the Coordinate arguments.
 
+*points=int* will define how many coordinates should be created for any detected arcs/circles.
 
 ```
 from kmlplus import paths

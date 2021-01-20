@@ -84,7 +84,6 @@ class LinePath:
             i += 1
         return a_list_to_return
 
-
     """
     Find the centroid of the linepath.  This will be used for ordering the coordinates
     to be counter clockwise so as to be best displayed by kml rendering.

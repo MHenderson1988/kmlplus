@@ -291,5 +291,6 @@ class Coordinate:
         geo_dict = Geodesic.WGS84.Inverse(another_coordinate.latitude, another_coordinate.longitude, self.latitude,
                                           self.longitude, )
 
-        bearing, distance = geo_dict['azi1'] % 360, round(geo_dict['s12'] / 1000, 3)  # converts metres to kilometres for distance
+        bearing, distance = geo_dict['azi1'] % 360, round(geo_dict['s12'] / 1000,
+                                                          3)  # converts metres to kilometres for distance
         return round(bearing, 2), distance
