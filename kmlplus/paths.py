@@ -16,7 +16,7 @@ class LinePath:
         self.args_list = args
         self.coordinate_list = self.check_args()
         self.all_coordinates = True
-        self.centroid = None
+        self.centroid = self.find_centroid()
         self.sort = kwargs.pop('sort', False)
         self.height = kwargs.pop('height', None)
 
@@ -53,8 +53,18 @@ class LinePath:
         a_list_to_return = []
         i = 0
         while i < len(self.args_list):
-            if self.args_list[i].arc_direction == 'clockwise' or self.args_list[i].arc_direction == 'anticlockwise':
-                start_bearing, start_distance = self.args_list[i].get_bearing_and_distance(self.args_list[i].arc_origin)
+            if self.args_list[i].arc_direction is None:
+                a_list_to_return.append(self.args_list[i])
+            elif self.args_list[i].arc_direction == 'clockwise' or self.args_list[i].arc_direction == 'anticlockwise':
+
+                # If the coordinate has an arc directional value but no origin designated, make the origin the centroid
+                # of the polygon.
+                if self.args_list[i].arc_origin is None:
+                    self.args_list[i].arc_origin = self.find_centroid()
+
+                # Set the start bearing and distance
+                a_start_bearing, a_start_distance = self.args_list[i].get_bearing_and_distance(
+                    self.args_list[i].arc_origin)
 
                 # Evaluates True if not the last coordinate in the arguments passed
                 if i < len(self.args_list) - 1:
@@ -64,14 +74,13 @@ class LinePath:
                 # Evaluates True if this is the last coordinate in the list
                 else:
                     end_bearing, end_distance = self.args_list[0].get_bearing_and_distance(self.args_list[i].arc_origin)
-                new_arc = ArcPath(self.args_list[i].arc_origin, start_bearing=start_bearing, end_bearing=end_bearing,
-                                  radius=start_distance, direction=self.args_list[i].arc_direction)
+
+                new_arc = ArcPath(self.args_list[i].arc_origin, start_bearing=a_start_bearing, end_bearing=end_bearing,
+                                  radius=a_start_distance, direction=self.args_list[i].arc_direction)
 
                 # Unpack the ArcPath's coordinates into the LinePath's coordinate list
                 for coordinate in new_arc:
                     a_list_to_return.append(coordinate)
-            else:
-                a_list_to_return.append(self.args_list[i])
             i += 1
         return a_list_to_return
 
@@ -124,7 +133,7 @@ class LinePath:
     self.sides attribute to a list of kml readable tuples which are used to draw the 'sides' of the polygons.
     """
 
-    def create_sides(self, *args, **kwargs):
+    def create_sides(self, *args):
         for args in args:
             if isinstance(args, LinePath):
                 assert len(self.coordinate_list) == len(args.coordinate_list), \
@@ -224,41 +233,26 @@ class ArcPath:
         else:
             TypeError("Error: origin MUST be an instance of the Coordinate class")
 
-    def calculate_heading_increments(self):
-        if self.end_bearing > self.start_bearing:
-            difference = (self.end_bearing - self.start_bearing) % 360
+    def calculate_heading_increments(self, start_bearing, end_bearing):
+        if self.direction == 'clockwise':
+            difference = end_bearing - start_bearing
+            if difference < 0:
+                difference = difference + 360
         else:
-            difference = (self.start_bearing - self.end_bearing) % 360
-
+            difference = start_bearing - end_bearing
+            if difference < 0:
+                difference = difference + 360
         incremental_heading_value = difference / self.points
         return incremental_heading_value
 
     def populate_path_list(self):
         coordinates_list = []
-        increments = self.calculate_heading_increments()
-
+        increments = self.calculate_heading_increments(self.start_bearing, self.end_bearing)
+        bearing = self.start_bearing
         while coordinates_list.__len__() < self.points:
-            coordinates_list.append(self.origin.generate_coordinates(self.radius, self.start_bearing, self.height))
+            coordinates_list.append(self.origin.generate_coordinates(self.radius, bearing, self.height))
             if self.direction == 'clockwise':
-                self.start_bearing = (self.start_bearing + increments) % 360
+                bearing = (bearing + increments) % 360
             else:
-                self.start_bearing = (self.start_bearing - increments) % 360
+                bearing = (bearing - increments) % 360
         return coordinates_list
-
-
-"""    def coordinates_kml_format(self):
-        coordinate_list = self.populate_path_list()
-        kml_format_list = []
-        for coordinate_instance in coordinate_list:
-            kml_format_list.append(coordinate_instance.kml_tuple())
-        return kml_format_list"""
-
-"""
-SlopedArcPath class is a subclass of ArcPath.  It it used to create an ArcPath which ends at 
-a different height from which it originally started.
-"""
-
-
-class SlopedArcPath(ArcPath):
-    def __init__(self, **kwargs):
-        super().__init__(self, **kwargs)
