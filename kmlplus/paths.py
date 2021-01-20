@@ -234,41 +234,26 @@ class ArcPath:
         else:
             TypeError("Error: origin MUST be an instance of the Coordinate class")
 
-    def calculate_heading_increments(self):
-        if self.end_bearing > self.start_bearing:
-            difference = (self.end_bearing - self.start_bearing) % 360
+    def calculate_heading_increments(self, start_bearing, end_bearing):
+        if self.direction == 'clockwise':
+            difference = end_bearing - start_bearing
+            if difference < 0:
+                difference = difference + 360
         else:
-            difference = (self.start_bearing - self.end_bearing) % 360
-
+            difference = start_bearing - end_bearing
+            if difference < 0:
+                difference = difference + 360
         incremental_heading_value = difference / self.points
         return incremental_heading_value
 
     def populate_path_list(self):
         coordinates_list = []
-        increments = self.calculate_heading_increments()
-
+        increments = self.calculate_heading_increments(self.start_bearing, self.end_bearing)
+        bearing = self.start_bearing
         while coordinates_list.__len__() < self.points:
-            coordinates_list.append(self.origin.generate_coordinates(self.radius, self.start_bearing, self.height))
+            coordinates_list.append(self.origin.generate_coordinates(self.radius, bearing, self.height))
             if self.direction == 'clockwise':
-                self.start_bearing = (self.start_bearing + increments) % 360
+                bearing = (bearing + increments) % 360
             else:
-                self.start_bearing = (self.start_bearing - increments) % 360
+                bearing = (bearing - increments) % 360
         return coordinates_list
-
-
-"""    def coordinates_kml_format(self):
-        coordinate_list = self.populate_path_list()
-        kml_format_list = []
-        for coordinate_instance in coordinate_list:
-            kml_format_list.append(coordinate_instance.kml_tuple())
-        return kml_format_list"""
-
-"""
-SlopedArcPath class is a subclass of ArcPath.  It it used to create an ArcPath which ends at 
-a different height from which it originally started.
-"""
-
-
-class SlopedArcPath(ArcPath):
-    def __init__(self, **kwargs):
-        super().__init__(self, **kwargs)
