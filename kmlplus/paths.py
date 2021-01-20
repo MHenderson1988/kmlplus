@@ -91,11 +91,11 @@ class LinePath:
 
     def find_centroid(self):
         latitude_total, longitude_total = 0, 0
-        for coordinate_instance in self.coordinate_list:
+        for coordinate_instance in self.args_list:
             latitude_total += coordinate_instance.latitude
             longitude_total += coordinate_instance.longitude
-        latitude_average, longitude_average = latitude_total / len(self.coordinate_list), \
-                                              longitude_total / len(self.coordinate_list)
+        latitude_average, longitude_average = latitude_total / len(self.args_list), \
+                                              longitude_total / len(self.args_list)
         return Coordinate(latitude_average, longitude_average)
 
     """
