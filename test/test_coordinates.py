@@ -72,10 +72,6 @@ class TestCoordinates(TestCase):
         string_to_strip = c1.strip_whitespace("    Hello")
         self.assertEqual("Hello", string_to_strip)
 
-    def test_convert_to_dms(self):
-        c1 = coordinates.Coordinate(341222.212343, -55312.32894389, 0)
-        self.assertRaises(TypeError, c1.convert_to_dms())
-
     def test_dms_to_decimal(self):
         c1 = coordinates.Coordinate("44.123423, -554312.3, 49")
         self.assertEqual(44.123423, c1.latitude)
@@ -108,3 +104,33 @@ class TestCoordinates(TestCase):
         self.assertEqual('clockwise', c1.arc_direction)
         self.assertEqual(-4.24453, c1.check_for_direction('-4.24453c'))
         self.assertEqual('anticlockwise', c2.arc_direction)
+
+    def test_set_direction_from_letter(self):
+        c1 = coordinates.Coordinate("55.23231a, -552312")
+        self.assertEqual('clockwise', c1.set_direction_from_letter('c'))
+        self.assertEqual('anticlockwise', c1.set_direction_from_letter('a'))
+        self.assertRaises(TypeError, c1.set_direction_from_letter(True))
+
+    def test_to_string_yx(self):
+        c1 = coordinates.Coordinate(55.11213, -4.24453)
+        expected_string = "55.11213, -4.24453"
+        actual_string = c1.to_string_yx()
+        self.assertEqual(expected_string, actual_string)
+
+    def test_kml_tuple(self):
+        c1 = coordinates.Coordinate("55.23231c, -552312")
+        expected = (-55.38667, 55.23231, 0)
+        self.assertEqual(expected, c1.kml_tuple())
+
+    def test_generate_coordinates(self):
+        c1 = coordinates.Coordinate(55.123, "-4.123", 0)
+        c2 = c1.generate_coordinates(10, 180, 0)
+        self.assertAlmostEqual(c2.latitude, 55.03317)
+        self.assertAlmostEqual(c2.longitude, -4.123)
+
+    def test_get_bearing_and_distance(self):
+        c1 = coordinates.Coordinate(55.123, "-4.123", 0)
+        c2 = c1.generate_coordinates(50, 180, 0)
+        bearing, distance = c2.get_bearing_and_distance(c1)
+        self.assertEqual(180, bearing)
+        self.assertEqual(50, distance)

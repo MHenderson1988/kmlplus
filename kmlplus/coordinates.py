@@ -8,7 +8,6 @@ class Coordinate:
         self._latitude = None
         self._longitude = None
         self._height = 0
-        self.coordinate_type = None
         # Initialise the arc direction attribute here so it is not overwritten by the lat_long arguments
         self.arc_direction = kwargs.pop('arc_direction', None)
         self.name = kwargs.pop('name', None)
@@ -45,7 +44,7 @@ class Coordinate:
 
     def validate_attribute_input(self, a_value):
         if isinstance(a_value, int) or isinstance(a_value, float):
-            return a_value
+            return round(a_value, 5)
         elif isinstance(a_value, str):
             try:
                 stripped_string = self.strip_whitespace(a_value)
@@ -101,22 +100,6 @@ class Coordinate:
     @staticmethod
     def strip_whitespace(a_string):
         return a_string.strip()
-
-    """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (dms).  If not it
-    returns a TypeError.  If successful, the function calls the decimal coordinate to dms coordinate conversion
-    function and updates the instance accordingly"""
-
-    def convert_to_dms(self):
-        if self.coordinate_type == 'dms':
-            raise TypeError("The coordinates provided are already in the degrees, minutes, seconds format.  You need "
-                            "to call the convert_to_decimal function instead")
-        else:
-            try:
-                self.latitude = self.decimal_to_dms(self.latitude)
-                self.longitude = self.decimal_to_dms(self.longitude)
-
-            except TypeError:
-                print("Something went wrong while converting from decimal to dms")
 
     """Takes no arguments.  This function checks that the coordinate is firstly of the correct type (decimal).  If not it
         returns a TypeError.  If successful, the function calls the decimal coordinate to dms coordinate conversion
@@ -246,11 +229,11 @@ class Coordinate:
     def check_for_direction(self, a_longitude_string):
         if not isinstance(a_longitude_string, str):
             try:
-                str(a_longitude_string)
+                a_longitude_string = str(a_longitude_string)
             except TypeError:
                 Exception("Cannot cast to string for check_for_direction")
         if a_longitude_string[-1].isalpha():
-            self.set_direction_from_letter(a_longitude_string[-1])
+            self.arc_direction = self.set_direction_from_letter(a_longitude_string[-1])
             return float(a_longitude_string[0:-1])
         else:
             return float(a_longitude_string)
@@ -260,12 +243,14 @@ class Coordinate:
     throws an Exception.
     """
 
-    def set_direction_from_letter(self, aCharacter):
-        if aCharacter == 'a':
-            self.arc_direction = 'anticlockwise'
-        elif aCharacter == 'c':
-            self.arc_direction = 'clockwise'
-        else:
+    @staticmethod
+    def set_direction_from_letter(aCharacter):
+        try:
+            if aCharacter == 'a':
+                return 'anticlockwise'
+            elif aCharacter == 'c':
+                return 'clockwise'
+        except TypeError:
             Exception("Longitude strings should be suffixed with either 'a' or 'c'")
 
     """
@@ -298,12 +283,13 @@ class Coordinate:
         new_coordinate_instance = Coordinate(lat_float, long_float, height=a_height)
         return new_coordinate_instance
 
-    """This takes an instance of the Coordinate class as its argument.  It returns the bearing (of type float) from the
-    instance which is calling the function to the instance provided in the argument"""
+    """This takes an instance of the Coordinate class as its argument.  It returns the bearing and distance FROM the argument to the
+    instance calling the function.  IE - if you're using instance A to call this function against instance B, it will return
+    the heading from B to A"""
 
     def get_bearing_and_distance(self, another_coordinate):
         geo_dict = Geodesic.WGS84.Inverse(another_coordinate.latitude, another_coordinate.longitude, self.latitude,
                                           self.longitude, )
 
-        bearing, distance = geo_dict['azi1'] % 360, geo_dict['s12'] / 1000  # converts metres to kilometres for distance
+        bearing, distance = geo_dict['azi1'] % 360, round(geo_dict['s12'] / 1000, 3)  # converts metres to kilometres for distance
         return round(bearing, 2), distance
