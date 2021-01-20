@@ -76,5 +76,28 @@ class TestCoordinates(TestCase):
         c1 = coordinates.Coordinate(341222.212343, -55312.32894389, 0)
         self.assertRaises(TypeError, c1.convert_to_dms())
 
-    def test_convert_to_decimal(self):
+    def test_dms_to_decimal(self):
+        c1 = coordinates.Coordinate("44.123423, -554312.3, 49")
+        self.assertEqual(44.123423, c1.latitude)
+        self.assertEqual(-55.72008, c1.longitude)
 
+    def test_split_dms_for_calc(self):
+        c1 = coordinates.Coordinate("55.11213, -4.24453")
+        degrees, minutes, seconds = c1.split_dms_for_calc(552211)
+        self.assertEqual(degrees, '55')
+        self.assertEqual(minutes, '22')
+        self.assertEqual(seconds, '11')
+        degrees, minutes, seconds = c1.split_dms_for_calc(-1782212.1526456)
+        self.assertEqual(degrees, '-178')
+        self.assertEqual(minutes, '22')
+        self.assertEqual(seconds, '12.1526456')
+
+    def test_str(self):
+        c1 = coordinates.Coordinate(44.22, -12.32)
+        actual_string = c1.__str__()
+        expected_string = "44.22, -12.32, 0"
+        self.assertEqual(actual_string, expected_string)
+
+    def test_lat_long_height_arguments(self):
+        c1 = coordinates.Coordinate("55.11213, -4.24453")
+        self.assertRaises(TypeError, c1.lat_long_height_arguments(True))

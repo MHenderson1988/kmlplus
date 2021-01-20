@@ -64,10 +64,13 @@ class Coordinate:
 
     @staticmethod
     def is_negative(aNumber):
-        if aNumber < 0:
-            return True
-        else:
-            return False
+        try:
+            if aNumber < 0:
+                return True
+            else:
+                return False
+        except TypeError:
+            print("is_negative can only evaluate numbers.  Please provide valid input.")
 
     """This converts a given float from a decimal coordinate to a degrees minutes seconds coordinate.  It returns 
     an int"""
@@ -137,6 +140,14 @@ class Coordinate:
     """Takes one argument of type int and returns a float representing a decimal coordinate"""
 
     def dms_to_decimal(self, coordinate_to_convert):
+        # Ensure value is a string, if not cast to a string for further evaluation
+        if not isinstance(coordinate_to_convert, str):
+            try:
+                str(coordinate_to_convert)
+            except TypeError:
+                print("Value could not be converted to a string.  dms_to_decimal requires either float,"
+                      "int or str to execute")
+
         degrees, split_minutes, split_seconds = self.split_dms_for_calc(coordinate_to_convert)
         degrees = float(degrees)
         minutes = float(split_minutes) / 60
@@ -152,14 +163,25 @@ class Coordinate:
     of the DMS coordinate provided"""
 
     def split_dms_for_calc(self, coordinate_to_convert):
-        is_negative = self.is_negative(coordinate_to_convert)
+
+        # Check argument is string and if not try to cast.
+        if not isinstance(coordinate_to_convert, str):
+            try:
+                str(coordinate_to_convert)
+            except TypeError:
+                print("Cannot cast value to string for split_dms_for_calc method")
+
         coordinate_string = str(coordinate_to_convert)
         # Split string to isolate DDMMSS without decimal places
         split_string = coordinate_string.split('.')
         before_decimal = split_string[0]
         length = len(before_decimal)
 
-        if is_negative:
+        degrees = None
+        minutes = None
+        seconds = None
+
+        if self.is_negative(coordinate_to_convert):
             if length == 8:
                 degrees = before_decimal[0:4]
                 minutes = before_decimal[4:6]
@@ -198,27 +220,29 @@ class Coordinate:
     of the object when initialised."""
 
     def lat_long_height_arguments(self, args):
-        if len(args) == 3:
-            self.latitude = args[0]
-            self.longitude = args[1]
-            self.height = args[2]
-        elif len(args) == 2:
-            self.latitude = args[0]
-            self.longitude = args[1]
-            self.height = 0
-        elif len(args) == 1:
-            try:
-                split_string = args[0].split(',')
-                if len(split_string) == 3:
-                    self.latitude = float(split_string[0])
-                    self.longitude = float(split_string[1])
-                    self.height = float(split_string[2])
-                elif len(split_string) == 2:
-                    self.latitude = float(split_string[0])
-                    self.longitude = float(split_string[1])
-            except TypeError:
-                Exception("Something went wrong initialising the latitude, longitude and height values.")
-
+        try:
+            if len(args) == 3:
+                self.latitude = args[0]
+                self.longitude = args[1]
+                self.height = args[2]
+            elif len(args) == 2:
+                self.latitude = args[0]
+                self.longitude = args[1]
+                self.height = 0
+            elif len(args) == 1:
+                try:
+                    split_string = args[0].split(',')
+                    if len(split_string) == 3:
+                        self.latitude = float(split_string[0])
+                        self.longitude = float(split_string[1])
+                        self.height = float(split_string[2])
+                    elif len(split_string) == 2:
+                        self.latitude = float(split_string[0])
+                        self.longitude = float(split_string[1])
+                except AttributeError:
+                    Exception("Something went wrong initialising the latitude, longitude and height values.")
+        except TypeError:
+            Exception("args must be either a single string or 2-3 int or float arguments.")
     """
     Takes one argument of type string.  Checks to see if string is suffixed with a letter denoting arc direction.
     If so calls the set_direction_from_letter function and returns the coordinate without it's suffix.
