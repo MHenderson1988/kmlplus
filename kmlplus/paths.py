@@ -53,7 +53,9 @@ class LinePath:
         a_list_to_return = []
         i = 0
         while i < len(self.args_list):
-            if self.args_list[i].arc_direction == 'clockwise' or self.args_list[i].arc_direction == 'anticlockwise':
+            if self.args_list[i].arc_direction is None:
+                a_list_to_return.append(self.args_list[i])
+            elif self.args_list[i].arc_direction == 'clockwise' or self.args_list[i].arc_direction == 'anticlockwise':
 
                 # If the coordinate has an arc directional value but no origin designated, make the origin the centroid
                 # of the polygon.
@@ -79,10 +81,9 @@ class LinePath:
                 # Unpack the ArcPath's coordinates into the LinePath's coordinate list
                 for coordinate in new_arc:
                     a_list_to_return.append(coordinate)
-            else:
-                a_list_to_return.append(self.args_list[i])
             i += 1
         return a_list_to_return
+
 
     """
     Find the centroid of the linepath.  This will be used for ordering the coordinates

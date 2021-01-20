@@ -34,7 +34,7 @@ representations from CAA AIP supplied data.
 
 ### Classes
 
-KML+ is comprised of three classes -
+KML+ comprises three classes -
 
 - Coordinate class
 - LinePath class
@@ -89,12 +89,13 @@ A note on arcs -
 
 ```LinePath(*args, sort=False, height=None*)```
 
-LinePath args MUST be Coordinate objects.
+*args must all be instances of Type Coordinate.
 
 *sort=True* will sort the Coordinate objects into anticlockwise order around the polygon's centroid therefore allowing
 correct rendering by Google Earth. This is experimental and is highly unlikely to work with concave polygons.
 
 *height=float or int* will override all height values in the Coordinate arguments.
+
 
 ```
 from kmlplus import paths
