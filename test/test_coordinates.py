@@ -101,3 +101,10 @@ class TestCoordinates(TestCase):
     def test_lat_long_height_arguments(self):
         c1 = coordinates.Coordinate("55.11213, -4.24453")
         self.assertRaises(TypeError, c1.lat_long_height_arguments(True))
+
+    def test_check_for_direction(self):
+        c1 = coordinates.Coordinate("55.11213, -4.24453c")
+        c2 = coordinates.Coordinate("55.23231a, -552312")
+        self.assertEqual('clockwise', c1.arc_direction)
+        self.assertEqual(-4.24453, c1.check_for_direction('-4.24453c'))
+        self.assertEqual('anticlockwise', c2.arc_direction)

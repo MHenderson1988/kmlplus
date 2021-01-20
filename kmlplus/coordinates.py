@@ -9,17 +9,11 @@ class Coordinate:
         self._longitude = None
         self._height = 0
         self.coordinate_type = None
-        self.lat_long_height_arguments(args)
-        self.name = kwargs.pop('name', None)
+        # Initialise the arc direction attribute here so it is not overwritten by the lat_long arguments
         self.arc_direction = kwargs.pop('arc_direction', None)
+        self.name = kwargs.pop('name', None)
         self.arc_origin = kwargs.pop('arc_origin', None)
-
-        # Convert coordinates to decimal degrees if given as DMS, on init
-        if self.detect_coordinate_type(self.latitude) == 'dms':
-            self.latitude = self.convert_to_decimal(self.latitude)
-        if self.detect_coordinate_type(self.longitude) == 'dms':
-            self.longitude = self.convert_to_decimal(self.longitude)
-        self.coordinate_type = 'decimal'
+        self.lat_long_height_arguments(args)
 
     @property
     def latitude(self):
@@ -55,7 +49,7 @@ class Coordinate:
         elif isinstance(a_value, str):
             try:
                 stripped_string = self.strip_whitespace(a_value)
-                return float(stripped_string)
+                return float(self.check_for_direction(a_value))
             except TypeError:
                 print("Couldn't convert to string")
 
@@ -223,32 +217,38 @@ class Coordinate:
         try:
             if len(args) == 3:
                 self.latitude = args[0]
-                self.longitude = args[1]
+                self.longitude = self.check_for_direction(args[1])
                 self.height = args[2]
             elif len(args) == 2:
                 self.latitude = args[0]
-                self.longitude = args[1]
+                self.longitude = self.check_for_direction(args[1])
                 self.height = 0
             elif len(args) == 1:
                 try:
                     split_string = args[0].split(',')
                     if len(split_string) == 3:
-                        self.latitude = float(split_string[0])
-                        self.longitude = float(split_string[1])
-                        self.height = float(split_string[2])
+                        self.latitude = split_string[0]
+                        self.longitude = split_string[1]
+                        self.height = split_string[2]
                     elif len(split_string) == 2:
-                        self.latitude = float(split_string[0])
-                        self.longitude = float(split_string[1])
+                        self.latitude = split_string[0]
+                        self.longitude = split_string[1]
                 except AttributeError:
                     Exception("Something went wrong initialising the latitude, longitude and height values.")
         except TypeError:
             Exception("args must be either a single string or 2-3 int or float arguments.")
+
     """
     Takes one argument of type string.  Checks to see if string is suffixed with a letter denoting arc direction.
     If so calls the set_direction_from_letter function and returns the coordinate without it's suffix.
     """
 
     def check_for_direction(self, a_longitude_string):
+        if not isinstance(a_longitude_string, str):
+            try:
+                str(a_longitude_string)
+            except TypeError:
+                Exception("Cannot cast to string for check_for_direction")
         if a_longitude_string[-1].isalpha():
             self.set_direction_from_letter(a_longitude_string[-1])
             return float(a_longitude_string[0:-1])
