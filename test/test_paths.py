@@ -83,21 +83,34 @@ class TestPaths(TestCase):
             i += 1
 
     def test_kml_format(self):
-        line_path = paths.LinePath(self._c1, self._c2)
-        expected = [(-4.11, 55.3232, 0.0), (-4.11, 55.22, 0.0)]
+        c1 = coordinates.Coordinate(-43.232, 55.323, 500)
+        c2 = coordinates.Coordinate(-43.232, 55.000, 23.2)
+        line_path = paths.LinePath(c1, c2)
+        expected = [(55.323, -43.232, 500.0), (55.000, -43.232, 23.2)]
         self.assertEqual(expected, line_path.kml_format())
 
     def test_create_sides(self):
         coordinate_1 = coordinates.Coordinate(55.22, -4.11, 0)
         coordinate_2 = coordinates.Coordinate(53.12, -3.11, 0)
 
+        c3 = coordinates.Coordinate(55.22, -4.11, 500)
+        c4 = coordinates.Coordinate(53.12, -3.11, 900)
+
+
         line_path_lower = paths.LinePath(coordinate_1, coordinate_2)
         line_path_higher, sides = line_path_lower.create_layer_and_sides(height=50)
 
-        expected = [[(-4.11, 55.22, 0.0), (-3.11, 53.12, 0.0), (-3.11, 53.12, 50.0), (-4.11, 55.22, 50.0)],
-                    [(-3.11, 53.12, 0.0), (-4.11, 55.22, 0.0), (-4.11, 55.22, 50.0), (-3.11, 53.12, 50.0)]]
+        expected_1 = [[(-4.11, 55.22, 0.0), (-3.11, 53.12, 0.0), (-3.11, 53.12, 50.0), (-4.11, 55.22, 50.0)],
+                     [(-3.11, 53.12, 0.0), (-4.11, 55.22, 0.0), (-4.11, 55.22, 50.0), (-3.11, 53.12, 50.0)]]
 
-        self.assertEqual(expected, sides)
+        expected_2 = [[(-4.11, 55.22, 500.0), (-3.11, 53.12, 500.0), (-3.11, 53.12, 900.0), (-4.11, 55.22, 900.0)],
+                      [(-3.11, 53.12, 500.0), (-4.11, 55.22, 500.0), (-4.11, 55.22, 900.0), (-3.11, 53.12, 900.0)]]
+
+        self.assertEqual(expected_1, sides)
+
+        line_path_higher = paths.LinePath(c3, c4)
+        sides = line_path_lower.create_sides(line_path_higher)
+        print(sides)
 
         """
         ArcPath Tests
