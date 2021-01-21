@@ -91,7 +91,7 @@ class TestCoordinates(TestCase):
     def test_str(self):
         c1 = coordinates.Coordinate(44.22, -12.32)
         actual_string = c1.__str__()
-        expected_string = "44.22, -12.32, 0"
+        expected_string = "44.22, -12.32, 0.0"
         self.assertEqual(actual_string, expected_string)
 
     def test_lat_long_height_arguments(self):

@@ -1,3 +1,5 @@
+import copy
+
 from kmlplus.coordinates import Coordinate
 
 """
@@ -13,17 +15,30 @@ automatically.
 class LinePath:
     def __init__(self, *args, **kwargs):
         self.__dict__.update(kwargs)
-        self.args_list = args
+        self.sort = kwargs.pop('sort', False)
+        self.height = kwargs.pop('height', 0.0)
+        self.arc_points = kwargs.pop('arc_points', 50)
+        self.origin = kwargs.pop('origin', None)
+
+        # Validate arc_point input is int else try to cast or throw exception
+        self.arc_points = self.validate_int(self.arc_points)
+
+        self.args_list = self.generate_coordinate_object(*args, height=self.height)
+
+        # If user has entered a height, check it is a valid float or int
+        if self.height is not None:
+            self.height = self.validate_float(self.height)
+            # If user passes a height value, change altitude values for all coordinate instances passed as arguments
+            for coord in self.args_list:
+                coord.height = self.height
+
         self.coordinate_list = self.check_args()
         self.all_coordinates = True
         self.centroid = self.find_centroid()
-        self.sort = kwargs.pop('sort', False)
-        self.height = kwargs.pop('height', None)
 
-        # If user passes a height value, change altitude values for all coordinate instances passed as arguments
-        if self.height is not None:
-            for coordinate in self.coordinate_list:
-                coordinate.height = self.height
+        # If no origin is provided for arcs, make it the centroid
+        if self.origin is None:
+            self.origin = self.centroid
 
         """If user wants coordinates sorted counter clockwise then call the sort vertices method which will change
         the order of the Coordinate instances in the coordinate_list attribute.  It will sort in descending order
@@ -32,7 +47,6 @@ class LinePath:
         if self.sort is True:
             self.sort_vertices()
         self.kml_coordinate_list = self.kml_format()
-        self.sides = None
 
     def __getitem__(self, index):
         return self.kml_coordinate_list[index]
@@ -44,6 +58,45 @@ class LinePath:
     def __len__(self):
         return len(self.coordinate_list)
 
+    @staticmethod
+    def validate_int(a_value):
+        if not isinstance(a_value, int):
+            try:
+                a_value = int(a_value)
+                return a_value
+            except ValueError as error:
+                print(error)
+                print('Defaulting value to int 50')
+                return 50
+        else:
+            return a_value
+
+    @staticmethod
+    def validate_float(a_value):
+        if not isinstance(a_value, float):
+            try:
+                a_value = float(a_value)
+                return a_value
+            except ValueError as error:
+                print(error)
+                print('Defaulting value to None')
+                return None
+        else:
+            return a_value
+
+    def generate_coordinate_object(self, *args, **kwargs):
+        list_to_return = []
+        for arg in args:
+            if not isinstance(arg, Coordinate):
+                try:
+                    new_coordinate = Coordinate(arg, height=self.height, arc_origin=self.origin)
+                    list_to_return.append(new_coordinate)
+                except TypeError as error:
+                    print(error)
+            elif isinstance(arg, Coordinate):
+                list_to_return.append(arg)
+        return list_to_return
+
     """
     Check each coordinate.  If it has a kwarg identifying it as the start of an arc path, create said path and return
     it with the other coordinates.
@@ -53,8 +106,11 @@ class LinePath:
         a_list_to_return = []
         i = 0
         while i < len(self.args_list):
+            # If not the start of an arc, ie not suffixed with 'a' or 'c'
             if self.args_list[i].arc_direction is None:
                 a_list_to_return.append(self.args_list[i])
+
+            # Else if an arc
             elif self.args_list[i].arc_direction == 'clockwise' or self.args_list[i].arc_direction == 'anticlockwise':
 
                 # If the coordinate has an arc directional value but no origin designated, make the origin the centroid
@@ -76,7 +132,8 @@ class LinePath:
                     end_bearing, end_distance = self.args_list[0].get_bearing_and_distance(self.args_list[i].arc_origin)
 
                 new_arc = ArcPath(self.args_list[i].arc_origin, start_bearing=a_start_bearing, end_bearing=end_bearing,
-                                  radius=a_start_distance, direction=self.args_list[i].arc_direction)
+                                  radius=a_start_distance, direction=self.args_list[i].arc_direction,
+                                  points=self.arc_points, height=self.height)
 
                 # Unpack the ArcPath's coordinates into the LinePath's coordinate list
                 for coordinate in new_arc:
@@ -96,7 +153,7 @@ class LinePath:
             longitude_total += coordinate_instance.longitude
         latitude_average, longitude_average = latitude_total / len(self.args_list), \
                                               longitude_total / len(self.args_list)
-        return Coordinate(latitude_average, longitude_average)
+        return Coordinate(latitude_average, longitude_average, self.height)
 
     """
     This method takes each vertices and calculates it's bearing from the centroid.  This is then used to sort the 
@@ -178,10 +235,18 @@ class LinePath:
                         )
                         i += 1
 
-                self.sides = side_list
+                return side_list
 
             else:
                 raise Exception('create_sides() function only accepts LinePath instances or that of its subclasses')
+
+    def create_layer_and_sides(self, **kwargs):
+        self.__dict__.update(kwargs)
+        height = kwargs.pop('height', 100)
+        copy_of_args = copy.deepcopy(self.args_list)
+        new_line_path = LinePath(*copy_of_args, height=height)
+
+        return new_line_path, self.create_sides(new_line_path)
 
 
 """

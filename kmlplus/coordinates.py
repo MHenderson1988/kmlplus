@@ -5,14 +5,12 @@ from geopy import distance as gp
 class Coordinate:
     def __init__(self, *args, **kwargs):
         self.__dict__.update(kwargs)
-        self._latitude = None
-        self._longitude = None
-        self._height = 0
         # Initialise the arc direction attribute here so it is not overwritten by the lat_long arguments
         self.arc_direction = kwargs.pop('arc_direction', None)
         self.name = kwargs.pop('name', None)
+        self.height = kwargs.pop('height', 0)
         self.arc_origin = kwargs.pop('arc_origin', None)
-        self.lat_long_height_arguments(args)
+        self.latitude, self.longitude, self.height = self.lat_long_height_arguments(args)
 
     @property
     def latitude(self):
@@ -43,8 +41,10 @@ class Coordinate:
         self._height = self.validate_attribute_input(a_height)
 
     def validate_attribute_input(self, a_value):
-        if isinstance(a_value, int) or isinstance(a_value, float):
+        if isinstance(a_value, float):
             return round(a_value, 5)
+        elif isinstance(a_value, int):
+            return float(a_value)
         elif isinstance(a_value, str):
             try:
                 stripped_string = self.strip_whitespace(a_value)
@@ -197,27 +197,40 @@ class Coordinate:
     of the object when initialised."""
 
     def lat_long_height_arguments(self, args):
+        latitude = 0
+        longitude = 0
+        height = 0
+
         try:
             if len(args) == 3:
-                self.latitude = args[0]
-                self.longitude = self.check_for_direction(str(args[1]))
-                self.height = args[2]
+                latitude = args[0]
+                longitude = self.check_for_direction(str(args[1]))
+                height = args[2]
+
             elif len(args) == 2:
-                self.latitude = args[0]
-                self.longitude = self.check_for_direction(str(args[1]))
-                self.height = 0
+                latitude = args[0]
+                longitude = self.check_for_direction(str(args[1]))
+                height = self.height
+
             elif len(args) == 1:
                 try:
                     split_string = args[0].split(',')
+
                     if len(split_string) == 3:
-                        self.latitude = split_string[0]
-                        self.longitude = split_string[1]
-                        self.height = split_string[2]
+                        latitude = split_string[0]
+                        longitude = split_string[1]
+                        height = split_string[2]
+
                     elif len(split_string) == 2:
-                        self.latitude = split_string[0]
-                        self.longitude = split_string[1]
+                        latitude = split_string[0]
+                        longitude = split_string[1]
+                        height = self.height
+
                 except AttributeError:
                     Exception("Something went wrong initialising the latitude, longitude and height values.")
+
+            return latitude, longitude, height
+
         except TypeError:
             Exception("args must be either a single string or 2-3 int or float arguments.")
 

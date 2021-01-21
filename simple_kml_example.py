@@ -8,9 +8,6 @@ such a list to automatically generate polygons such as airspace.
 The example requires the installation of simple kml which can be achieved via -
 # pip install simplekml
 """
-
-import copy
-
 import simplekml
 
 from kmlplus import paths, coordinates
@@ -47,80 +44,33 @@ cta_6 = [
 ]
 
 """
-Iterate through the coordinates.  Takes upper and lower heights and will return two LinePath objects representing the 
-upper and lower boundaries of the airspace.  Accepts kwargs lower_height and upper_height.
+Using the create_polygon function to automate the creation of all coordinates related to cta_1.  Create a new linepath
+for the lower layer before creating the upper layer and sides.  These returns can be used to render the full polygon in 
+SimpleKml.
 """
 
 
-def read_coordinates(*args, **kwargs):
-    list_to_return = []
-    # Provide a reference point, as supplied by CAA in AIP, for arcs
-    origin = kwargs.pop('origin', None)
-    lower_height = kwargs.pop('lower_height', 1500)
-    upper_height = kwargs.pop('upper_height', 5500)
-    # Retrieve each DMS coordinate in the list supplied
-    for item in args:
-        # Split the string into lat and long
-        lat_string, long_string = item.split(',')
-        # If the coordinate is the start of an arc do the following
-        if long_string[-1] == 'a':
-            long_string = long_string[0:-1]
-            coordinate_instance = coordinates.Coordinate(int(lat_string), int(long_string), coordinate_type='dms',
-                                                         arc_direction='anticlockwise', start_of_arc=True,
-                                                         arc_origin=origin)
-        elif long_string[-1] == 'c':
-            long_string = long_string[0:-1]
-            coordinate_instance = coordinates.Coordinate(int(lat_string), int(long_string), coordinate_type='dms',
-                                                         start_of_arc=True, arc_direction='clockwise',
-                                                         arc_origin=origin)
-        # If not the start of an arc, just create a normal new coordinate
-        else:
-            coordinate_instance = coordinates.Coordinate(int(lat_string), int(long_string), coordinate_type='dms')
-
-        list_to_return.append(coordinate_instance)
-
-    lower, upper = create_upper_lower(list_to_return, lower_height, upper_height)
-    return lower, upper
+def create_polygon(a_list, lower_height, upper_height, arc_origin, **kwargs):
+    lp = paths.LinePath(*a_list, height=lower_height, origin=arc_origin)
+    lp2, sides = lp.create_layer_and_sides(height=upper_height, origin=arc_origin)
+    return lp, lp2, sides
 
 
-"""If using the same coordinates but different heights for your upper and lower
-levels.  Do one of two things - 
-
-Two SEPARATE lists with new objects created for each ie use the read_coordinates twice
-OR import copy as is seen below and create a deep copy of the first list. 
-
-If you do not then the 'height' kwarg will malfunction and will keep overwriting
-existing objects in both layers resulting in a failed polygon"""
+cta_1_lower, cta_1_upper, cta_1_sides = create_polygon(cta_1, 1500, 5500, frz_ref_point)
+cta_2_lower, cta_2_upper, cta_2_sides = create_polygon(cta_2, 2000, 5500, frz_ref_point)
+cta_3_lower, cta_3_upper, cta_3_sides = create_polygon(cta_3, 3000, 5500, frz_ref_point)
+cta_4_lower, cta_4_upper, cta_4_sides = create_polygon(cta_4, 3000, 5500, frz_ref_point)
+cta_5_lower, cta_5_upper, cta_5_sides = create_polygon(cta_5, 3500, 5500, frz_ref_point)
+cta_6_lower, cta_6_upper, cta_6_sides = create_polygon(cta_6, 4000, 5500, frz_ref_point)
 
 
-def create_upper_lower(a_list, lower_height, upper_height):
-    a_list_copy = copy.deepcopy(a_list)
-    lower = paths.LinePath(*a_list, height=lower_height)
-    upper = paths.LinePath(*a_list_copy, height=upper_height)
-    return lower, upper
-
-
-cta_1_lower, cta_1_higher = read_coordinates(*cta_1, origin=frz_ref_point, lower_height=1500, upper_height=5500)
-cta_2_lower, cta_2_higher = read_coordinates(*cta_2, origin=frz_ref_point, lower_height=2000, upper_height=5500)
-cta_3_lower, cta_3_higher = read_coordinates(*cta_3, origin=frz_ref_point, lower_height=3000, upper_height=5500)
-cta_4_lower, cta_4_higher = read_coordinates(*cta_4, origin=frz_ref_point, lower_height=3000, upper_height=5500)
-cta_5_lower, cta_5_higher = read_coordinates(*cta_5, origin=frz_ref_point, lower_height=3500, upper_height=5500)
-cta_6_lower, cta_6_higher = read_coordinates(*cta_6, origin=frz_ref_point, lower_height=4000, upper_height=5500)
-cta_1_lower.create_sides(cta_1_higher)
-cta_2_lower.create_sides(cta_2_higher)
-cta_3_lower.create_sides(cta_3_higher)
-cta_4_lower.create_sides(cta_4_higher)
-cta_5_lower.create_sides(cta_5_higher)
-cta_6_lower.create_sides(cta_6_higher)
-
-
-def create_polygon(a_folder, cta_lower, cta_higher, sides):
+def create_airspace(a_folder, lower_layer, upper_layer, sides):
     pol = a_folder.newpolygon()
-    pol.outerboundaryis = cta_lower
+    pol.outerboundaryis = lower_layer
     pol.altitudemode = simplekml.AltitudeMode.relativetoground
 
     pol = a_folder.newpolygon()
-    pol.outerboundaryis = cta_higher
+    pol.outerboundaryis = upper_layer
     pol.altitudemode = simplekml.AltitudeMode.relativetoground
 
     for item in sides:
@@ -133,14 +83,14 @@ def create_kml():
     kml = simplekml.Kml()
     fol = kml.newfolder(name='Example')
 
-    create_polygon(fol, cta_1_lower, cta_1_higher, cta_1_lower.sides)
-    create_polygon(fol, cta_2_lower, cta_2_higher, cta_2_lower.sides)
-    create_polygon(fol, cta_3_lower, cta_3_higher, cta_3_lower.sides)
-    create_polygon(fol, cta_4_lower, cta_4_higher, cta_4_lower.sides)
-    create_polygon(fol, cta_5_lower, cta_5_higher, cta_5_lower.sides)
-    create_polygon(fol, cta_6_lower, cta_6_higher, cta_6_lower.sides)
+    create_airspace(fol, cta_1_lower, cta_1_upper, cta_1_sides)
+    create_airspace(fol, cta_2_lower, cta_2_upper, cta_2_sides)
+    create_airspace(fol, cta_3_lower, cta_3_upper, cta_3_sides)
+    create_airspace(fol, cta_4_lower, cta_4_upper, cta_4_sides)
+    create_airspace(fol, cta_5_lower, cta_5_upper, cta_5_sides)
+    create_airspace(fol, cta_6_lower, cta_6_upper, cta_6_sides)
 
-    kml.save('Floating polygon example.kml')
+    kml.save('Airspace example.kml')
 
 
 if __name__ == "__main__":
