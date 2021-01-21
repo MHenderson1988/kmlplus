@@ -8,7 +8,7 @@ class Coordinate:
         # Initialise the arc direction attribute here so it is not overwritten by the lat_long arguments
         self.arc_direction = kwargs.pop('arc_direction', None)
         self.name = kwargs.pop('name', None)
-        self.height = kwargs.pop('height', 0)
+        self.height = kwargs.pop('height', 0.0)
         self.arc_origin = kwargs.pop('arc_origin', None)
         self.latitude, self.longitude, self.height = self.lat_long_height_arguments(args)
 

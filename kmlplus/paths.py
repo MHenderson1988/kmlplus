@@ -16,14 +16,14 @@ class LinePath:
     def __init__(self, *args, **kwargs):
         self.__dict__.update(kwargs)
         self.sort = kwargs.pop('sort', False)
-        self.height = kwargs.pop('height', 0.0)
+        self.height = kwargs.pop('height', None)
         self.arc_points = kwargs.pop('arc_points', 50)
         self.origin = kwargs.pop('origin', None)
 
         # Validate arc_point input is int else try to cast or throw exception
         self.arc_points = self.validate_int(self.arc_points)
 
-        self.args_list = self.generate_coordinate_object(*args, height=self.height)
+        self.args_list = self.generate_coordinate_object(*args)
 
         # If user has entered a height, check it is a valid float or int
         if self.height is not None:
@@ -84,12 +84,15 @@ class LinePath:
         else:
             return a_value
 
-    def generate_coordinate_object(self, *args, **kwargs):
+    def generate_coordinate_object(self, *args):
         list_to_return = []
         for arg in args:
             if not isinstance(arg, Coordinate):
                 try:
-                    new_coordinate = Coordinate(arg, height=self.height, arc_origin=self.origin)
+                    if self.height is not None:
+                        new_coordinate = Coordinate(arg, height=self.height, arc_origin=self.origin)
+                    else:
+                        new_coordinate = Coordinate(arg, arc_origin=self.origin)
                     list_to_return.append(new_coordinate)
                 except TypeError as error:
                     print(error)
@@ -153,7 +156,11 @@ class LinePath:
             longitude_total += coordinate_instance.longitude
         latitude_average, longitude_average = latitude_total / len(self.args_list), \
                                               longitude_total / len(self.args_list)
-        return Coordinate(latitude_average, longitude_average, self.height)
+        if self.height is not None:
+            height = self.height
+        else:
+            height = 0.0
+        return Coordinate(latitude_average, longitude_average, height)
 
     """
     This method takes each vertices and calculates it's bearing from the centroid.  This is then used to sort the 
@@ -242,7 +249,7 @@ class LinePath:
 
     def create_layer_and_sides(self, **kwargs):
         self.__dict__.update(kwargs)
-        height = kwargs.pop('height', 100)
+        height = kwargs.pop('height', 100.0)
         copy_of_args = copy.deepcopy(self.args_list)
         new_line_path = LinePath(*copy_of_args, height=height)
 
