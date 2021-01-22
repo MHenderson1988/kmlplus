@@ -35,6 +35,7 @@ class LinePath:
         self.coordinate_list = self.check_args()
         self.all_coordinates = True
         self.centroid = self.find_centroid()
+        self.sides = self.sides_depreciated()
 
         # If no origin is provided for arcs, make it the centroid
         if self.origin is None:
@@ -83,6 +84,13 @@ class LinePath:
                 return None
         else:
             return a_value
+
+    @staticmethod
+    def sides_depreciated():
+        deprecated_warning = "LinePath.sides deprecated since v2.0.  Please use LinePath.create_layer_and_sides()" \
+                             " to return a new LinePath layer and sides.  Alternatively call .create_sides() to return" \
+                             " a list of sides between this linepath and another."
+        return deprecated_warning
 
     def generate_coordinate_object(self, *args):
         list_to_return = []
@@ -169,7 +177,7 @@ class LinePath:
 
     def calculate_bearings_from_centroid(self):
         for coordinate in self.coordinate_list:
-            bearing, distance = self.centroid.get_bearing_and_distance(coordinate)
+            bearing, distance = coordinate.get_bearing_and_distance(self.centroid)
             setattr(coordinate, 'bearing_from_centroid', bearing)
 
     """
