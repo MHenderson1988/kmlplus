@@ -1,4 +1,5 @@
 import simplekml
+
 from kmlplus import paths
 
 # Auto generate a linepath polygon from a list of string representations of coordinates in latitude, longitude, height
@@ -11,6 +12,7 @@ lower_layer = paths.LinePath(*list_of_coordinates, height=3000)
 
 # Create the upper layer at 800m, and fill in the sides between the two
 upper_layer, sides = lower_layer.create_layer_and_sides(height=10000)
+
 
 # Use simplekml to create the .kml
 def create_kml():

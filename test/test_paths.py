@@ -172,8 +172,8 @@ class TestPaths(TestCase):
     def test_sides_deprecated(self):
         lp = paths.LinePath(self._c5)
         expected = "LinePath.sides deprecated since v2.0.  Please use LinePath.create_layer_and_sides()" \
-                    " to return a new LinePath layer and sides.  Alternatively call .create_sides() to return" \
-                    " a list of sides between this linepath and another."
+                   " to return a new LinePath layer and sides.  Alternatively call .create_sides() to return" \
+                   " a list of sides between this linepath and another."
         self.assertEqual(expected, lp.sides)
 
         """

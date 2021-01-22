@@ -34,7 +34,7 @@ representations from CAA AIP supplied data.
 
 ### Quick Start
 
-The simplest way to create a standard floating polygon 
+The simplest way to create a standard floating polygon
 
 ```bazaar
 import simplekml
@@ -77,7 +77,6 @@ if __name__ == "__main__":
 ```
 
 ![Floating polygon example](img/quick_start.jpg)
-
 
 ### Classes
 
@@ -167,8 +166,8 @@ populate the arc coordinates.
 
 #### Creating a polygon using the LinePath class
 
-**Note** - LinePath.sides has been deprecated since 2.0.  You can now create the sides using the .create_sides() method
-which returns a list.  Or call .create_layer_and_sides() method to create an upper layer and the sides simultaneously
+**Note** - LinePath.sides has been deprecated since 2.0. You can now create the sides using the .create_sides() method
+which returns a list. Or call .create_layer_and_sides() method to create an upper layer and the sides simultaneously
 
 Once you have created the lower layer of your polygon, you can interpolate the upper layer and generate the sides by
 calling the create_layer_and_sides() method -
