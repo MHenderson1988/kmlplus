@@ -177,7 +177,7 @@ class LinePath:
 
     def calculate_bearings_from_centroid(self):
         for coordinate in self.coordinate_list:
-            bearing, distance = self.centroid.get_bearing_and_distance(coordinate)
+            bearing, distance = coordinate.get_bearing_and_distance(self.centroid)
             setattr(coordinate, 'bearing_from_centroid', bearing)
 
     """
