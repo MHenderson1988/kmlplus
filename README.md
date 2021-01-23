@@ -66,7 +66,7 @@ list_of_coordinates = ["55.123, -4.123", "55.600, -41232.12", "55.100, -4.4323",
 # Pass the list to the LinePath constructor.  You can override the height at this point with the 'height' kwarg.
 lower_layer = paths.LinePath(*list_of_coordinates, height=3000)
 
-# Create the upper layer at 800m, and fill in the sides between the two
+# Create the upper layer at 10000m, and fill in the sides between the two
 upper_layer, sides = lower_layer.create_layer_and_sides(height=10000)
 
 # Use simplekml to create the .kml
