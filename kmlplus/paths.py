@@ -259,7 +259,7 @@ class LinePath:
         self.__dict__.update(kwargs)
         height = kwargs.pop('height', 100.0)
         copy_of_args = copy.deepcopy(self.args_list)
-        new_line_path = LinePath(*copy_of_args, height=height)
+        new_line_path = LinePath(*copy_of_args, height=height, sort=self.sort)
 
         return new_line_path, self.create_sides(new_line_path)
 
