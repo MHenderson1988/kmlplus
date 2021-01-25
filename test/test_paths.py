@@ -24,6 +24,22 @@ class TestPaths(TestCase):
     LinePath tests
     """
 
+    def test_quick_polygon(self):
+        polygon_lower, polygon_upper, polygon_sides = paths.quick_polygon(*self._coordinate_list, lower_height=1000,
+                                                                          upper_height=12000)
+        self.assertIsInstance(polygon_lower, paths.LinePath)
+        for item in polygon_lower:
+            self.assertIsInstance(item, tuple)
+        for item in polygon_upper:
+            self.assertIsInstance(item, tuple)
+        for item in polygon_sides:
+            self.assertIsInstance(item, list)
+            for tuples in item:
+                self.assertIsInstance(tuples, tuple)
+
+        self.assertIsInstance(polygon_upper, paths.LinePath)
+        self.assertIsInstance(polygon_sides, list)
+
     def test_linepath(self):
         # Assert LinePath initiates with a list of Coordinate objects
         line_path = paths.LinePath(*self._coordinate_list)
