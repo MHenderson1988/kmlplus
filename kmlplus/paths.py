@@ -9,10 +9,10 @@ upper_height, origin and sort.  Returns two LinePaths for the lower and upper la
 tuples for the sides.  
 """
 
+
 # TODO: Add tests for quick_polygon()
 
 def quick_polygon(*args, **kwargs):
-    __dict__.update(kwargs)
     lower_height = kwargs.pop('lower_height', 0)
     upper_height = kwargs.pop('upper_height', lower_height + 5000)
     sort = kwargs.pop('sort', False)

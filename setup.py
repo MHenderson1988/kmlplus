@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="KMLPlus",  # Replace with your own username
-    version="2.0.2",
+    version="2.1.0",
     author="Mark Henderson",
     author_email="mark.henderson1988@gmail.com",
     description="A Python library for creating 3d floating polygons and circles in .kml for Google Earth.",
