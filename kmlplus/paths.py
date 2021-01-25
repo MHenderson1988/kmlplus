@@ -3,6 +3,27 @@ import copy
 from kmlplus.coordinates import Coordinate
 
 """
+This function will create lower and upper layers as well as the sides.  It is limited to 'flat' layers ie each layer
+must be the same height.  It offers a quick way to create a polygon.  Accepts args and kwargs of lower_height,
+upper_height, origin and sort.  Returns two LinePaths for the lower and upper layers and a list of lists containing 
+tuples for the sides.  
+"""
+
+# TODO: Add tests for quick_polygon()
+
+def quick_polygon(*args, **kwargs):
+    __dict__.update(kwargs)
+    lower_height = kwargs.pop('lower_height', 0)
+    upper_height = kwargs.pop('upper_height', lower_height + 5000)
+    sort = kwargs.pop('sort', False)
+
+    lower_layer = LinePath(*args, height=lower_height, sort=sort)
+    upper_layer, sides = lower_layer.create_layer_and_sides(height=upper_height)
+
+    return lower_layer, upper_layer, sides
+
+
+"""
 LinePath is used to create polygons by combining Coordinate objects.  LinePath objects connect coordinate objects via
 straight lines when used in conjunction with polygon classes such as the 'floatingpolygon' class.  If a circle or 'arc'
 is required, you can first use the ArcPath class and provide it as a * argument to the LinePath class.
