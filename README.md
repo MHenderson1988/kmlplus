@@ -12,9 +12,6 @@ Table of Contents
 
 1. [Who is this for](#who-is-this-for)
 2. [Installing](#installing)
-    - [Pip](#pip)
-    - [Clone](#clone)
-    - [Running tests](#running-tests)
 3. [Usage](#usage)
     - [Recommendations](#recommendations)
     - [Quick Start](#quick-start)
@@ -146,6 +143,8 @@ lp_2 = paths.LinePath(*list_of_coordinates_upper)
 sloped_sides = lp_1.create_sides(lp_2)
 ```
 
+![Sloped polygon example](img/sloped_poly.jpg)
+
 ---
 
 Classes
@@ -203,6 +202,41 @@ A note on arcs -
 
 * If kwarg arc_origin is not passed, it will default to the centroid of the LineString created later on.
 
+###Methods
+
+```bazaar
+"""
+Takes 3 key word arguments for distance(in Km), bearing and height.  Returns a Coordinate object located at the
+desired distance and bearing from the Coordinate object calling the function.
+"""
+
+Coordinate.generate_coordinates(distance=10, bearing=10, height=0)
+```
+
+```bazaar
+"""
+Takes a single Coordinate object as it's argument.  Returns the bearing and distance from the Coordinate given as the
+argument to the one calling it.
+"""
+
+Coordinate.get_bearing_and_distance(a_coordinate_object)
+```
+
+```bazaar
+"""
+Accepts no arguments and returns a string representation of the Latitude and Longitude
+"""
+
+Coordinate.to_string_yx()
+```
+
+```bazaar
+"""
+Accepts no arguments and returns a .kml readable Tuple
+"""
+
+Coordinate.kml_tuple()
+```
 ***
 
 ## LinePath

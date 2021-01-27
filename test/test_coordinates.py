@@ -53,13 +53,6 @@ class TestCoordinates(TestCase):
         self.assertTrue(c1.is_negative(c1.longitude))
         self.assertFalse(c1.is_negative(c1.latitude))
 
-    def test_decimal_to_dms(self):
-        c1 = coordinates.Coordinate("55.11213, -4.24453")
-        self.assertIsInstance(c1.decimal_to_dms(c1.latitude), float)
-        self.assertEqual(55643.67, c1.decimal_to_dms(c1.latitude))
-        self.assertIsInstance(c1.decimal_to_dms(c1.longitude), float)
-        self.assertEqual(-41440.31, c1.decimal_to_dms(c1.longitude))
-
     def test_detect_coordinate_type(self):
         c1 = coordinates.Coordinate(881232.12, 1795410.00, 4568.45)
         # Check that conversion happens on init
