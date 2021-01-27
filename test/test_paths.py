@@ -171,7 +171,7 @@ class TestPaths(TestCase):
         airspace_list = ['11.11, -22.22, 0', '11.12, -22.23, 0']
 
         lp1 = paths.LinePath(coordinate_1, coordinate_2)
-        
+
         expected_coordinates = [(-4.11, 55.22, 0.0), (-3.11, 53.12, 0.0)]
         expected_coordinates_upper_layer = [(-4.11, 55.22, 653.2), (-3.11, 53.12, 653.2)]
         expected_sides = [[(-4.11, 55.22, 0.0), (-3.11, 53.12, 0.0), (-3.11, 53.12, 653.2), (-4.11, 55.22, 653.2)],
@@ -198,6 +198,10 @@ class TestPaths(TestCase):
         """
 
     def test_arc_path(self):
+        c1 = coordinates.Coordinate("55.1234, -4.1234, 0")
+        ap1 = paths.ArcPath(origin=c1, start_bearing=10, end_bearing=270, radius=25, direction='anticlockwise',
+                            points=100)
+        print(ap1)
         ap = paths.ArcPath(self._origin, 100, 200, 10)
         self.assertIsInstance(ap.origin, coordinates.Coordinate)
         self.assertEqual(ap.start_bearing, 100)

@@ -206,8 +206,8 @@ A note on arcs -
 
 *generate_coordinates(distance=10, bearing=10, height=0)*
 
-Takes 3 key word arguments of distance(in Km), bearing and height. It returns a new Coordinate object representing the location specified from the Coordinate object calling the
-function
+Takes 3 key word arguments of distance(in Km), bearing and height. It returns a new Coordinate object representing the
+location specified from the Coordinate object calling the function
 
 ```bazaar
 c1 = coordinates.Coordinate(55.123, -4.123, 0)
@@ -220,8 +220,8 @@ print(c2)
 
 *get_bearing_and_distance(a_coordinate_object)*
 
-Takes one other Coordinate object as its argument. It returns the distance
-and bearing FROM the argument to the object calling the method.
+Takes one other Coordinate object as its argument. It returns the distance and bearing FROM the argument to the object
+calling the method.
 
 ```bazaar
 c1 = coordinates.Coordinate(55.123, -4.123, 0)
@@ -287,6 +287,8 @@ my_line_path = paths.Linepath(coordinate_1, coordinate_2, *arcpath_1)
 If a coordinate is detected with an arc suffix 'c' or 'a', the LinePath will automatically call the ArcPath class and
 populate the arc coordinates.
 
+---
+
 ### Creating a polygon using the LinePath class (The non-quick polygon)
 
 **Note** - LinePath.sides has been deprecated since 2.0. You can now create the sides using the .create_sides() method
@@ -299,6 +301,8 @@ calling the create_layer_and_sides() method -
 my_line_path = paths.Linepath(coordinate_1, coordinate_2, *arcpath_1)
 upper_layer, sides = my_line_path.create_layer_and_sides(height=height_for_upper_layer, origin=ArcPath_origin_coordinates)
 ```
+
+---
 
 ### Automatically create LinePath objects without Coordinate objects.
 
@@ -330,10 +334,12 @@ line_path = paths.LinePath(c1, c2)
 >> [(55.323, -43.232, 500.0), (55.0, -43.232, 23.2)]
 ```
 
+---
+
 *create_sides(a_linepath_instance)*
 
-Takes a LinePath instance as it's argument and creates polygons to form the 'sides' between the calling linepath
-and the instance provided as the argument.
+Takes a LinePath instance as it's argument and creates polygons to form the 'sides' between the calling linepath and the
+instance provided as the argument.
 
 ```bazaar
 coordinate_1, coordinate_2 = coordinates.Coordinate(55.22, -4.11, 0), coordinates.Coordinate(53.12, -3.11, 0)
@@ -349,10 +355,12 @@ print(sides)
  [(-3.11, 53.12, 0.0), (-4.11, 55.22, 0.0), (-4.11, 55.22, 500.0), (-3.11, 53.12, 900.0)]]
 ```
 
+---
+
 *create_layer_and_sides(*height=100.0*)
 
-Creates a new layer, copying the coordinates contained within the calling LinePath object and creates the 'sides'
-to join them.
+Creates a new layer, copying the coordinates contained within the calling LinePath object and creates the 'sides' to
+join them.
 
 ```bazaar
 line_path = paths.LinePath(*self._coordinate_list)
@@ -368,6 +376,15 @@ ArcPath(*origin, start_bearing, end_bearing, radius, height=self.origin.height, 
 ArcPath objects are used to create a series of Coordinate objects to simulate a circle or arc which starts and ends on a
 specified bearing from a specified origin at a given radius. They can be 'Clockwise' or 'Anticlockwise' and return as
 many or as few 'points' as desired.
+
+```bazaar
+c1 = coordinates.Coordinate("55.1234, -4.1234, 0")
+ap1 = paths.ArcPath(origin=c1, start_bearing=10, end_bearing=270, radius=25, direction='anticlockwise', points=100)
+
+print(ap1)
+
+>>> ArcPath instance containing 100 Coordinate instances - ['55.34453, -4.05497, 0.0', '55.34518, -4.06176, 0.0', '55.34576, -4.06856, 0.0'.........]
+```
 
 ## Acknowledgements
 
