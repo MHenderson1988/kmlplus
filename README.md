@@ -202,7 +202,7 @@ A note on arcs -
 
 * If kwarg arc_origin is not passed, it will default to the centroid of the LineString created later on.
 
-###Methods
+### Methods
 
 ```bazaar
 """
