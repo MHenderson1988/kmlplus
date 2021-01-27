@@ -171,6 +171,7 @@ class TestPaths(TestCase):
         airspace_list = ['11.11, -22.22, 0', '11.12, -22.23, 0']
 
         lp1 = paths.LinePath(coordinate_1, coordinate_2)
+        
         expected_coordinates = [(-4.11, 55.22, 0.0), (-3.11, 53.12, 0.0)]
         expected_coordinates_upper_layer = [(-4.11, 55.22, 653.2), (-3.11, 53.12, 653.2)]
         expected_sides = [[(-4.11, 55.22, 0.0), (-3.11, 53.12, 0.0), (-3.11, 53.12, 653.2), (-4.11, 55.22, 653.2)],

@@ -276,7 +276,6 @@ class LinePath:
                 raise Exception('create_sides() function only accepts LinePath instances or that of its subclasses')
 
     def create_layer_and_sides(self, **kwargs):
-        self.__dict__.update(kwargs)
         height = kwargs.pop('height', 100.0)
 
         copy_of_args = copy.deepcopy(self.args_list)

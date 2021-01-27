@@ -81,7 +81,7 @@ representations from CAA AIP supplied data.
 
 ### Quick Start
 
-The simplest way to create a standard 'level' floating polygon
+The simplest way to create a standard 'level' floating polygon is to use the 'paths.quick_polygon()' method.
 
 ```bazaar
 import simplekml
@@ -93,7 +93,7 @@ from kmlplus import paths
 list_of_coordinates = ["55.123, -4.123", "55.600, -41232.12", "55.100, -4.4323", "55.123, -4.123"]
 
 # Pass the list to the LinePath constructor.  You can override the height at this point with the 'height' kwarg.
-lower_layer, upper_layer, sides = paths.LinePath(*list_of_coordinates, lower_height=3000, upper_height 8000)
+lower_layer, upper_layer, sides = paths.quick_polygon(*list_of_coordinates, lower_height=3000, upper_height=8000)
 
 
 # Use simplekml to create the .kml
@@ -204,8 +204,9 @@ A note on arcs -
 
 ### Methods
 
-generate_coordinates(distance=10, bearing=10, height=0) takes 3 key word arguments of distance(in Km), bearing and
-height. It returns a new Coordinate object representing the location specified from the Coordinate object calling the
+*generate_coordinates(distance=10, bearing=10, height=0)*
+
+Takes 3 key word arguments of distance(in Km), bearing and height. It returns a new Coordinate object representing the location specified from the Coordinate object calling the
 function
 
 ```bazaar
@@ -217,7 +218,9 @@ print(c2)
 >> 55.03317, -4.123, 0.0
 ```
 
-get_bearing_and_distance(a_coordinate_object) takes one other Coordinate object as its argument. It returns the distance
+*get_bearing_and_distance(a_coordinate_object)*
+
+Takes one other Coordinate object as its argument. It returns the distance
 and bearing FROM the argument to the object calling the method.
 
 ```bazaar
@@ -230,7 +233,9 @@ print(bearing, distance)
 >> 180.0 50.0
 ```
 
-to_string_yx accepts no arguments and returns a string in Latitude, Longitude format.
+*to_string_yx()*
+
+Accepts no arguments and returns a string in Latitude, Longitude format.
 
 ```bazaar
 c1 = coordinates.Coordinate(55.11213, -4.24453)
@@ -239,7 +244,9 @@ print(c1.to_string_yx())
 >> 55.11213, -4.24453
 ```
 
-kml_tuple() accepts no arguments and returns a Tuple readable by .kml (Longitude, Latitude, height)
+*kml_tuple()*
+
+Accepts no arguments and returns a Tuple readable by .kml (Longitude, Latitude, height)
 
 ```bazaar
 c1 = coordinates.Coordinate("55.23231c, -552312")
@@ -277,15 +284,15 @@ from kmlplus import paths
 my_line_path = paths.Linepath(coordinate_1, coordinate_2, *arcpath_1)
 ```
 
-If a coordinate is detected with an arc suffic 'c' or 'a', the LinePath will automatically call the ArcPath class and
+If a coordinate is detected with an arc suffix 'c' or 'a', the LinePath will automatically call the ArcPath class and
 populate the arc coordinates.
 
-### Creating a polygon using the LinePath class
+### Creating a polygon using the LinePath class (The non-quick polygon)
 
 **Note** - LinePath.sides has been deprecated since 2.0. You can now create the sides using the .create_sides() method
 which returns a list. Or call .create_layer_and_sides() method to create an upper layer and the sides simultaneously
 
-Once you have created the lower layer of your polygon, you can interpolate the upper layer and generate the sides by
+Once you have created the lower layer of your polygon, you can generate the upper layer and generate the sides by
 calling the create_layer_and_sides() method -
 
 ```bazaar
@@ -307,6 +314,49 @@ def create_polygon(a_list, lower_height, upper_height, arc_origin, **kwargs):
     lp = paths.LinePath(*a_list, height=lower_height, origin=arc_origin)
     lp2, sides = lp.create_layer_and_sides(height=upper_height, origin=arc_origin)
     return lp, lp2, sides
+```
+
+### Methods
+
+*kml_format()*
+
+Returns all Coordinates in the instance as a list of Tuples.
+
+```bazaar
+c1 = coordinates.Coordinate(-43.232, 55.323, 500)
+c2 = coordinates.Coordinate(-43.232, 55.000, 23.2)
+line_path = paths.LinePath(c1, c2)
+
+>> [(55.323, -43.232, 500.0), (55.0, -43.232, 23.2)]
+```
+
+*create_sides(a_linepath_instance)*
+
+Takes a LinePath instance as it's argument and creates polygons to form the 'sides' between the calling linepath
+and the instance provided as the argument.
+
+```bazaar
+coordinate_1, coordinate_2 = coordinates.Coordinate(55.22, -4.11, 0), coordinates.Coordinate(53.12, -3.11, 0)
+coordinate_3, coordinate_4 = coordinates.Coordinate(55.22, -4.11, 500), coordinates.Coordinate(53.12, -3.11, 900)
+
+lp1 = paths.LinePath(coordinate_1, coordinate_2)
+lp2 = paths.LinePath(coordinate_3, coordinate_4)
+
+sides = lp1.create_sides(lp2)
+print(sides)
+
+>>[[(-4.11, 55.22, 0.0), (-3.11, 53.12, 0.0), (-3.11, 53.12, 900.0), (-4.11, 55.22, 500.0)],
+ [(-3.11, 53.12, 0.0), (-4.11, 55.22, 0.0), (-4.11, 55.22, 500.0), (-3.11, 53.12, 900.0)]]
+```
+
+*create_layer_and_sides(*height=100.0*)
+
+Creates a new layer, copying the coordinates contained within the calling LinePath object and creates the 'sides'
+to join them.
+
+```bazaar
+line_path = paths.LinePath(*self._coordinate_list)
+line_path_2, sides = line_path.create_layer_and_sides(height=400)
 ```
 
 ## ArcPath
