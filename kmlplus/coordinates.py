@@ -283,7 +283,8 @@ class Coordinate:
             decimal_lat_lon_string = gp.distance(kilometers=distance).destination(point=point,
                                                                                   bearing=bearing).format_decimal()
             decimal_lat_lon_string = decimal_lat_lon_string.split(',')
-            lat_float, long_float = round(float(decimal_lat_lon_string[0]), 6), round(float(decimal_lat_lon_string[1]), 6)
+            lat_float, long_float = round(float(decimal_lat_lon_string[0]), 6), round(float(decimal_lat_lon_string[1]),
+                                                                                      6)
 
             new_coordinate_instance = Coordinate(lat_float, long_float, height=height)
             return new_coordinate_instance

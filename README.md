@@ -204,39 +204,50 @@ A note on arcs -
 
 ### Methods
 
-```bazaar
-"""
-Takes 3 key word arguments for distance(in Km), bearing and height.  Returns a Coordinate object located at the
-desired distance and bearing from the Coordinate object calling the function.
-"""
-
-Coordinate.generate_coordinates(distance=10, bearing=10, height=0)
-```
+generate_coordinates(distance=10, bearing=10, height=0) takes 3 key word arguments of distance(in Km), bearing and
+height. It returns a new Coordinate object representing the location specified from the Coordinate object calling the
+function
 
 ```bazaar
-"""
-Takes a single Coordinate object as it's argument.  Returns the bearing and distance from the Coordinate given as the
-argument to the one calling it.
-"""
+c1 = coordinates.Coordinate(55.123, -4.123, 0)
+c2 = c1.generate_coordinates(10, 180, 0)
 
-Coordinate.get_bearing_and_distance(a_coordinate_object)
+print(c2)
+
+>> 55.03317, -4.123, 0.0
 ```
+
+get_bearing_and_distance(a_coordinate_object) takes one other Coordinate object as its argument. It returns the distance
+and bearing FROM the argument to the object calling the method.
 
 ```bazaar
-"""
-Accepts no arguments and returns a string representation of the Latitude and Longitude
-"""
+c1 = coordinates.Coordinate(55.123, -4.123, 0)
+c2 = c1.generate_coordinates(50, 180, 0)
+bearing, distance = c2.get_bearing_and_distance(c1)
 
-Coordinate.to_string_yx()
+print(bearing, distance)
+
+>> 180.0 50.0
 ```
+
+to_string_yx accepts no arguments and returns a string in Latitude, Longitude format.
 
 ```bazaar
-"""
-Accepts no arguments and returns a .kml readable Tuple
-"""
+c1 = coordinates.Coordinate(55.11213, -4.24453)
+print(c1.to_string_yx())
 
-Coordinate.kml_tuple()
+>> 55.11213, -4.24453
 ```
+
+kml_tuple() accepts no arguments and returns a Tuple readable by .kml (Longitude, Latitude, height)
+
+```bazaar
+c1 = coordinates.Coordinate("55.23231c, -552312")
+print(c1.kml_tuple())
+
+>> (-55.38667, 55.23231, 0.0)
+```
+
 ***
 
 ## LinePath

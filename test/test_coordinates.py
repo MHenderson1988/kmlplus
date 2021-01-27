@@ -113,6 +113,7 @@ class TestCoordinates(TestCase):
     def test_kml_tuple(self):
         c1 = coordinates.Coordinate("55.23231c, -552312")
         expected = (-55.38667, 55.23231, 0)
+        print(c1.kml_tuple())
         self.assertEqual(expected, c1.kml_tuple())
 
     def test_generate_coordinates(self):
@@ -125,5 +126,6 @@ class TestCoordinates(TestCase):
         c1 = coordinates.Coordinate(55.123, "-4.123", 0)
         c2 = c1.generate_coordinates(50, 180, 0)
         bearing, distance = c2.get_bearing_and_distance(c1)
+        print(bearing, distance)
         self.assertEqual(180, bearing)
         self.assertEqual(50, distance)
