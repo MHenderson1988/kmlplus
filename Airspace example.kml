@@ -4353,6 +4353,66 @@
                     </outerBoundaryIs>
                 </Polygon>
             </Placemark>
+            <Placemark id="2614">
+                <Polygon id="2613">
+                    <altitudeMode>relativeToGround</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="2617">
+                            <coordinates>-4.33,56.11,5000.0 -4.33,56.88,20000.0 -4.88,56.88,20000.0 -4.88,56.11,5000.0</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="2620">
+                <Polygon id="2619">
+                    <altitudeMode>relativeToGround</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="2623">
+                            <coordinates>-4.33,56.11,10000.0 -4.33,56.88,25000.0 -4.88,56.88,25000.0 -4.88,56.11,10000.0</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="2626">
+                <Polygon id="2625">
+                    <altitudeMode>relativeToGround</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="2629">
+                            <coordinates>-4.33,56.11,5000.0 -4.33,56.88,20000.0 -4.33,56.88,25000.0 -4.33,56.11,10000.0</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="2632">
+                <Polygon id="2631">
+                    <altitudeMode>relativeToGround</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="2635">
+                            <coordinates>-4.33,56.88,20000.0 -4.88,56.88,20000.0 -4.88,56.88,25000.0 -4.33,56.88,25000.0</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="2638">
+                <Polygon id="2637">
+                    <altitudeMode>relativeToGround</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="2641">
+                            <coordinates>-4.88,56.88,20000.0 -4.88,56.11,5000.0 -4.88,56.11,10000.0 -4.88,56.88,25000.0</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="2644">
+                <Polygon id="2643">
+                    <altitudeMode>relativeToGround</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="2647">
+                            <coordinates>-4.88,56.11,5000.0 -4.33,56.11,5000.0 -4.33,56.11,10000.0 -4.88,56.11,10000.0</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
         </Folder>
     </Document>
 </kml>

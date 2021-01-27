@@ -17,6 +17,7 @@ Make lists of the EGPK CTA areas, as provided on the CAA AIP.  Suffix a denotes 
 and c denotes the start of a clockwise arc.  Both arcs are based upon the FRZ reference point.
 """
 frz_ref_point = coordinates.Coordinate(55.509392, -4.594581)
+
 cta_1 = [
     "554023,-45040", "553734,-44227a", "552811,-44906", "553124,-45830", "554023,-45040"
 ]
@@ -49,19 +50,37 @@ for the lower layer before creating the upper layer and sides.  These returns ca
 SimpleKml.
 """
 
+"""
+Using the quick_polygon method to create a standard floating polygon.  Quick polygon takes a list of arguments of either
+Coordinate objects or a list of strings or tuples.  It uses lower_height, upper_height and origin as its keyword
+arguments.  If no origin is specified then the centroid will be calculated and used as the basis for calculating
+arc and circular segments.
+"""
+cta_1_lower, cta_1_upper, cta_1_sides = paths.quick_polygon(*cta_1, lower_height=1500, upper_height=5500,
+                                                            origin=frz_ref_point)
+cta_2_lower, cta_2_upper, cta_2_sides = paths.quick_polygon(*cta_2, lower_height=2000, upper_height=5500,
+                                                            origin=frz_ref_point)
+cta_3_lower, cta_3_upper, cta_3_sides = paths.quick_polygon(*cta_3, lower_height=3000, upper_height=5500,
+                                                            origin=frz_ref_point)
+cta_4_lower, cta_4_upper, cta_4_sides = paths.quick_polygon(*cta_4, lower_height=3000, upper_height=5500,
+                                                            origin=frz_ref_point)
+cta_5_lower, cta_5_upper, cta_5_sides = paths.quick_polygon(*cta_5, lower_height=3500, upper_height=5500,
+                                                            origin=frz_ref_point)
+cta_6_lower, cta_6_upper, cta_6_sides = paths.quick_polygon(*cta_6, lower_height=4000, upper_height=5500,
+                                                            origin=frz_ref_point)
 
-def create_polygon(a_list, lower_height, upper_height, arc_origin, **kwargs):
-    lp = paths.LinePath(*a_list, height=lower_height, origin=arc_origin)
-    lp2, sides = lp.create_layer_and_sides(height=upper_height, origin=arc_origin)
-    return lp, lp2, sides
+"""
+Creating a sloped polygon using the create_layer_and_sides method.  When creating a sloped polygon you will need to
+determine the coordinates manually.  The blanket 'height' key word argument will cause all to default to a single value
+and will result in a 'level' polygon.
+"""
 
+list_of_coordinates_lower = ["56.11, -4.33, 5000", "56.88, -4.33, 20000", "56.88, -4.88, 20000", "56.11, -4.88, 5000"]
+list_of_coordinates_upper = ["56.11, -4.33, 10000", "56.88, -4.33, 25000", "56.88, -4.88, 25000", "56.11, -4.88, 10000"]
 
-cta_1_lower, cta_1_upper, cta_1_sides = create_polygon(cta_1, 1500, 5500, frz_ref_point)
-cta_2_lower, cta_2_upper, cta_2_sides = create_polygon(cta_2, 2000, 5500, frz_ref_point)
-cta_3_lower, cta_3_upper, cta_3_sides = create_polygon(cta_3, 3000, 5500, frz_ref_point)
-cta_4_lower, cta_4_upper, cta_4_sides = create_polygon(cta_4, 3000, 5500, frz_ref_point)
-cta_5_lower, cta_5_upper, cta_5_sides = create_polygon(cta_5, 3500, 5500, frz_ref_point)
-cta_6_lower, cta_6_upper, cta_6_sides = create_polygon(cta_6, 4000, 5500, frz_ref_point)
+lp_1 = paths.LinePath(*list_of_coordinates_lower)
+lp_2 = paths.LinePath(*list_of_coordinates_upper)
+sloped_sides = lp_1.create_sides(lp_2)
 
 
 def create_airspace(a_folder, lower_layer, upper_layer, sides):
@@ -89,6 +108,8 @@ def create_kml():
     create_airspace(fol, cta_4_lower, cta_4_upper, cta_4_sides)
     create_airspace(fol, cta_5_lower, cta_5_upper, cta_5_sides)
     create_airspace(fol, cta_6_lower, cta_6_upper, cta_6_sides)
+
+    create_airspace(fol, lp_1, lp_2, sloped_sides)
 
     kml.save('Airspace example.kml')
 

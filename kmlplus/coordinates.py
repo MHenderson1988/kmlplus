@@ -65,17 +65,6 @@ class Coordinate:
         except TypeError:
             print("is_negative can only evaluate numbers.  Please provide valid input.")
 
-    """This converts a given float from a decimal coordinate to a degrees minutes seconds coordinate.  It returns 
-    an int"""
-
-    @staticmethod
-    def decimal_to_dms(coordinate_to_convert):
-        degrees = int(coordinate_to_convert)
-        minutes = abs((coordinate_to_convert - degrees) * 60)
-        seconds = minutes % 1 * 60
-        dms_string = str(degrees) + str(int(minutes)) + str(round(seconds, 2))
-        return float(dms_string)
-
     """Takes an argument of type float or int.  Logically a coordinate of dms will not have a decimal place until at
     least six positions in eg - 552312.374, -45643.2 or 824512, -1795212.548 whereas decimal coordinates will have a
     decimal occur earlier.  Returns a string indicating whether the given coordinate is of type dms or decimal"""
@@ -282,19 +271,23 @@ class Coordinate:
     def kml_tuple(self):
         return self.longitude, self.latitude, self.height
 
-    """Takes 2 parameters and 1 key word argument for height.  Accepts a string of decimal lat/long, a bearing from 0 
+    """Takes 3 key word arguments for distance(in Km), bearing and height.  a bearing from 0 
     - 359 degrees and a distance in kilometres.  Optional keyword argument of height in metres.  Returns an instance 
     of the Coordinate class which is the desired bearing and distance from the lat/long string provided. """
 
-    def generate_coordinates(self, distance_km, a_bearing, a_height):
-        point = gp.Point.from_string(self.to_string_yx())
-        decimal_lat_lon_string = gp.distance(kilometers=distance_km).destination(point=point,
-                                                                                 bearing=a_bearing).format_decimal()
-        decimal_lat_lon_string = decimal_lat_lon_string.split(',')
-        lat_float, long_float = round(float(decimal_lat_lon_string[0]), 6), round(float(decimal_lat_lon_string[1]), 6)
+    def generate_coordinates(self, distance=10, bearing=10, height=0):
+        if 0 > bearing > 359:
+            raise ValueError('Bearing must be a valid number between 0 and 359')
+        else:
+            point = gp.Point.from_string(self.to_string_yx())
+            decimal_lat_lon_string = gp.distance(kilometers=distance).destination(point=point,
+                                                                                  bearing=bearing).format_decimal()
+            decimal_lat_lon_string = decimal_lat_lon_string.split(',')
+            lat_float, long_float = round(float(decimal_lat_lon_string[0]), 6), round(float(decimal_lat_lon_string[1]),
+                                                                                      6)
 
-        new_coordinate_instance = Coordinate(lat_float, long_float, height=a_height)
-        return new_coordinate_instance
+            new_coordinate_instance = Coordinate(lat_float, long_float, height=height)
+            return new_coordinate_instance
 
     """This takes an instance of the Coordinate class as its argument.  It returns the bearing and distance FROM the argument to the
     instance calling the function.  IE - if you're using instance A to call this function against instance B, it will return

@@ -10,14 +10,13 @@ tuples for the sides.
 """
 
 
-# TODO: Add tests for quick_polygon()
-
 def quick_polygon(*args, **kwargs):
     lower_height = kwargs.pop('lower_height', 0)
     upper_height = kwargs.pop('upper_height', lower_height + 5000)
+    origin = kwargs.pop('origin', None)
     sort = kwargs.pop('sort', False)
 
-    lower_layer = LinePath(*args, height=lower_height, sort=sort)
+    lower_layer = LinePath(*args, height=lower_height, sort=sort, origin=origin)
     upper_layer, sides = lower_layer.create_layer_and_sides(height=upper_height)
 
     return lower_layer, upper_layer, sides
@@ -174,6 +173,16 @@ class LinePath:
         return a_list_to_return
 
     """
+    This method takes each vertices and calculates it's bearing from the centroid.  This is then used to sort the 
+    vertices into anticlockwise ordering.
+    """
+
+    def calculate_bearings_from_centroid(self):
+        for coordinate in self.coordinate_list:
+            bearing, distance = coordinate.get_bearing_and_distance(self.centroid)
+            setattr(coordinate, 'bearing_from_centroid', bearing)
+
+    """
     Find the centroid of the linepath.  This will be used for ordering the coordinates
     to be counter clockwise so as to be best displayed by kml rendering.
     """
@@ -190,16 +199,6 @@ class LinePath:
         else:
             height = 0.0
         return Coordinate(latitude_average, longitude_average, height)
-
-    """
-    This method takes each vertices and calculates it's bearing from the centroid.  This is then used to sort the 
-    vertices into anticlockwise ordering.
-    """
-
-    def calculate_bearings_from_centroid(self):
-        for coordinate in self.coordinate_list:
-            bearing, distance = coordinate.get_bearing_and_distance(self.centroid)
-            setattr(coordinate, 'bearing_from_centroid', bearing)
 
     """
     This method sorts the vertices into anticlockwise ordering
@@ -277,10 +276,10 @@ class LinePath:
                 raise Exception('create_sides() function only accepts LinePath instances or that of its subclasses')
 
     def create_layer_and_sides(self, **kwargs):
-        self.__dict__.update(kwargs)
         height = kwargs.pop('height', 100.0)
+
         copy_of_args = copy.deepcopy(self.args_list)
-        new_line_path = LinePath(*copy_of_args, height=height, sort=self.sort)
+        new_line_path = LinePath(*copy_of_args, height=height, sort=self.sort, origin=self.origin)
 
         return new_line_path, self.create_sides(new_line_path)
 

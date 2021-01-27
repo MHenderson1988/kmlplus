@@ -53,13 +53,6 @@ class TestCoordinates(TestCase):
         self.assertTrue(c1.is_negative(c1.longitude))
         self.assertFalse(c1.is_negative(c1.latitude))
 
-    def test_decimal_to_dms(self):
-        c1 = coordinates.Coordinate("55.11213, -4.24453")
-        self.assertIsInstance(c1.decimal_to_dms(c1.latitude), float)
-        self.assertEqual(55643.67, c1.decimal_to_dms(c1.latitude))
-        self.assertIsInstance(c1.decimal_to_dms(c1.longitude), float)
-        self.assertEqual(-41440.31, c1.decimal_to_dms(c1.longitude))
-
     def test_detect_coordinate_type(self):
         c1 = coordinates.Coordinate(881232.12, 1795410.00, 4568.45)
         # Check that conversion happens on init
@@ -120,6 +113,7 @@ class TestCoordinates(TestCase):
     def test_kml_tuple(self):
         c1 = coordinates.Coordinate("55.23231c, -552312")
         expected = (-55.38667, 55.23231, 0)
+        print(c1.kml_tuple())
         self.assertEqual(expected, c1.kml_tuple())
 
     def test_generate_coordinates(self):
@@ -132,5 +126,6 @@ class TestCoordinates(TestCase):
         c1 = coordinates.Coordinate(55.123, "-4.123", 0)
         c2 = c1.generate_coordinates(50, 180, 0)
         bearing, distance = c2.get_bearing_and_distance(c1)
+        print(bearing, distance)
         self.assertEqual(180, bearing)
         self.assertEqual(50, distance)
