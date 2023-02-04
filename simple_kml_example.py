@@ -10,7 +10,7 @@ The example requires the installation of simple kml which can be achieved via -
 """
 import simplekml
 
-from kmlplus import paths, coordinates
+from kmlplus import paths, point
 
 """
 Make lists of the EGPK CTA areas, as provided on the CAA AIP.  Suffix a denotes the start of an anticlockwise arc
