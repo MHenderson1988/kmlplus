@@ -1,5 +1,4 @@
 import math
-import geopy.distance
 
 import util
 from kmlplus.util import dms_to_decimal
@@ -47,5 +46,3 @@ class Point:
         lon2 = math.degrees(lon2)
 
         return cls(lat2, lon2, z=kwargs.pop('z', 0))
-
-

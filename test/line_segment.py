@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from kmlplus.line_segment import LineSegment, CurvedSegment
 from kmlplus.point import Point
 

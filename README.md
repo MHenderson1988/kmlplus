@@ -17,13 +17,13 @@ Table of Contents
     - [Quick Start](#quick-start)
 4. [Classes](#classes)
     - [Coordinate](#coordinate)
-      - [Methods](#coordinate-methods)
+        - [Methods](#coordinate-methods)
     - [LinePath](#linepath)
         - [Creating a polygon using the LinePath class](#creating-a-polygon-using-the-linepath-class)
         - [Automatically create LinePath objects without Coordinate objects](#automatically-create-linepath-objects-without-coordinate-objects)
-         - [Methods](#linepath-methods)
+        - [Methods](#linepath-methods)
     - [ArcPath](#arcpath)
-      - [Methods](#arcpath-methods)
+        - [Methods](#arcpath-methods)
 5. [Acknowledgements](#acknowledgements)
 
 ---

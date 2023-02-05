@@ -47,7 +47,4 @@ def calculate_dms_to_decimal(dms_sliced_dict):
 
 def get_earth_radius(**kwargs) -> float:
     uom_dict = {'km': 6378.14, 'mi': 3963.19, 'nm': 3443.92, 'm': 6378140.00}
-    # Radius of earth in Km
-    radius = uom_dict[kwargs.pop('uom', 'km')]
-
-    return radius
+    return uom_dict[kwargs.pop('uom', 'km')]

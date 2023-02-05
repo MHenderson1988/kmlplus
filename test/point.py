@@ -1,11 +1,12 @@
 from unittest import TestCase
+
 from kmlplus.point import Point
 
 
 class TestPoint(TestCase):
     def setUp(self):
         pass
-    
+
     def test_from_dms(self):
         test_obj = Point.from_dms('551206.00N', '0045206.234W')
         self.assertEqual(test_obj.y, 55.20166666666667)

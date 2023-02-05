@@ -1,4 +1,5 @@
 import math
+
 from kmlplus.point import Point
 
 
@@ -75,7 +76,23 @@ class CurvedSegment:
     def __init__(self, start: Point, end: Point, **kwargs):
         self.start = start
         self.end = end
-        self.centre = kwargs.pop('centre', (self.get_distance() / 2))
         self.number_of_points = kwargs.pop('points', 100)
 
+    def find_midpoint(self, **kwargs):
+        x1, x2 = self.start.x, self.end.y
+        y1, y2 = self.start.y, self.end.y
 
+        x = (x1 + x2) / 2
+        y = (y1 + y2) / 2
+
+        return Point(y, x, z=kwargs.pop('z', 0))
+
+
+class ClockwiseCurvedSegement(CurvedSegment):
+    def __init__(self, start: Point, end: Point, **kwargs):
+        super().__init__(start, end, **kwargs)
+
+
+class AntiClockwiseCurvedSegement(CurvedSegment):
+    def __init__(self, start: Point, end: Point, **kwargs):
+        super().__init__(start, end, **kwargs)
