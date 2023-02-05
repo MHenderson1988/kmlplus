@@ -1,5 +1,5 @@
 from unittest import TestCase
-from kmlplus.util import dms_to_decimal, get_dms_slice_dict, calculate_dms_to_decimal
+from kmlplus.util import dms_to_decimal, get_dms_slice_dict, calculate_dms_to_decimal, get_earth_radius
 
 
 class TestUtil(TestCase):
@@ -37,3 +37,23 @@ class TestUtil(TestCase):
         expected = {'degrees': 4, 'minutes': 0.86666666666666666666666666666667,
                     'seconds': 0.00173166666666666666666666666667, 'hemisphere': 'W'}
         self.assertEqual(result, expected)
+
+    def test_get_earth_radius(self):
+        # Test for Km
+        result = get_earth_radius(uom='km')
+        self.assertEqual(result, 6378.14)
+
+        result = get_earth_radius()
+        self.assertEqual(result, 6378.14)
+
+        # Test for nautical mile
+        result = get_earth_radius(uom='nm')
+        self.assertEqual(result, 3443.92)
+
+        # Test for statute miles
+        result = get_earth_radius(uom='mi')
+        self.assertEqual(result, 3963.19)
+
+        # Test for metres
+        result = get_earth_radius(uom='m')
+        self.assertEqual(result, 6378140.00)

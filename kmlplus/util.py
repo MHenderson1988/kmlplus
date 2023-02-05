@@ -26,7 +26,7 @@ def get_dms_slice_dict(latitude_or_longitude_string):
         seconds = float(latitude_or_longitude_string[4:-1])
 
     else:
-        raise ValueError('DMS coordinates must indicate which hemisphere they belong to by appending N, E, S or W'\
+        raise ValueError('DMS coordinates must indicate which hemisphere they belong to by appending N, E, S or W' \
                          'to the end of the coordinate.  No other format currently accepted')
 
     slice_dict = {'degrees': degrees, 'minutes': minutes, 'seconds': seconds, 'hemisphere': hemisphere}
@@ -44,3 +44,10 @@ def calculate_dms_to_decimal(dms_sliced_dict):
 
     return calculated_dms_dict
 
+
+def get_earth_radius(**kwargs) -> float:
+    uom_dict = {'km': 6378.14, 'mi': 3963.19, 'nm': 3443.92, 'm': 6378140.00}
+    # Radius of earth in Km
+    radius = uom_dict[kwargs.pop('uom', 'km')]
+
+    return radius
