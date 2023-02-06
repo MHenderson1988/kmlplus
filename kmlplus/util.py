@@ -77,10 +77,13 @@ def detect_coordinate_type(coordinate_string):
         else:
             raise ValueError('Only valid DMS or decimal degree coordinate pairs are accepted.')
 
+    def equal_type(type_1, type_2):
+        if type_1 == type_2:
+            return type_1
+        else:
+            raise ValueError('Both latitude and longitude must be the same type.  Both DMS or both DD.')
+
     lat_type = match_regex(split_list[0])
     lon_type = match_regex(split_list[1])
 
-    if lat_type == lon_type:
-        return lat_type
-    else:
-        raise ValueError('Both latitude and longitude must be the same type.  Both DMS or both DD.')
+    return equal_type(lat_type, lon_type)
