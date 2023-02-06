@@ -31,6 +31,16 @@ class Point:
         return cls(y, x, z=kwargs.pop('z', 0))
 
     @classmethod
+    def find_midpoint(cls, point_1, point_2, **kwargs):
+        x1, x2 = point_1.x, point_2.x
+        y1, y2 = point_1.y, point_2.y
+
+        x = (x1 + x2) / 2
+        y = (y1 + y2) / 2
+
+        return cls(y, x, z=kwargs.pop('z', 0))
+
+    @classmethod
     def from_point_bearing_and_distance(cls, point, bearing: float, distance: float, **kwargs):
         d = distance
         R = util.get_earth_radius(uom=kwargs.pop('uom', 'km'))
@@ -46,3 +56,38 @@ class Point:
         lon2 = math.degrees(lon2)
 
         return cls(lat2, lon2, z=kwargs.pop('z', 0))
+
+    def get_distance(self, another_point, **kwargs: str):
+        radius_dict = {'km': 6378.14, 'mi': 3963.19, 'nm': 3443.91795200126}
+
+        x1, y1, x2, y2 = map(math.radians, [self.x, self.y, another_point.x, another_point.y])
+
+        dlon = x2 - x1
+        dlat = y2 - y1
+        a = math.sin(dlat / 2) ** 2 + math.cos(y1) * math.cos(y2) * math.sin(dlon / 2) ** 2
+        c = 2 * math.asin(math.sqrt(a))
+        r = radius_dict[kwargs.pop('uom', 'km')]
+        distance = c * r
+
+        return distance
+
+    def get_bearing(self, another_point) -> float:
+        # Convert coordinates to radians
+        x1, y1, x2, y2 = map(math.radians, [self.x, self.y, another_point.x, another_point.y])
+
+        # Calculate the bearing
+        bearing = math.atan2(
+            math.sin(x2 - x1) * math.cos(y2),
+            math.cos(y1) * math.sin(y2) - math.sin(y1) * math.cos(y1) * math.cos(x2 - x1)
+        )
+
+        # Convert bearing to degrees
+        bearing = math.degrees(bearing)
+
+        # Make sure bearing is positive
+        bearing = (bearing + 360) % 360
+        return bearing
+
+    def get_inverse_bearing(self, another_point) -> float:
+        bearing = self.get_bearing(another_point)
+        return (bearing + 180) % 360
