@@ -46,10 +46,10 @@ class TestPoint(TestCase):
     def test_get_bearing(self):
         result = self.test_point_1.get_bearing(self.test_point_2)
         self.assertEqual(180, result)
-        
+
         result = self.test_point_2.get_bearing(self.test_point_1)
         self.assertEqual(0, result)
-        
+
         result = self.test_midpoint.get_bearing(self.test_point_1)
         self.assertEqual(0, result)
 
@@ -59,3 +59,12 @@ class TestPoint(TestCase):
     def test_get_inverse_bearing(self):
         inverse_bearing = self.test_point_1.get_inverse_bearing(self.test_point_2)
         self.assertEqual(0, inverse_bearing)
+
+        inverse_bearing = self.test_point_2.get_inverse_bearing(self.test_point_1)
+        self.assertEqual(180, inverse_bearing)
+
+        inverse_bearing = self.test_midpoint.get_inverse_bearing(self.test_point_2)
+        self.assertEqual(0, inverse_bearing)
+
+        inverse_bearing = self.test_midpoint.get_inverse_bearing(self.test_point_1)
+        self.assertEqual(180, inverse_bearing)
