@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from kmlplus.util import dms_to_decimal, get_dms_slice_dict, calculate_dms_to_decimal, get_earth_radius
+from kmlplus.util import dms_to_decimal, get_dms_slice_dict, calculate_dms_to_decimal, get_earth_radius, \
+    detect_coordinate_type
 
 
 class TestUtil(TestCase):
@@ -58,3 +59,25 @@ class TestUtil(TestCase):
         # Test for metres
         result = get_earth_radius(uom='m')
         self.assertEqual(result, 6378140.00)
+
+    def test_detect_coordinate_type(self):
+        result = detect_coordinate_type('+55.393922, 4.323232')
+        self.assertEqual('dd', result)
+        result = detect_coordinate_type('55.393922, 4.323232')
+        self.assertEqual('dd', result)
+        result = detect_coordinate_type('55.393922, -4.393922')
+        self.assertEqual('dd', result)
+        result = detect_coordinate_type('55.393922, +04.393922')
+        self.assertEqual('dd', result)
+
+        result = detect_coordinate_type('556622.123N, 0045645.21W')
+        self.assertEqual('dms', result)
+        result = detect_coordinate_type('0045645.21W, 0045645.21W')
+        self.assertEqual('dms', result)
+
+        with self.assertRaises(ValueError):
+            detect_coordinate_type('+0043212.30W')
+        with self.assertRaises(ValueError):
+            detect_coordinate_type('+04232.322')
+        with self.assertRaises(ValueError):
+            detect_coordinate_type('+55.393922N')

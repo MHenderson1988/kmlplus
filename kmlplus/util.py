@@ -1,3 +1,6 @@
+import re
+
+
 def dms_to_decimal(latitude_or_longitude):
     slice_dms = get_dms_slice_dict(latitude_or_longitude)
     calculated_dms_dict = calculate_dms_to_decimal(slice_dms)
@@ -48,3 +51,36 @@ def calculate_dms_to_decimal(dms_sliced_dict):
 def get_earth_radius(**kwargs) -> float:
     uom_dict = {'km': 6378.14, 'mi': 3963.19, 'nm': 3443.92, 'm': 6378140.00}
     return uom_dict[kwargs.pop('uom', 'km')]
+
+
+def contains_z_value(coordinate_string: str):
+    coordinate_string.split(', ')
+    if len(coordinate_string) == 3:
+        return True
+    elif len(coordinate_string) == 2:
+        return False
+    else:
+        raise ValueError('Coordinate string must contain at least two valid coordinates of the same type and an,'
+                         ' optional height z value, separated by a comma separator')
+
+
+def detect_coordinate_type(coordinate_string):
+    split_list = coordinate_string.split(', ')
+
+    def match_regex(string_to_match):
+        regex_dict = {'dms': '^\d{6,7}[.]\d{1,}\D{1}$', 'dd': '^[-?|+?]?\d{1,3}[.]\d+$'}
+
+        if re.match(regex_dict['dms'], string_to_match):
+            return 'dms'
+        elif re.match(regex_dict['dd'], string_to_match):
+            return 'dd'
+        else:
+            raise ValueError('Only valid DMS or decimal degree coordinate pairs are accepted.')
+
+    lat_type = match_regex(split_list[0])
+    lon_type = match_regex(split_list[1])
+
+    if lat_type == lon_type:
+        return lat_type
+    else:
+        raise ValueError('Both latitude and longitude must be the same type.  Both DMS or both DD.')

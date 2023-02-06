@@ -37,10 +37,10 @@ class TestClockwiseCurvedSegment(TestCase):
 class TestAnticlockwiseCurvedSegment(TestCase):
     def setUp(self):
         self.test_obj = AnticlockwiseCurvedSegment(Point.from_dms('551206.00N', '0045206.234W'),
-                                               Point.from_dms('501206.00N', '0045206.234W'))
+                                                   Point.from_dms('501206.00N', '0045206.234W'))
 
         self.inverse_test_obj = AnticlockwiseCurvedSegment(Point.from_dms('501206.00N', '0045206.234W'),
-                                                       Point.from_dms('551206.00N', '0045206.234W'))
+                                                           Point.from_dms('551206.00N', '0045206.234W'))
 
     def test_get_points(self):
         result = self.test_obj.get_points()
@@ -53,7 +53,7 @@ class TestAnticlockwiseCurvedSegment(TestCase):
 
         self.assertAlmostEqual(result[99].y, 50.20166666666667, delta=7)
         self.assertAlmostEqual(result[99].x, -4.868398333333333, delta=7)
-        
+
         # As this is moving anti-clockwise, the longitude should decrease due to the arc as its moving westerly.
         self.assertTrue(result[0].x > result[49].x)
 

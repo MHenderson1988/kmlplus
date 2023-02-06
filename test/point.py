@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from kmlplus.point import Point
+from kmlplus.point import Point, PointFactory
 
 
 class TestPoint(TestCase):
@@ -68,3 +68,16 @@ class TestPoint(TestCase):
 
         inverse_bearing = self.test_midpoint.get_inverse_bearing(self.test_point_1)
         self.assertEqual(180, inverse_bearing)
+
+
+class TestPointFactory(TestCase):
+    def setUp(self):
+        pass
+
+    def test_process_coordinates(self):
+        PointFactory.process_coordinates(['22.323232, -4.287282'])
+
+    def test_process_dd(self):
+        pf = PointFactory()
+        result = pf.process_dd('22.32322, -4.32732')
+        self.assertTrue(isinstance(Point, result))

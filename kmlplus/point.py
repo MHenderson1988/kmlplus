@@ -1,7 +1,7 @@
 import math
 
 import util
-from kmlplus.util import dms_to_decimal
+from kmlplus.util import dms_to_decimal, detect_coordinate_type
 
 
 class Point:
@@ -91,3 +91,15 @@ class Point:
     def get_inverse_bearing(self, another_point) -> float:
         bearing = self.get_bearing(another_point)
         return (bearing + 180) % 360
+
+
+class PointFactory:
+    @classmethod
+    def process_coordinates(cls, iterable):
+        list_of_points = []
+        for i in iterable:
+            coordinate_type = detect_coordinate_type(i)
+            if coordinate_type == 'dd':
+
+            elif coordinate_type == 'dms':
+                list_of_points.append(Point.from_dms())
