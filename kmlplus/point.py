@@ -112,9 +112,19 @@ class PointFactory:
                 raise IndexError('Coordinate strings should contain latitude and longitude or latitude, longitude'
                                  'and height only.')
 
-        for i in coordinate_list:
-            coordinate_type = detect_coordinate_type(i)
-            if coordinate_type == 'dd' or coordinate_type == 'dms':
-                return process_string(i, coordinate_type)
+        def populate_point_list(coordinate_list):
+            point_list = []
+            for i in coordinate_list:
+                coordinate_type = detect_coordinate_type(i)
+                if coordinate_type == 'dd' or coordinate_type == 'dms':
+                    point_obj = process_string(i, coordinate_type)
+                    point_list.append(point_obj)
+                else:
+                    raise TypeError('Coordinates must be DMS, decimal degrees or UTM')
+
+            if len(point_list) > 2:
+                return point_list
             else:
-                raise TypeError('Coordinates must be DMS, decimal degrees or UTM')
+                raise ValueError('Cannot create a polygon from less than 2 points')
+
+        return populate_point_list(coordinate_list)

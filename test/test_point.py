@@ -77,10 +77,12 @@ class TestPointFactory(TestCase):
         pass
 
     def test_process_coordinates(self):
-        test_dd = PointFactory.process_coordinates(['22.323232, -4.287282'])
-        self.assertTrue(isinstance(test_dd, Point))
+        test_dd = PointFactory.process_coordinates(['22.323232, -4.287282',
+                                                    '23.323232, -5.328723',
+                                                    '22.112333, -6.23789238923'])
+        self.assertTrue(isinstance(test_dd[0], Point))
 
         # Test that dms coordinates are correctly returned as decimal degrees.
-        test_dms = PointFactory.process_coordinates(['532452N, 0045263W'])
-        type_result = util.detect_coordinate_type(f'{test_dms.y}, {test_dms.x}')
+        test_dms = PointFactory.process_coordinates(['532452N, 0045263W', '542352N, 0053421W', '563321N, 0054844W'])
+        type_result = util.detect_coordinate_type(f'{test_dms[0].y}, {test_dms[0].x}')
         self.assertEqual(type_result, 'dd')
