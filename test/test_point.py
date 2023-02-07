@@ -1,6 +1,8 @@
 from unittest import TestCase
 
+import util
 from kmlplus.point import Point, PointFactory
+from kmlplus.point import detect_coordinate_type
 
 
 class TestPoint(TestCase):
@@ -75,9 +77,10 @@ class TestPointFactory(TestCase):
         pass
 
     def test_process_coordinates(self):
-        PointFactory.process_coordinates(['22.323232, -4.287282'])
+        test_dd = PointFactory.process_coordinates(['22.323232, -4.287282'])
+        self.assertTrue(isinstance(test_dd, Point))
 
-    def test_process_dd(self):
-        pf = PointFactory()
-        result = pf.process_dd('22.32322, -4.32732')
-        self.assertTrue(isinstance(Point, result))
+        # Test that dms coordinates are correctly returned as decimal degrees.
+        test_dms = PointFactory.process_coordinates(['532452N, 0045263W'])
+        type_result = util.detect_coordinate_type(f'{test_dms.y}, {test_dms.x}')
+        self.assertEqual(type_result, 'dd')

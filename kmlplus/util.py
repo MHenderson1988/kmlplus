@@ -68,7 +68,8 @@ def detect_coordinate_type(coordinate_string):
     split_list = coordinate_string.split(', ')
 
     def match_regex(string_to_match):
-        regex_dict = {'dms': '^\d{6,7}[.]\d{1,}\D{1}$', 'dd': '^[-?|+?]?\d{1,3}[.]\d+$'}
+        regex_dict = {'dms': '^\d{6,7}[.]\d{1,}\D{1}$|^\d{6,7}\D{1}$',
+                      'dd': '^[-?|+?]?\d{1,3}[.]\d+$'}
 
         if re.match(regex_dict['dms'], string_to_match):
             return 'dms'
@@ -77,7 +78,7 @@ def detect_coordinate_type(coordinate_string):
         else:
             raise ValueError('Only valid DMS or decimal degree coordinate pairs are accepted.')
 
-    def equal_type(type_1, type_2):
+    def equal_type(type_1: str, type_2: str):
         if type_1 == type_2:
             return type_1
         else:
@@ -86,4 +87,8 @@ def detect_coordinate_type(coordinate_string):
     lat_type = match_regex(split_list[0])
     lon_type = match_regex(split_list[1])
 
-    return equal_type(lat_type, lon_type)
+    if equal_type(lat_type, lon_type):
+        return lat_type
+    else:
+        raise ValueError('Latitude and longitude must both be the same type.  ie - both decimal degrees; dms'
+                         'or UTM')

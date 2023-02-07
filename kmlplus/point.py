@@ -94,12 +94,27 @@ class Point:
 
 
 class PointFactory:
-    @classmethod
-    def process_coordinates(cls, iterable):
-        list_of_points = []
-        for i in iterable:
-            coordinate_type = detect_coordinate_type(i)
-            if coordinate_type == 'dd':
 
-            elif coordinate_type == 'dms':
-                list_of_points.append(Point.from_dms())
+    @classmethod
+    def process_coordinates(cls, coordinate_list):
+
+        def process_string(coordinate_string, coordinate_type):
+            type_dict = {'dd': 'from_decimal_degrees', 'dms': 'from_dms'}
+
+            split = coordinate_string.split(', ')
+            if len(split) == 2:
+                func = getattr(Point, type_dict[coordinate_type])
+                return func(split[0], split[1])
+            elif len(split) == 3:
+                func = getattr(Point, type_dict[coordinate_type])
+                return func(split[0], split[1], z=split[2])
+            else:
+                raise IndexError('Coordinate strings should contain latitude and longitude or latitude, longitude'
+                                 'and height only.')
+
+        for i in coordinate_list:
+            coordinate_type = detect_coordinate_type(i)
+            if coordinate_type == 'dd' or coordinate_type == 'dms':
+                return process_string(i, coordinate_type)
+            else:
+                raise TypeError('Coordinates must be DMS, decimal degrees or UTM')
