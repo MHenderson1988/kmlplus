@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from kmlplus.util import dms_to_decimal, get_dms_slice_dict, calculate_dms_to_decimal, get_earth_radius, \
-    detect_coordinate_type
+    detect_coordinate_type, point_or_segment, split_segment_string
 
 
 class TestUtil(TestCase):
@@ -61,18 +61,18 @@ class TestUtil(TestCase):
         self.assertEqual(result, 6378140.00)
 
     def test_detect_coordinate_type(self):
-        result = detect_coordinate_type('+55.393922, 4.323232')
+        result = detect_coordinate_type('+55.393922 4.323232')
         self.assertEqual('dd', result)
-        result = detect_coordinate_type('55.393922, 4.323232')
+        result = detect_coordinate_type('55.393922 4.323232')
         self.assertEqual('dd', result)
-        result = detect_coordinate_type('55.393922, -4.393922')
+        result = detect_coordinate_type('55.393922 -4.393922')
         self.assertEqual('dd', result)
-        result = detect_coordinate_type('55.393922, +04.393922')
+        result = detect_coordinate_type('55.393922 +04.393922')
         self.assertEqual('dd', result)
 
-        result = detect_coordinate_type('556622.123N, 0045645.21W')
+        result = detect_coordinate_type('556622.123N 0045645.21W')
         self.assertEqual('dms', result)
-        result = detect_coordinate_type('0045645.21W, 0045645.21W')
+        result = detect_coordinate_type('0045645.21W 0045645.21W')
         self.assertEqual('dms', result)
 
         with self.assertRaises(ValueError):
@@ -81,3 +81,21 @@ class TestUtil(TestCase):
             detect_coordinate_type('+04232.322')
         with self.assertRaises(ValueError):
             detect_coordinate_type('+55.393922N')
+
+    def test_point_or_segment(self):
+        # point, no height
+        coordinate_string = '521244N, 0056555W'
+        result = point_or_segment(coordinate_string)
+        pass
+
+    def test_split_segment_string(self):
+        string = 'start=522423N 0042354W, end=522428N 0042254W, direction=clockwise,' \
+                 ' centre=502211N 0043212W, sample=50'
+        d = split_segment_string(string)
+
+        self.assertTrue(isinstance(d, dict))
+        self.assertEqual(d.get('start'), '522423N 0042354W')
+        self.assertEqual(d.get('end'), '522428N 0042254W')
+        self.assertEqual(d.get('direction'), 'clockwise')
+        self.assertEqual(d.get('centre'), '502211N 0043212W')
+        self.assertEqual(d.get('sample'), '50')

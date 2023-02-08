@@ -54,7 +54,7 @@ def get_earth_radius(**kwargs) -> float:
 
 
 def contains_z_value(coordinate_string: str):
-    coordinate_string.split(', ')
+    coordinate_string.split(' ')
     if len(coordinate_string) == 3:
         return True
     elif len(coordinate_string) == 2:
@@ -65,7 +65,7 @@ def contains_z_value(coordinate_string: str):
 
 
 def detect_coordinate_type(coordinate_string):
-    split_list = coordinate_string.split(', ')
+    split_list = coordinate_string.split(' ')
 
     def match_regex(string_to_match):
         regex_dict = {'dms': '^\d{6,7}[.]\d{1,}\D{1}$|^\d{6,7}\D{1}$',
@@ -84,11 +84,24 @@ def detect_coordinate_type(coordinate_string):
         else:
             raise ValueError('Both latitude and longitude must be the same type.  Both DMS or both DD.')
 
-    lat_type = match_regex(split_list[0])
-    lon_type = match_regex(split_list[1])
+    lat_type = match_regex(split_list[0].strip())
+    lon_type = match_regex(split_list[1].strip())
 
     if equal_type(lat_type, lon_type):
         return lat_type
     else:
         raise ValueError('Latitude and longitude must both be the same type.  ie - both decimal degrees; dms'
                          'or UTM')
+
+
+def point_or_segment(coordinate_string: str):
+    if '=' in coordinate_string:
+        return 'curvedsegment'
+    else:
+        return 'point'
+
+
+def split_segment_string(string):
+    split_list = string.split(', ')
+    segment_dict = {item.split('=')[0]: item.split('=')[1] for item in split_list}
+    return segment_dict
