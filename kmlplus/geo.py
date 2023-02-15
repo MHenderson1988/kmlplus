@@ -106,12 +106,12 @@ class Point:
 
 
 class PointFactory:
-    def __init__(self, coordinate_list):
+    def __init__(self, coordinate_list: list):
         self.coordinate_list = coordinate_list
 
     def process_coordinates(self):
 
-        def check_point_list_length(point_list):
+        def check_point_list_length(point_list: list) -> list:
             if len(point_list) > 2:
                 return point_list
             else:
@@ -119,6 +119,28 @@ class PointFactory:
 
         point_list = self.populate_point_list()
         return check_point_list_length(point_list)
+
+    def populate_point_list(self):
+
+        def is_curved_segment(coordinate_string):
+            if 'start=' in coordinate_string:
+                return True
+            else:
+                return False
+
+        point_list = []
+        for i in self.coordinate_list:
+            # Check if a curved segment
+            if is_curved_segment(i):
+                point_list + CurvedSegmentFactory.generate_segment(i)
+            else:
+                coordinate_type = detect_coordinate_type(i)
+                if coordinate_type == 'dd' or coordinate_type == 'dms':
+                    point_obj = self.process_string(i, coordinate_type)
+                    point_list.append(point_obj)
+                else:
+                    raise TypeError('Coordinates must be DMS, decimal degrees or UTM')
+        return point_list
 
     def process_string(self, coordinate_string, coordinate_type):
         type_dict = {'dd': 'from_decimal_degrees', 'dms': 'from_dms'}
@@ -134,25 +156,13 @@ class PointFactory:
             raise IndexError('Coordinate strings should contain latitude and longitude or latitude, longitude'
                              'and height only.')
 
-    def populate_point_list(self):
-        point_list = []
-        for i in self.coordinate_list:
-            coordinate_type = detect_coordinate_type(i)
-            if coordinate_type == 'dd' or coordinate_type == 'dms':
-                point_obj = self.process_string(i, coordinate_type)
-                point_list.append(point_obj)
-            else:
-                raise TypeError('Coordinates must be DMS, decimal degrees or UTM')
-
-        return point_list
-
 
 class CurvedSegmentFactory:
     @classmethod
     def process_segment(cls, coordinate_string):
         string_dict = util.split_segment_string(coordinate_string)
         direction = string_dict['direction']
-        
+
         # Check coordinate type and create point objects
 
         point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}",
@@ -161,7 +171,8 @@ class CurvedSegmentFactory:
         if direction == 'anticlockwise':
             # return an anticlockwise segment
             if string_dict['centre']:
-                return AnticlockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2], sample=string_dict.get('sample', 100))
+                return AnticlockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
+                                                  sample=string_dict.get('sample', 100))
             else:
                 return AnticlockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100))
         else:
