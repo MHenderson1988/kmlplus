@@ -106,8 +106,9 @@ class Point:
 
 
 class PointFactory:
-    def __init__(self, coordinate_list: list):
+    def __init__(self, coordinate_list: list, **kwargs):
         self.coordinate_list = coordinate_list
+        self.z_override = kwargs.pop('z', None)
 
     def process_coordinates(self):
 
@@ -148,10 +149,17 @@ class PointFactory:
         split = coordinate_string.split(' ')
         if len(split) == 2:
             func = getattr(Point, type_dict[coordinate_type])
-            return func(split[0], split[1])
+            if self.z_override is not None:
+                return func(split[0], split[1], z=self.z_override)
+            else:
+                return func(split[0], split[1])
+
         elif len(split) == 3:
             func = getattr(Point, type_dict[coordinate_type])
-            return func(split[0], split[1], z=split[2])
+            if self.z_override is not None:
+                return func(split[0], split[1], z=self.z_override)
+            else:
+                return func(split[0], split[1], z=split[2])
         else:
             raise IndexError('Coordinate strings should contain latitude and longitude or latitude, longitude'
                              'and height only.')

@@ -12,7 +12,8 @@ class IPolygon(ABC):
 class Polygon(IPolygon):
     def __init__(self, coordinates: list, **kwargs):
         self.coordinates_list = coordinates
+        self.z_override = kwargs.pop('z', None)
 
-    def new_layer(self, **kwargs) -> list:
-        generated_points = PointFactory(self.coordinates_list).process_coordinates()
+    def new_layer(self) -> list:
+        generated_points = PointFactory(self.coordinates_list, z=self.z_override).process_coordinates()
         return generated_points
