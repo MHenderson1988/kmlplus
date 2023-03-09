@@ -3,17 +3,9 @@ from collections import deque
 from kmlplus.geo import PointFactory
 
 
-class IPolygon(ABC):
-    @abstractmethod
-    def new_layer(self):
-        pass
-
-
-class Polygon(IPolygon):
-    def __init__(self, coordinates: list, **kwargs):
-        self.coordinates_list = coordinates
-        self.z_override = kwargs.pop('z', None)
-
-    def new_layer(self) -> list:
-        generated_points = PointFactory(self.coordinates_list, z=self.z_override).process_coordinates()
+class Polygon:
+    @classmethod
+    def new_layer(cls, coordinate_list, **kwargs) -> list:
+        z_override = kwargs.pop('z', None)
+        generated_points = PointFactory(coordinate_list, z=z_override).process_coordinates()
         return generated_points
