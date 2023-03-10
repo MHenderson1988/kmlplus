@@ -39,10 +39,6 @@ class Point:
         return cls(y, x, z=kwargs.pop('z', 0))
 
     @classmethod
-    def from_utm(cls, y, x, **kwargs):
-        return cls(y, x, z=kwargs.pop('z', 0))
-
-    @classmethod
     def find_midpoint(cls, point_1, point_2, **kwargs):
         x1, x2 = point_1.x, point_2.x
         y1, y2 = point_1.y, point_2.y

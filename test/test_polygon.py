@@ -15,35 +15,35 @@ class TestPolygon(TestCase):
         test_dms = ['554433N 0010203W', '443322N 0000102W', '443322N 0010102E']
         
         # Tests for coordinates with no z value provided. Should default to 0.
-        result_no_height = Polygon().new_layer(test_coordinates_no_height)
+        result_no_height = Polygon.create_polygon(test_coordinates_no_height)
 
-        self.assertTrue(isinstance(result_no_height, list))
+        self.assertTrue(isinstance(result_no_height, Polygon))
         self.assertEqual(len(result_no_height), 3)
         for i in result_no_height:
             self.assertEqual(i.z, 0)
             self.assertTrue(isinstance(i, Point))
         
         # Tests for coordinates with a user provided z value.
-        result_with_height = Polygon().new_layer(test_coordinates_with_height)
+        result_with_height = Polygon.create_polygon(test_coordinates_with_height)
         
-        self.assertTrue(isinstance(result_with_height, list))#
+        self.assertTrue(isinstance(result_with_height, Polygon))
         self.assertEqual(len(result_with_height), 3)
         for i in result_with_height:
             self.assertTrue(isinstance(i, Point))
             self.assertNotEqual(i.z, 0)
 
         # Test results for coordinates with height overridden.
-        result_with_height_override = Polygon().new_layer(test_coordinates_with_height_override, z=500.11)
+        result_with_height_override = Polygon.create_polygon(test_coordinates_with_height_override, z=500.11)
 
-        self.assertTrue(isinstance(result_with_height_override, list))
+        self.assertTrue(isinstance(result_with_height_override, Polygon))
         self.assertEqual(len(result_with_height_override), 3)
         for i in result_with_height_override:
             self.assertTrue(isinstance(i, Point))
             self.assertEqual(500.11, i.z)
 
         # Test with DMS
-        result_dms_no_height = Polygon().new_layer(test_dms)
-        self.assertTrue(isinstance(result_dms_no_height, list))
+        result_dms_no_height = Polygon.create_polygon(test_dms)
+        self.assertTrue(isinstance(result_dms_no_height, Polygon))
         self.assertEqual(3, len(result_dms_no_height))
         for i in result_dms_no_height:
             self.assertTrue(isinstance(i, Point))
