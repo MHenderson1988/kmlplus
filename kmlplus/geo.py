@@ -173,7 +173,7 @@ class CurvedSegmentFactory:
 
         if direction == 'anticlockwise':
             # return an anticlockwise segment
-            if string_dict['centre']:
+            if string_dict.get('centre') is not None:
                 return AnticlockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
                                                   sample=string_dict.get('sample', 100))
             else:
