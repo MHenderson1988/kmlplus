@@ -40,8 +40,8 @@ class Point:
 
     @classmethod
     def find_midpoint(cls, point_1, point_2, **kwargs):
-        x1, x2 = point_1.x, point_2.x
-        y1, y2 = point_1.y, point_2.y
+        x1, x2 = float(point_1.x), float(point_2.x)
+        y1, y2 = float(point_1.y), float(point_2.y)
 
         x = (x1 + x2) / 2
         y = (y1 + y2) / 2
@@ -68,7 +68,7 @@ class Point:
     def get_distance(self, another_point, **kwargs: str):
         radius_dict = {'km': 6378.14, 'mi': 3963.19, 'nm': 3443.91795200126}
 
-        x1, y1, x2, y2 = map(math.radians, [self.x, self.y, another_point.x, another_point.y])
+        x1, y1, x2, y2 = map(math.radians, [self.x, self.y, float(another_point.x), float(another_point.y)])
 
         dlon = x2 - x1
         dlat = y2 - y1
@@ -81,7 +81,7 @@ class Point:
 
     def get_bearing(self, another_point) -> float:
         # Convert coordinates to radians
-        x1, y1, x2, y2 = map(math.radians, [self.x, self.y, another_point.x, another_point.y])
+        x1, y1, x2, y2 = map(math.radians, [self.x, self.y, float(another_point.x), float(another_point.y)])
 
         # Calculate the bearing
         bearing = math.atan2(
@@ -107,15 +107,8 @@ class PointFactory:
         self.z_override = kwargs.pop('z', None)
 
     def process_coordinates(self):
-
-        def check_point_list_length(point_list: list) -> list:
-            if len(point_list) > 2:
-                return point_list
-            else:
-                raise ValueError('Cannot create a polygon from less than 2 points')
-
         point_list = self.populate_point_list()
-        return check_point_list_length(point_list)
+        return point_list
 
     def populate_point_list(self):
 
@@ -129,7 +122,8 @@ class PointFactory:
         for i in self.coordinate_list:
             # Check if a curved segment
             if is_curved_segment(i):
-                point_list + CurvedSegmentFactory.generate_segment(i)
+                curved_segment_points = CurvedSegmentFactory(i).generate_segment()
+                point_list += curved_segment_points
             else:
                 coordinate_type = detect_coordinate_type(i)
                 if coordinate_type == 'dd' or coordinate_type == 'dms':
@@ -162,15 +156,20 @@ class PointFactory:
 
 
 class CurvedSegmentFactory:
-    @classmethod
-    def process_segment(cls, coordinate_string):
-        string_dict = util.split_segment_string(coordinate_string)
+    def __init__(self, coordinate_string):
+        self.coordinate_string = coordinate_string
+
+    def process_segment(self):
+        string_dict = util.split_segment_string(self.coordinate_string)
         direction = string_dict['direction']
 
         # Check coordinate type and create point objects
 
-        point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}",
+        if string_dict.get('centre') is not None:
+            point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}",
                                    f"{string_dict.get('centre')}"]).process_coordinates()
+        else:
+            point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}"]).process_coordinates()
 
         if direction == 'anticlockwise':
             # return an anticlockwise segment
@@ -180,16 +179,17 @@ class CurvedSegmentFactory:
             else:
                 return AnticlockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100))
         else:
-            if string_dict['centre']:
+            if string_dict.get('centre') is not None:
                 return ClockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
                                               sample=string_dict.get('sample', 100))
             else:
                 return ClockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100))
 
-    @classmethod
-    def generate_segment(cls, coordinate_string):
-        segment = CurvedSegmentFactory.process_segment(coordinate_string)
-        return segment.get_points()
+    def generate_segment(self):
+        segment = self.process_segment()
+        segment_points = segment.get_points()
+
+        return segment_points
 
 
 class ICurvedSegment(ABC):
@@ -206,6 +206,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
     def __init__(self, start: str, end: str, **kwargs):
         self.start = start
         self.end = end
+        self.z = kwargs.pop('z', 0)
         self.centre = kwargs.pop('centre', Point.find_midpoint(self.start, self.end))
         self.sample = kwargs.pop('sample', 100)
         self.start_bearing = self.centre.get_bearing(self.start)
@@ -267,7 +268,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         point_list = []
 
         for n in range(0, self.sample):
-            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance)
+            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing += bearing_inc
 
@@ -285,6 +286,7 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
     def __init__(self, start: str, end: str, **kwargs):
         self.start = start
         self.end = end
+        self.z = kwargs.pop('z', 0)
         self.centre = kwargs.pop('centre', Point.find_midpoint(self.start, self.end))
         self.sample = kwargs.pop('sample', 100)
         self.start_bearing = self.centre.get_bearing(self.start)
@@ -346,7 +348,7 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         point_list = []
 
         for n in range(0, self.sample):
-            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance)
+            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing -= bearing_inc
 
