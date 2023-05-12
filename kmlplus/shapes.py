@@ -1,5 +1,4 @@
 from abc import abstractmethod, ABC
-from collections import deque
 from kmlplus.geo import PointFactory, Point, CurvedSegmentFactory
 
 
@@ -13,7 +12,7 @@ class Circle(ICircle):
     def __init__(self, centre, radius, **kwargs):
         self._centre = centre
         self._radius = radius
-        self._z = kwargs.get('z', 0.0)
+        self._z = kwargs.get('z', 0)
         self._sample = kwargs.get('sample', 100)
         self.points = self.create()
 
@@ -80,12 +79,6 @@ class Circle(ICircle):
         return circle
 
 
-class ICylinder(ABC):
-    @abstractmethod
-    def generate_sides(self):
-        pass
-
-
 class IPolygon(ABC):
     @abstractmethod
     def __len__(self):
@@ -111,15 +104,11 @@ class IPolygon(ABC):
     def __ne__(self, another_polygon):
         pass
 
-    @classmethod
-    @abstractmethod
-    def create_polygon(cls, coordinate_list):
-        pass
-
 
 class Polygon(IPolygon):
-    def __init__(self, point_list):
-        self._point_list = point_list
+    def __init__(self, point_list, **kwargs):
+        self._z = kwargs.get('z', None)
+        self._point_list = PointFactory(point_list, z=self._z).process_coordinates()
 
     def __len__(self):
         return len(self.point_list)
@@ -149,6 +138,17 @@ class Polygon(IPolygon):
         return self.__len__() != another_polygon.__len__()
 
     @property
+    def z(self):
+        return self._z
+
+    @z.setter
+    def z(self, value):
+        if isinstance(value, float):
+            self._z = value
+        else:
+            self._z = float(value)
+
+    @property
     def point_list(self):
         return self._point_list
     
@@ -158,27 +158,20 @@ class Polygon(IPolygon):
             self._point_list = a_point_list
         else:
             raise ValueError('Cannot create a polygon from less than 2 points')
-    
-    @classmethod
-    def create_polygon(cls, coordinate_list, **kwargs):
-        z_override = kwargs.pop('z', None)
-        if z_override is not None:
-            return cls(PointFactory(coordinate_list, z=z_override).process_coordinates())
-        else:
-            return cls(PointFactory(coordinate_list).process_coordinates())
 
 
-class IThreeDimensionShape(ABC):
-    @abstractmethod
-    def generate_sides(self):
-        pass
-
-
-class Polyhedron(IThreeDimensionShape):
-    def __init__(self, lower_polygon, upper_polygon):
-        self.lower_polygon = lower_polygon
-        self.upper_polygon = upper_polygon
+class ThreeDimensionShape:
+    def __init__(self, lower_coordinates, upper_coordinates, **kwargs):
+        self.lower_polygon = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
+        self.upper_polygon = self.create_layer(upper_coordinates, kwargs.get('lower_layer', None))
         self.sides = self.generate_sides()
+
+    def create_layer(self, coordinate_list, layer_height):
+        if layer_height:
+            poly = Polygon(coordinate_list, z=layer_height)
+        else:
+            poly = Polygon(coordinate_list)
+        return poly
 
     def generate_sides(self):
         if self.lower_polygon != self.upper_polygon:
@@ -187,22 +180,32 @@ class Polyhedron(IThreeDimensionShape):
         else:
             side_coordinates = []
             i = 0
-            while i < len(self.lower_polygon)-1:
-                side_coordinates.append(self.lower_polygon[i])
-                side_coordinates.append(self.lower_polygon[i+1])
-                side_coordinates.append(self.upper_polygon[i+1])
-                side_coordinates.append(self.upper_polygon[i])
+            while i < len(self.lower_polygon) - 1:
+                side_coordinates.append(
+                [
+                    self.lower_polygon[i],
+                    self.lower_polygon[i + 1],
+                    self.upper_polygon[i + 1],
+                    self.upper_polygon[i],
+
                 # Return to the original point
-                side_coordinates.append(self.lower_polygon[i])
+
+                    self.lower_polygon[i]
+                ]
+            )
 
                 i += 1
 
             # When you reach the last point, join it up to the first
-            side_coordinates.append(self.lower_polygon[i])
-            side_coordinates.append(self.lower_polygon[0])
-            side_coordinates.append(self.upper_polygon[0])
-            side_coordinates.append(self.upper_polygon[i])
-            # Return to the original point
-            side_coordinates.append(self.lower_polygon[i])
+            side_coordinates.append(
+                [
+                    self.lower_polygon[i],
+                    self.lower_polygon[0],
+                    self.upper_polygon[0],
+                    self.upper_polygon[i],
+                    # Return to the original point
+                    self.lower_polygon[i]
+                 ]
+            )
 
             return side_coordinates

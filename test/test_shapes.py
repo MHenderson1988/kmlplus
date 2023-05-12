@@ -1,4 +1,4 @@
-from kmlplus.shapes import Circle, Polygon, Polyhedron
+from kmlplus.shapes import Circle, Polygon, ThreeDimensionShape
 from kmlplus.geo import Point
 from unittest import TestCase
 
@@ -35,7 +35,7 @@ class TestPolygon(TestCase):
         test_dms = ['554433N 0010203W', '443322N 0000102W', '443322N 0010102E']
 
         # Tests for coordinates with no z value provided. Should default to 0.
-        result_no_height = Polygon.create_polygon(test_coordinates_no_height)
+        result_no_height = Polygon(test_coordinates_no_height)
 
         self.assertTrue(isinstance(result_no_height, Polygon))
         self.assertEqual(len(result_no_height), 3)
@@ -44,7 +44,7 @@ class TestPolygon(TestCase):
             self.assertTrue(isinstance(i, Point))
 
         # Tests for coordinates with a user provided z value.
-        result_with_height = Polygon.create_polygon(test_coordinates_with_height)
+        result_with_height = Polygon(test_coordinates_with_height)
 
         self.assertTrue(isinstance(result_with_height, Polygon))
         self.assertEqual(len(result_with_height), 3)
@@ -53,7 +53,7 @@ class TestPolygon(TestCase):
             self.assertNotEqual(i.z, 0)
 
         # Test results for coordinates with height overridden.
-        result_with_height_override = Polygon.create_polygon(test_coordinates_with_height_override, z=500.11)
+        result_with_height_override = Polygon(test_coordinates_with_height_override, z=500.11)
 
         self.assertTrue(isinstance(result_with_height_override, Polygon))
         self.assertEqual(len(result_with_height_override), 3)
@@ -62,7 +62,7 @@ class TestPolygon(TestCase):
             self.assertEqual(500.11, i.z)
 
         # Test with DMS
-        result_dms_no_height = Polygon.create_polygon(test_dms)
+        result_dms_no_height = Polygon(test_dms)
         self.assertTrue(isinstance(result_dms_no_height, Polygon))
         self.assertEqual(3, len(result_dms_no_height))
         for i in result_dms_no_height:
@@ -70,14 +70,14 @@ class TestPolygon(TestCase):
             self.assertEqual(0, i.z)
 
         # Test with DD and curved segment
-        result_dd_arc = Polygon.create_polygon(test_coordinates_with_cw_arc)
+        result_dd_arc = Polygon(test_coordinates_with_cw_arc)
         self.assertTrue(isinstance(result_dd_arc, Polygon))
         self.assertTrue(len(result_dd_arc) > 100)
         for i in result_dd_arc:
             self.assertTrue(isinstance(i, Point))
             self.assertEqual(0, i.z)
 
-        result_dd_arc = Polygon.create_polygon(test_coordinates_with_ccw_arc)
+        result_dd_arc = Polygon(test_coordinates_with_ccw_arc)
         self.assertTrue(isinstance(result_dd_arc, Polygon))
         self.assertTrue(len(result_dd_arc) > 100)
         for i in result_dd_arc:
@@ -85,19 +85,11 @@ class TestPolygon(TestCase):
             self.assertEqual(0, i.z)
 
 
-class TestPolyhedron(TestCase):
-    def setUp(self):
-        test_coordinates_no_height = ['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923']
-        self.lower_polygon = Polygon.create_polygon(test_coordinates_no_height)
-        self.upper_polygon = Polygon.create_polygon(test_coordinates_no_height, z=100)
+class TestThreeDimensionShape(TestCase):
 
     def test_generate_sides(self):
-        poly = Polyhedron(self.lower_polygon, self.upper_polygon)
-        self.assertTrue(isinstance(poly, Polyhedron))
+        test_list = ['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923']
+        poly = ThreeDimensionShape(test_list, test_list)
+        self.assertTrue(isinstance(poly, ThreeDimensionShape))
         self.assertTrue(isinstance(poly.sides, list))
-        self.assertEqual(15, len(poly.sides))
-
-        # Check z values move in 1, 2, upper 1, upper 2 direction.
-        self.assertEqual(poly.sides[0].z, poly.sides[1].z)
-        self.assertNotEqual(poly.sides[1].z, poly.sides[2].z)
-        self.assertEqual(poly.sides[2].z, poly.sides[3].z)
+        self.assertEqual(3, len(poly.sides))

@@ -91,7 +91,7 @@ class TestPointFactory(TestCase):
 
     def test_process_string(self):
         no_height = '22.323232 -4.287282'
-        with_height = '22.323232 -4.287282, 8'
+        with_height = '22.323232 -4.287282 8'
 
         dms_test = '521244N 0056555W'
 
