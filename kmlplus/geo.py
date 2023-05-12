@@ -12,6 +12,9 @@ class Point:
         self.z = kwargs.pop('z', 0.0)
 
     def __str__(self):
+        return f'{self.y} {self.x} {self.z}'
+
+    def __repr__(self):
         return f'{__class__} y: {self.y} x: {self.x} z: {self.z}'
 
     def __eq__(self, other):

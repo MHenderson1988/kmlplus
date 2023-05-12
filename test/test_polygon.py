@@ -1,5 +1,5 @@
 from unittest import TestCase
-from kmlplus.polygon import Polygon, Polyhedron
+from kmlplus.shapes import Polygon, Polyhedron
 from kmlplus.geo import Point
 
 
