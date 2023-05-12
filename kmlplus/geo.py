@@ -21,6 +21,28 @@ class Point:
         return self.__str__ == other.__str__
 
     @property
+    def y(self):
+        return self._y
+
+    @y.setter
+    def y(self, value):
+        if isinstance(value, float):
+            self._y = value
+        else:
+            self._y = float(value)
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, value):
+        if isinstance(value, float):
+            self._x = value
+        else:
+            self._x = float(value)
+
+    @property
     def z(self):
         return self._z
 
@@ -164,7 +186,7 @@ class CurvedSegmentFactory:
 
     def process_segment(self):
         string_dict = util.split_segment_string(self.coordinate_string)
-        direction = string_dict['direction']
+        direction = string_dict.setdefault('direction', 'clockwise')
 
         # Check coordinate type and create point objects
 
@@ -363,3 +385,5 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         incremental_value = difference / (self.sample + 1)
 
         return incremental_value
+
+

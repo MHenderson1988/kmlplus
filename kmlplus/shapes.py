@@ -4,22 +4,46 @@ from kmlplus.geo import PointFactory, Point, CurvedSegmentFactory
 
 
 class ICircle(ABC):
-    @classmethod
     @abstractmethod
-    def create(cls, centre, radius):
+    def create(self):
         pass
 
 
 class Circle(ICircle):
-    def __init__(self, centre, radius):
+    def __init__(self, centre, radius, **kwargs):
         self._centre = centre
         self._radius = radius
+        self._z = kwargs.get('z', 0.0)
+        self._sample = kwargs.get('sample', 100)
+        self.points = self.create()
 
     def __eq__(self, another_circle):
         if self.centre and self.radius == another_circle.centre and another_circle.radius:
             return True
         else:
             return False
+
+    @property
+    def z(self):
+        return self._z
+
+    @z.setter
+    def z(self, value):
+        if isinstance(float, value):
+            self._z = value
+        else:
+            self._z = float(value)
+
+    @property
+    def sample(self):
+        return self._sample
+
+    @sample.setter
+    def sample(self, value):
+        if isinstance(int, value):
+            self._sample = value
+        else:
+            self._sample = int(value)
 
     @property
     def centre(self):
@@ -48,6 +72,12 @@ class Circle(ICircle):
                 print('Radius must be a float or type which can be converted to float eg int or string.')
         else:
             raise ValueError('Radius must be greater than 0 and of type float or other type which can be cast to float.')
+
+    def create(self):
+        start_point = Point.from_point_bearing_and_distance(Point(self.centre.split(' ')[1], self.centre.split(' ')[0]), 0, self.radius)
+        circle = CurvedSegmentFactory(f'start={start_point.y} {start_point.x}, end={start_point.y} {start_point.x}, '
+                                      f'centre={self.centre}, sample={self.sample}').generate_segment()
+        return circle
 
 
 class ICylinder(ABC):

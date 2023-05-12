@@ -154,7 +154,7 @@ class TestClockwiseCurvedSegment(TestCase):
         # As this is moving clockwise, the longitude should increase due to the arc as its moving easterly.
         self.assertTrue(result[0].x < result[49].x)
 
-    def test_get_heading_increments(self):
+    def test_get_bearing_increments(self):
         result = self.test_obj.get_bearing_increment()
         self.assertEqual(result, 1.7821782178217822)
 
@@ -185,7 +185,7 @@ class TestAnticlockwiseCurvedSegment(TestCase):
         # As this is moving anti-clockwise, the longitude should decrease due to the arc as its moving westerly.
         self.assertTrue(result[0].x > result[49].x)
 
-    def test_get_heading_increments(self):
+    def test_get_bearing_increments(self):
         result = self.test_obj.get_bearing_increment()
         self.assertEqual(1.7821782178217822, result)
 
