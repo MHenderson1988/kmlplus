@@ -125,6 +125,10 @@ class Point:
         bearing = self.get_bearing(another_point)
         return (bearing + 180) % 360
 
+    def kml_friendly(self):
+        kml_tuple = (self.x, self.y, self.z)
+        return kml_tuple
+
 
 class PointFactory:
     def __init__(self, coordinate_list: list, **kwargs):
@@ -156,6 +160,7 @@ class PointFactory:
                     point_list.append(point_obj)
                 else:
                     raise TypeError('Coordinates must be DMS, decimal degrees or UTM')
+
         return point_list
 
     def process_string(self, coordinate_string, coordinate_type):
@@ -192,7 +197,7 @@ class CurvedSegmentFactory:
 
         if string_dict.get('centre') is not None:
             point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}",
-                                   f"{string_dict.get('centre')}"]).process_coordinates()
+                                       f"{string_dict.get('centre')}"]).process_coordinates()
         else:
             point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}"]).process_coordinates()
 
@@ -385,5 +390,3 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         incremental_value = difference / (self.sample + 1)
 
         return incremental_value
-
-

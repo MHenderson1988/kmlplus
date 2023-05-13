@@ -151,7 +151,7 @@ class Polygon(IPolygon):
     @property
     def point_list(self):
         return self._point_list
-    
+
     @point_list.setter
     def point_list(self, a_point_list):
         if len(a_point_list) > 2:
@@ -159,18 +159,65 @@ class Polygon(IPolygon):
         else:
             raise ValueError('Cannot create a polygon from less than 2 points')
 
+    def calculate_centroid(self):
+        latitude_total, longitude_total = 0, 0
+        for coordinate_instance in self.point_list:
+            latitude_total += coordinate_instance.y
+            longitude_total += coordinate_instance.x
+        latitude_average, longitude_average = latitude_total / len(self.point_list), \
+                                              longitude_total / len(self.point_list)
 
-class ThreeDimensionShape:
+        return Point(latitude_average, longitude_average)
+
+    def calculate_bearing_from_centroid(self, point):
+        return point.get_bearing(self.calculate_centroid())
+
+
+class Kml3D:
     def __init__(self, lower_coordinates, upper_coordinates, **kwargs):
-        self.lower_polygon = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
-        self.upper_polygon = self.create_layer(upper_coordinates, kwargs.get('lower_layer', None))
+        self._lower_polygon = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
+        self._upper_polygon = self.create_layer(upper_coordinates, kwargs.get('upper_layer', None))
         self.sides = self.generate_sides()
 
-    def create_layer(self, coordinate_list, layer_height):
-        if layer_height:
-            poly = Polygon(coordinate_list, z=layer_height)
+    @property
+    def lower_polygon(self):
+        return self._lower_polygon
+
+    @lower_polygon.setter
+    def lower_polygon(self, a_polygon):
+        self._lower_polygon = a_polygon.sort(reverse=True, key=lambda x: a_polygon.calculate_bearing_from_centroid(x))
+
+    @property
+    def upper_polygon(self):
+        return self._upper_polygon
+
+    @upper_polygon.setter
+    def upper_polygon(self, a_polygon):
+        self._upper_polygon = a_polygon.sort(reverse=True, key=lambda x: a_polygon.calculate_bearing_from_centroid(x))
+
+    def to_kml(self):
+        lower = [(p.x, p.y, p.z) for p in self.lower_polygon]
+        upper = [(p.x, p.y, p.z) for p in self.upper_polygon]
+        sides = []
+
+        for polygon in self.sides:
+            holding_list = []
+            for point_list in polygon:
+                holding_list.append((point_list.x, point_list.y, point_list.z))
+            sides.append(holding_list)
+
+        return lower, upper, sides
+
+    def create_layer(self, coordinate_list, layer_height, **kwargs):
+        is_side = kwargs.get('sides', False)
+        poly = None
+        if is_side:
+            poly = [Polygon(x) for x in coordinate_list]
         else:
-            poly = Polygon(coordinate_list)
+            if layer_height:
+                poly = Polygon(coordinate_list, z=layer_height)
+            else:
+                poly = Polygon(coordinate_list)
         return poly
 
     def generate_sides(self):
@@ -181,31 +228,15 @@ class ThreeDimensionShape:
             side_coordinates = []
             i = 0
             while i < len(self.lower_polygon) - 1:
-                side_coordinates.append(
-                [
-                    self.lower_polygon[i],
-                    self.lower_polygon[i + 1],
-                    self.upper_polygon[i + 1],
-                    self.upper_polygon[i],
+                polygon_coordinate_list = [self.lower_polygon[i].__str__(), self.lower_polygon[i + 1].__str__(), self.upper_polygon[i + 1].__str__(), self.upper_polygon[i].__str__(), self.lower_polygon[i].__str__()]
 
-                # Return to the original point
-
-                    self.lower_polygon[i]
-                ]
-            )
+                side_coordinates.append(Polygon(polygon_coordinate_list))
 
                 i += 1
 
             # When you reach the last point, join it up to the first
-            side_coordinates.append(
-                [
-                    self.lower_polygon[i],
-                    self.lower_polygon[0],
-                    self.upper_polygon[0],
-                    self.upper_polygon[i],
-                    # Return to the original point
-                    self.lower_polygon[i]
-                 ]
-            )
+            polygon_coordinate_list = [self.lower_polygon[i].__str__(), self.lower_polygon[0].__str__(), self.upper_polygon[0].__str__(), self.upper_polygon[i].__str__(), self.lower_polygon[i].__str__()]
+
+            side_coordinates.append(Polygon(polygon_coordinate_list))
 
             return side_coordinates
