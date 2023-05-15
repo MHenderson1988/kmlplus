@@ -1,5 +1,6 @@
 import math
 from abc import ABC, abstractmethod
+from pyproj import Geod
 
 import util
 from kmlplus.util import dms_to_decimal, detect_coordinate_type
@@ -51,7 +52,10 @@ class Point:
         if isinstance(value, float):
             self._z = value
         else:
-            self._z = float(value)
+            if value is None:
+                self._z = 0.0
+            else:
+                self._z = float(value)
 
     @classmethod
     def from_decimal_degrees(cls, y, x, **kwargs):
@@ -75,55 +79,27 @@ class Point:
 
     @classmethod
     def from_point_bearing_and_distance(cls, point, bearing: float, distance: float, **kwargs):
-        d = distance
-        R = util.get_earth_radius(uom=kwargs.pop('uom', 'km'))
-        lat1, lon1, brng = map(math.radians, [point.y, point.x, bearing])
-
-        lat2 = math.asin(math.sin(lat1) * math.cos(d / R) +
-                         math.cos(lat1) * math.sin(d / R) * math.cos(brng))
-
-        lon2 = lon1 + math.atan2(math.sin(brng) * math.sin(d / R) * math.cos(lat1),
-                                 math.cos(d / R) - math.sin(lat1) * math.sin(lat2))
-
-        lat2 = math.degrees(lat2)
-        lon2 = math.degrees(lon2)
-
-        return cls(lat2, lon2, z=kwargs.pop('z', 0))
+        g = Geod(ellps='WGS84')
+        p = g.fwd(point.x, point.y, az=bearing, dist=distance)
+        return cls(p[1], p[0], z=kwargs.pop('z', 0))
 
     def get_distance(self, another_point, **kwargs: str):
-        radius_dict = {'km': 6378.14, 'mi': 3963.19, 'nm': 3443.91795200126}
-
-        x1, y1, x2, y2 = map(math.radians, [self.x, self.y, float(another_point.x), float(another_point.y)])
-
-        dlon = x2 - x1
-        dlat = y2 - y1
-        a = math.sin(dlat / 2) ** 2 + math.cos(y1) * math.cos(y2) * math.sin(dlon / 2) ** 2
-        c = 2 * math.asin(math.sqrt(a))
-        r = radius_dict[kwargs.pop('uom', 'km')]
-        distance = c * r
-
-        return distance
+        g = Geod(ellps='WGS84')
+        geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
+        bearing = geo_tup[2]
+        return bearing
 
     def get_bearing(self, another_point) -> float:
-        # Convert coordinates to radians
-        x1, y1, x2, y2 = map(math.radians, [self.x, self.y, float(another_point.x), float(another_point.y)])
-
-        # Calculate the bearing
-        bearing = math.atan2(
-            math.sin(x2 - x1) * math.cos(y2),
-            math.cos(y1) * math.sin(y2) - math.sin(y1) * math.cos(y1) * math.cos(x2 - x1)
-        )
-
-        # Convert bearing to degrees
-        bearing = math.degrees(bearing)
-
-        # Make sure bearing is positive
-        bearing = (bearing + 360) % 360
+        g = Geod(ellps='WGS84')
+        geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
+        bearing = geo_tup[0]
         return bearing
 
     def get_inverse_bearing(self, another_point) -> float:
-        bearing = self.get_bearing(another_point)
-        return (bearing + 180) % 360
+        g = Geod(ellps='WGS84')
+        geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
+        bearing = geo_tup[1]
+        return bearing
 
     def kml_friendly(self):
         kml_tuple = (self.x, self.y, self.z)
@@ -151,7 +127,7 @@ class PointFactory:
         for i in self.coordinate_list:
             # Check if a curved segment
             if is_curved_segment(i):
-                curved_segment_points = CurvedSegmentFactory(i).generate_segment()
+                curved_segment_points = CurvedSegmentFactory(i, z_override=self.z_override).generate_segment()
                 point_list += curved_segment_points
             else:
                 coordinate_type = detect_coordinate_type(i)
@@ -186,8 +162,9 @@ class PointFactory:
 
 
 class CurvedSegmentFactory:
-    def __init__(self, coordinate_string):
+    def __init__(self, coordinate_string, **kwargs):
         self.coordinate_string = coordinate_string
+        self.z_override = kwargs.get('z_override', None)
 
     def process_segment(self):
         string_dict = util.split_segment_string(self.coordinate_string)
@@ -197,23 +174,27 @@ class CurvedSegmentFactory:
 
         if string_dict.get('centre') is not None:
             point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}",
-                                       f"{string_dict.get('centre')}"]).process_coordinates()
+                                       f"{string_dict.get('centre')}"], z=self.z_override).process_coordinates()
         else:
-            point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}"]).process_coordinates()
+            point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}"],
+                                      z=self.z_override).process_coordinates()
 
         if direction == 'anticlockwise':
             # return an anticlockwise segment
             if string_dict.get('centre') is not None:
                 return AnticlockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
-                                                  sample=string_dict.get('sample', 100))
+                                                  sample=string_dict.get('sample', 100), z=self.z_override)
             else:
-                return AnticlockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100))
+                return AnticlockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100),
+                                                  z=self.z_override)
         else:
             if string_dict.get('centre') is not None:
                 return ClockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
-                                              sample=string_dict.get('sample', 100))
+                                              sample=string_dict.get('sample', 100),
+                                              z=self.z_override)
             else:
-                return ClockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100))
+                return ClockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100),
+                                              z=self.z_override)
 
     def generate_segment(self):
         segment = self.process_segment()
@@ -236,7 +217,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
     def __init__(self, start: str, end: str, **kwargs):
         self.start = start
         self.end = end
-        self.z = kwargs.pop('z', 0)
+        self.z = kwargs.pop('z', None)
         self.centre = kwargs.pop('centre', Point.find_midpoint(self.start, self.end))
         self.sample = kwargs.pop('sample', 100)
         self.start_bearing = self.centre.get_bearing(self.start)
@@ -292,15 +273,17 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         # How many plots to point on the arc, default 100.
         bearing_inc = self.get_bearing_increment()
 
-        start_bearing = self.centre.get_bearing(self.start)
+        start_bearing = self.start_bearing
         distance = self.centre.get_distance(self.start)
 
-        point_list = []
+        point_list = [self.start]
 
         for n in range(0, self.sample):
             arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing += bearing_inc
+
+        point_list.append(self.end)
 
         return point_list
 
@@ -316,7 +299,7 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
     def __init__(self, start: str, end: str, **kwargs):
         self.start = start
         self.end = end
-        self.z = kwargs.pop('z', 0)
+        self.z = kwargs.pop('z', None)
         self.centre = kwargs.pop('centre', Point.find_midpoint(self.start, self.end))
         self.sample = kwargs.pop('sample', 100)
         self.start_bearing = self.centre.get_bearing(self.start)
@@ -375,12 +358,14 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         start_bearing = self.centre.get_bearing(self.start)
         distance = self.centre.get_distance(self.start)
 
-        point_list = []
+        point_list = [self.start]
 
         for n in range(0, self.sample):
             arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing -= bearing_inc
+
+        point_list.append(self.end)
 
         return point_list
 

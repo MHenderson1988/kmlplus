@@ -155,7 +155,12 @@ class Polygon(IPolygon):
     @point_list.setter
     def point_list(self, a_point_list):
         if len(a_point_list) > 2:
+            # Close the polygon, if it is not already
+            if a_point_list[0] != a_point_list[-1]:
+                first_vertice = a_point_list[0]
+                a_point_list.append(first_vertice)
             self._point_list = a_point_list
+
         else:
             raise ValueError('Cannot create a polygon from less than 2 points')
 
@@ -210,7 +215,6 @@ class Kml3D:
 
     def create_layer(self, coordinate_list, layer_height, **kwargs):
         is_side = kwargs.get('sides', False)
-        poly = None
         if is_side:
             poly = [Polygon(x) for x in coordinate_list]
         else:
@@ -235,8 +239,8 @@ class Kml3D:
                 i += 1
 
             # When you reach the last point, join it up to the first
-            polygon_coordinate_list = [self.lower_polygon[i].__str__(), self.lower_polygon[0].__str__(), self.upper_polygon[0].__str__(), self.upper_polygon[i].__str__(), self.lower_polygon[i].__str__()]
+            # polygon_coordinate_list = [self.lower_polygon[i].__str__(), self.lower_polygon[0].__str__(), self.upper_polygon[0].__str__(), self.upper_polygon[i].__str__(), self.lower_polygon[i].__str__()]
 
-            side_coordinates.append(Polygon(polygon_coordinate_list))
+            #side_coordinates.append(Polygon(polygon_coordinate_list))
 
             return side_coordinates

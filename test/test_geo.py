@@ -172,7 +172,7 @@ class TestAnticlockwiseCurvedSegment(TestCase):
 
     def test_get_points(self):
         result = self.test_obj.get_points()
-        self.assertEqual(len(result), 100)
+        self.assertEqual(len(result), 102)
 
         # Check start and end points are accurately computed
         # Delta 7 implies tolerance of 1.11cm
