@@ -276,9 +276,9 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         start_bearing = self.start_bearing
         distance = self.centre.get_distance(self.start)
 
-        point_list = [self.start]
+        point_list = []
 
-        for n in range(0, self.sample):
+        for n in range(0, self.sample+1):
             arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing += bearing_inc
@@ -358,9 +358,9 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         start_bearing = self.centre.get_bearing(self.start)
         distance = self.centre.get_distance(self.start)
 
-        point_list = [self.start]
+        point_list = []
 
-        for n in range(0, self.sample):
+        for n in range(0, self.sample+1):
             arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing -= bearing_inc

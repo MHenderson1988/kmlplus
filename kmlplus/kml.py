@@ -2,7 +2,7 @@ import simplekml
 from kmlplus.shapes import Kml3D
 
 if __name__ == '__main__':
-    curved_layer = ['start=55.2222222 -4.111111, end=55.0 -4.1, direction=clockwise, sample=5', '55.2222222 -4.111111']
+    curved_layer = ['start=55.2222222 -4.111111, end=55.0 -4.1, direction=anticlockwise, sample=200', '55.2222222 -4.111111']
     straight_layer = ['22.323232 -4.287282 100', '23.323232 -5.328723 150', '22.112333 -6.23789238923 200', '22.323232 -4.287282 100']
 
     poly = Kml3D(curved_layer, curved_layer, lower_layer=10000, upper_layer=20000)
