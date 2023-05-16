@@ -212,6 +212,10 @@ class ICurvedSegment(ABC):
     def get_bearing_increment(self):
         pass
 
+    @abstractmethod
+    def get_height_increment(self):
+        pass
+
 
 class ClockwiseCurvedSegment(ICurvedSegment):
     def __init__(self, start: str, end: str, **kwargs):
@@ -272,6 +276,10 @@ class ClockwiseCurvedSegment(ICurvedSegment):
     def get_points(self):
         # How many plots to point on the arc, default 100.
         bearing_inc = self.get_bearing_increment()
+        if self.z is None:
+            height_inc = self.get_height_increment()
+        else:
+            height_inc = 0
 
         start_bearing = self.start_bearing
         distance = self.centre.get_distance(self.start)
@@ -279,9 +287,13 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         point_list = []
 
         for n in range(0, self.sample+1):
+            if self.z is None:
+                self.z = self.start.z
+
             arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing += bearing_inc
+            self.z += height_inc
 
         point_list.append(self.end)
 
@@ -293,6 +305,14 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         incremental_value = difference / (self.sample + 1)
 
         return incremental_value
+
+    def get_height_increment(self):
+        if self.start.z > self.end.z:
+            difference = -abs(self.start.z - self.end.z) / self.sample
+            return difference
+        else:
+            difference = abs(self.start.z - self.end.z) / self.sample
+            return difference
 
 
 class AnticlockwiseCurvedSegment(ICurvedSegment):
@@ -354,6 +374,10 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
     def get_points(self):
         # How many plots to point on the arc, default 100.
         bearing_inc = self.get_bearing_increment()
+        if self.z is None:
+            height_inc = self.get_height_increment()
+        else:
+            height_inc = 0
 
         start_bearing = self.centre.get_bearing(self.start)
         distance = self.centre.get_distance(self.start)
@@ -361,9 +385,13 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         point_list = []
 
         for n in range(0, self.sample+1):
+            if self.z is None:
+                self.z = self.start.z
+
             arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing -= bearing_inc
+            self.z += height_inc
 
         point_list.append(self.end)
 
@@ -375,3 +403,12 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         incremental_value = difference / (self.sample + 1)
 
         return incremental_value
+
+    def get_height_increment(self):
+        if self.start.z > self.end.z:
+            difference = -abs(self.start.z - self.end.z) / self.sample
+            return difference
+        else:
+            difference = abs(self.start.z - self.end.z) / self.sample
+            return difference
+
