@@ -48,3 +48,39 @@ prestwick_cta_1 = [
     'start=553734N 0044227W, centre=553034N 0043540W, end=552811N 0044906W, direction=anticlockwise',
     'start=553124N 0045830W, centre=553034N 0043540W, end=554023N 0045040W'
     ]
+
+prestwick_cta_2 = [
+    '553044N 0044945W',
+    '552703N 0043902W',
+    '552518N 0044044W',
+    'start=552811N 0044906W, centre=553034N 0043540W, end=553044N 0044945W'
+    ]
+
+prestwick_cta_3 = [
+    '552703N 0043902W',
+    'start=552150N 0042400W, centre=553034N 0043540W, end=552040N 0042722W',
+    '552518N 0044044W',
+    '552703N 0043902W'
+    ]
+prestwick_cta_4 = [
+    '552838N 0041639W',
+    'start=552658N 0041154W, centre=553034N 0043540W, end=552010N 0041916W',
+    'start=552150N 0042400W, centre=553034N 0043540W, end=552838N 0041639W, direction=anticlockwise'
+    ]
+prestwick_cta_5 = [
+    '553124N 0045830W',
+    '552040N 0042722W',
+    '551848N 0044702W',
+    '553124N 0045830W'
+    ]
+prestwick_cta_6 = [
+    '552658N 0041154W',
+    'start=552521N 0040716W, centre=553034N 0043540W, end=551710N 0041723W',
+    'start=552040N 0042722W, centre=553034N 0043540W, end=552150N 0042400W, direction=anticlockwise',
+    'start=552010N 0041916W, centre=553034N 0043540W, end=552658N 0041154W, direction=anticlockwise'
+    ]
+prestwick_ctr =[
+    '553734N 0044227W',
+    'start=552838N 0041639W, centre=553034N 0043540W, end=552150N 0042400W',
+    'start=553044N 0044945W, centre=553034N 0043540W, end=553734N 0044227W'
+ ]
