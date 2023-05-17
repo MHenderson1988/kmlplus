@@ -42,3 +42,9 @@ birmingham_cta_10 = [
     '521702N 0021251W',
     '521803N 0021116W'
 ]
+
+prestwick_cta_1 = [
+    '554023N 0045040W',
+    'start=553734N 0044227W, centre=553034N 0043540W, end=552811N 0044906W, direction=anticlockwise',
+    'start=553124N 0045830W, centre=553034N 0043540W, end=554023N 0045040W'
+    ]
