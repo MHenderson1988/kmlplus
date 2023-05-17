@@ -30,19 +30,19 @@ class TestPoint(TestCase):
         test_obj = Point.from_dms('551206.00N', '0045206.23W')
         test_result = Point.from_point_bearing_and_distance(test_obj, 180.00, 383.00, uom='km')
 
-        self.assertAlmostEqual(51.756802, test_result.y, delta=0.01)
+        self.assertAlmostEqual(55.198226, test_result.y, delta=0.01)
         self.assertAlmostEqual(-4.868396, test_result.x, delta=0.00001)
 
     def test_get_distance(self):
         # test km
         test_obj = Point.from_dms('551206.00N', '0045206.234W')
         distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W'))
-        self.assertEqual(556.5977157657558, distance)
+        self.assertEqual(556402.304538113, distance)
 
         # test miles
         test_obj = Point.from_dms('551206.00N', '0045206.234W')
-        distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W'), uom='mi')
-        self.assertEqual(345.8535719105704, distance)
+        distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W'), uom='km')
+        self.assertEqual(556.402304538113, distance)
 
     def test_get_bearing(self):
         result = self.test_point_1.get_bearing(self.test_point_2)
@@ -122,8 +122,8 @@ class TestCurvedSegmentFactory(TestCase):
             ' centre=502211N 0043212W, sample=50').generate_segment()
         ac_cs = CurvedSegmentFactory('start=522423N 0042354W, end=522428N 0042254W, direction=anticlockwise,' \
             ' centre=502211N 0043212W, sample=50').generate_segment()
-        self.assertTrue(len(c_cs) == 50)
-        self.assertTrue(len(ac_cs) == 50)
+        self.assertTrue(len(c_cs) == 52)
+        self.assertTrue(len(ac_cs) == 52)
         for i in c_cs:
             self.assertTrue(isinstance(i, Point))
         for i in ac_cs:

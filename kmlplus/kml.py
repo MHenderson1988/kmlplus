@@ -67,5 +67,3 @@ if __name__ == '__main__':
         '521702N 0021251W',
         '521803N 0021116W'
     ]
-
-    create_polygon(birmingham_cta_10, lower_layer=6500, upper_layer=10500)

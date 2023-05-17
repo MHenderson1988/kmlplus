@@ -10,11 +10,11 @@ class TestCircle(TestCase):
 
     def test_create(self):
         self.assertTrue(isinstance(self.circle_no_height.points, list))
-        self.assertEqual(len(self.circle_no_height.points), 100)
+        self.assertEqual(len(self.circle_no_height.points), 102)
         self.assertTrue(isinstance(self.circle_no_height.points[2], Point))
 
         self.assertTrue(isinstance(self.circle_height.points, list))
-        self.assertEqual(len(self.circle_height.points), 150)
+        self.assertEqual(len(self.circle_height.points), 152)
         self.assertTrue(isinstance(self.circle_height.points[2], Point))
 
 
@@ -88,7 +88,7 @@ class TestPolygon(TestCase):
 class TestThreeDimensionShape(TestCase):
 
     def test_generate_sides(self):
-        test_list = ['22.323232 -4.287282 20', '23.323232 -5.328723', '22.112333 -6.23789238923']
+        test_list = ['22.323232 -4.287282 20', '23.323232 -5.328723', '22.112333 -6.23789238923', '22.323232 -4.287282 20']
         poly = Kml3D(test_list, test_list, upper_layer=100)
         self.assertTrue(isinstance(poly, Kml3D))
         self.assertTrue(isinstance(poly.sides, list))

@@ -84,10 +84,14 @@ class Point:
         return cls(p[1], p[0], z=kwargs.pop('z', 0))
 
     def get_distance(self, another_point, **kwargs: str):
+        radius_dict = {'km': 0.001, 'mi': 0.000621371, 'nm': 0.000539957, 'm': 1}
         g = Geod(ellps='WGS84')
         geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
-        bearing = geo_tup[2]
-        return bearing
+
+        #PyProj gives distance in metres
+        distance = geo_tup[2] * radius_dict[kwargs.pop('uom', 'm')]
+
+        return distance
 
     def get_bearing(self, another_point) -> float:
         g = Geod(ellps='WGS84')
