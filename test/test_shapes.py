@@ -1,6 +1,7 @@
-from kmlplus.shapes import Circle, Polygon, Kml3D
-from kmlplus.geo import Point
 from unittest import TestCase
+
+from kmlplus.geo import Point
+from kmlplus.shapes import Circle, Polygon, Kml3D
 
 
 class TestCircle(TestCase):
@@ -88,7 +89,8 @@ class TestPolygon(TestCase):
 class TestThreeDimensionShape(TestCase):
 
     def test_generate_sides(self):
-        test_list = ['22.323232 -4.287282 20', '23.323232 -5.328723', '22.112333 -6.23789238923', '22.323232 -4.287282 20']
+        test_list = ['22.323232 -4.287282 20', '23.323232 -5.328723', '22.112333 -6.23789238923',
+                     '22.323232 -4.287282 20']
         poly = Kml3D(test_list, test_list, upper_layer=100)
         self.assertTrue(isinstance(poly, Kml3D))
         self.assertTrue(isinstance(poly.sides, list))
@@ -98,5 +100,5 @@ class TestThreeDimensionShape(TestCase):
         test_list = ['22.323232 -4.287282 20', '23.323232 -5.328723', '22.112333 -6.23789238923']
         poly = Kml3D(test_list, test_list, upper_layer=100)
         lower, upper, sides = poly.to_kml()
-        
+
         self.assertTrue(isinstance(lower, list))

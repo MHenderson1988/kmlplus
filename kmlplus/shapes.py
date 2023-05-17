@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABC
-from kmlplus.geo import PointFactory, Point, CurvedSegmentFactory
+
+from kmlplus.geo import PointFactory, Point
 
 
 class ICircle(ABC):
@@ -10,7 +11,7 @@ class ICircle(ABC):
 
 class Circle(ICircle):
     def __init__(self, centre, radius, **kwargs):
-        self._centre = centre
+        self._centre = PointFactory([centre]).process_coordinates()[0]
         self._radius = radius
         self._z = kwargs.get('z', 0)
         self._sample = kwargs.get('sample', 100)
@@ -70,12 +71,24 @@ class Circle(ICircle):
             except TypeError:
                 print('Radius must be a float or type which can be converted to float eg int or string.')
         else:
-            raise ValueError('Radius must be greater than 0 and of type float or other type which can be cast to float.')
+            raise ValueError(
+                'Radius must be greater than 0 and of type float or other type which can be cast to float.')
 
     def create(self):
-        start_point = Point.from_point_bearing_and_distance(Point(self.centre.split(' ')[1], self.centre.split(' ')[0]), 0, self.radius)
-        circle = CurvedSegmentFactory(f'start={start_point.y} {start_point.x}, end={start_point.y} {start_point.x}, '
-                                      f'centre={self.centre}, sample={self.sample}').generate_segment()
+        start_point = Point.from_point_bearing_and_distance(self.centre, 0, self.radius)
+        point_list = []
+
+        start_bearing = 0
+        bearing_increment = 360 / self.sample
+
+        for n in range(0, self.sample + 1):
+            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=self.z)
+            point_list.append(point)
+            start_bearing -= bearing_increment
+
+        # kml tuples
+        circle = [(p.x, p.y, p.z) for p in point_list]
+
         return circle
 
 
@@ -232,7 +245,9 @@ class Kml3D:
             side_coordinates = []
             i = 0
             while i < len(self.lower_polygon) - 1:
-                polygon_coordinate_list = [self.lower_polygon[i].__str__(), self.lower_polygon[i + 1].__str__(), self.upper_polygon[i + 1].__str__(), self.upper_polygon[i].__str__(), self.lower_polygon[i].__str__()]
+                polygon_coordinate_list = [self.lower_polygon[i].__str__(), self.lower_polygon[i + 1].__str__(),
+                                           self.upper_polygon[i + 1].__str__(), self.upper_polygon[i].__str__(),
+                                           self.lower_polygon[i].__str__()]
 
                 side_coordinates.append(Polygon(polygon_coordinate_list))
 
@@ -241,6 +256,6 @@ class Kml3D:
             # When you reach the last point, join it up to the first
             # polygon_coordinate_list = [self.lower_polygon[i].__str__(), self.lower_polygon[0].__str__(), self.upper_polygon[0].__str__(), self.upper_polygon[i].__str__(), self.lower_polygon[i].__str__()]
 
-            #side_coordinates.append(Polygon(polygon_coordinate_list))
+            # side_coordinates.append(Polygon(polygon_coordinate_list))
 
             return side_coordinates

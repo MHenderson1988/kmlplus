@@ -111,17 +111,17 @@ class TestPointFactory(TestCase):
 class TestCurvedSegmentFactory(TestCase):
     def test_process_segment(self):
         c_cs = CurvedSegmentFactory('start=522423N 0042354W, end=522428N 0042254W, direction=clockwise,' \
-            ' centre=502211N 0043212W, sample=50').process_segment()
+                                    ' centre=502211N 0043212W, sample=50').process_segment()
         ac_cs = CurvedSegmentFactory('start=522423N 0042354W, end=522428N 0042254W, direction=anticlockwise,' \
-            ' centre=502211N 0043212W, sample=50').process_segment()
+                                     ' centre=502211N 0043212W, sample=50').process_segment()
         self.assertTrue(isinstance(c_cs, ClockwiseCurvedSegment))
         self.assertTrue(isinstance(ac_cs, AnticlockwiseCurvedSegment))
 
     def test_generate_segment(self):
         c_cs = CurvedSegmentFactory('start=522423N 0042354W, end=522428N 0042254W, direction=clockwise,' \
-            ' centre=502211N 0043212W, sample=50').generate_segment()
+                                    ' centre=502211N 0043212W, sample=50').generate_segment()
         ac_cs = CurvedSegmentFactory('start=522423N 0042354W, end=522428N 0042254W, direction=anticlockwise,' \
-            ' centre=502211N 0043212W, sample=50').generate_segment()
+                                     ' centre=502211N 0043212W, sample=50').generate_segment()
         self.assertTrue(len(c_cs) == 52)
         self.assertTrue(len(ac_cs) == 52)
         for i in c_cs:

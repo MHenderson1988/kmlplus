@@ -1,5 +1,5 @@
-import math
 from abc import ABC, abstractmethod
+
 from pyproj import Geod
 
 import util
@@ -79,8 +79,13 @@ class Point:
 
     @classmethod
     def from_point_bearing_and_distance(cls, point, bearing: float, distance: float, **kwargs):
+        radius_dict = {'km': 0.001, 'mi': 0.000621371, 'nm': 0.000539957, 'm': 1}
+        # PyProj gives distance in metres
+        distance = distance * radius_dict[kwargs.pop('uom', 'm')]
+
         g = Geod(ellps='WGS84')
         p = g.fwd(point.x, point.y, az=bearing, dist=distance)
+
         return cls(p[1], p[0], z=kwargs.pop('z', 0))
 
     def get_distance(self, another_point, **kwargs: str):
@@ -88,7 +93,7 @@ class Point:
         g = Geod(ellps='WGS84')
         geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
 
-        #PyProj gives distance in metres
+        # PyProj gives distance in metres
         distance = geo_tup[2] * radius_dict[kwargs.pop('uom', 'm')]
 
         return distance
@@ -290,7 +295,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
 
         point_list = []
 
-        for n in range(0, self.sample+1):
+        for n in range(0, self.sample + 1):
             if self.z is None:
                 self.z = self.start.z
 
@@ -388,7 +393,7 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
 
         point_list = []
 
-        for n in range(0, self.sample+1):
+        for n in range(0, self.sample + 1):
             if self.z is None:
                 self.z = self.start.z
 
@@ -415,4 +420,3 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         else:
             difference = abs(self.start.z - self.end.z) / self.sample
             return difference
-
