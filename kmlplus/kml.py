@@ -1,7 +1,8 @@
 import simplekml
 
 import test_data.airspace
-from kmlplus.shapes import Kml3D, Circle
+from kmlplus.shapes import Polyhedron, Circle, Cylinder
+from kmlplus.geo import PointFactory
 
 
 class KmlPlus:
@@ -9,6 +10,36 @@ class KmlPlus:
         self.output_path = kwargs.get('output', None)
         self.save_name = save_name
         self.kml = simplekml.Kml()
+
+    def point(self, coordinate, **kwargs):
+        name = kwargs.get('name', None)
+        point_name = kwargs.get('point_name', 'KmlPlus Point')
+        colour_hex = kwargs.get('colour_hex', '7Fc0c0c0')
+
+        point = PointFactory(coordinate).process_coordinates()
+
+        if name:
+            fol = self.kml.newfolder(name=name)
+        else:
+            fol = self.kml.newfolder(name='KmlPlus Point')
+
+        pnt = fol.newpoint(name=point_name)
+        pnt.coords = [(point[0].x, point[0].y, point[0].z)]
+
+        self.kml.save(self.save_name)
+
+    def linestring(self, coordinate_list, **kwargs):
+        name = kwargs.get('name', None)
+        string_name = kwargs.get('linestring_name', 'KmlPlus Linestring')
+        colour_hex = kwargs.get('colour_hex', '7Fc0c0c0')
+
+        if name:
+            fol = self.kml.newfolder(name=name)
+        else:
+            fol = self.kml.newfolder(name='KmlPlus Point')
+
+        s = fol.newlinestring(name=string_name)
+        s.coords = []
 
     def polyhedron(self, coordinate_list, **kwargs):
         name = kwargs.get('name', None)
@@ -18,11 +49,10 @@ class KmlPlus:
         lower_layer = kwargs.get('lower_layer', None)
         upper_layer = kwargs.get('upper_layer', None)
 
-        poly = Kml3D(coordinate_list, coordinate_list, lower_layer=lower_layer, upper_layer=upper_layer)
+        poly = Polyhedron(coordinate_list, coordinate_list, lower_layer=lower_layer, upper_layer=upper_layer)
         lower, upper, sides = poly.to_kml()
 
         if name:
-
             fol = self.kml.newfolder(name=name)
 
             lower_pol = fol.newpolygon(name=lower_poly_name)
@@ -75,15 +105,54 @@ class KmlPlus:
 
         self.kml.save(self.save_name)
 
+    def cylinder(self, coordinate, radius, **kwargs):
+        name = kwargs.get('name', None)
+        uom = kwargs.get('uom', 'nm')
+        colour_hex = kwargs.get('colour_hex', '7Fc0c0c0')
+        lower_circle_name = kwargs.get('lower_name', 'Lower Circle')
+        upper_circle_name = kwargs.get('upper_name', 'Upper Circle')
+        lower_layer = kwargs.get('lower_layer', None)
+        upper_layer = kwargs.get('upper_layer', None)
+        sample = kwargs.get('sample', 100)
+
+        cylinder = Cylinder((coordinate, radius), (coordinate, radius),
+                            lower_layer=lower_layer, upper_layer=upper_layer, sample=sample, uom=uom)
+        lower, upper, sides = cylinder.to_kml()
+
+        if name:
+            fol = self.kml.newfolder(name=name)
+        else:
+            fol = self.kml.newfolder(name='KmlPlus Object')
+
+            lower_pol = fol.newpolygon(name=lower_circle_name)
+            lower_pol.outerboundaryis = lower
+            lower_pol.polystyle.color = colour_hex
+            lower_pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+            upper_pol = fol.newpolygon(name=upper_circle_name)
+            upper_pol.outerboundaryis = upper
+            upper_pol.polystyle.color = colour_hex
+            upper_pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+            for coords in sides:
+                side_pol = fol.newpolygon(name='A side')
+                side_pol.outerboundaryis = coords
+                side_pol.polystyle.color = colour_hex
+                side_pol.altitudemode = simplekml.AltitudeMode.relativetoground
+
+        self.kml.save(self.save_name)
+
 
 if __name__ == '__main__':
     kml_file = KmlPlus('Point Styling.kml')
 
-    kml_file.polyhedron(test_data.airspace.london_fir, lower_layer=19500, upper_layer=24500, name='London FIR')
+    """kml_file.polyhedron(test_data.airspace.london_fir, lower_layer=19500, upper_layer=24500, name='London FIR')"""
 
-    kml_file.circle(test_data.airspace.beccles_parachute, 5000)
+    kml_file.linestring(test_data.airspace.birmingham_cta_9)
+    kml_file.cylinder(test_data.airspace.beccles_parachute, 1, upper_layer=5000)
+    kml_file.point(test_data.airspace.beccles_parachute)
 
-    kml_file.polyhedron(test_data.airspace.birmingham_cta_10, lower_layer=6500, upper_layer=10500,
+    """kml_file.polyhedron(test_data.airspace.birmingham_cta_10, lower_layer=6500, upper_layer=10500,
                         name='Birmingham CTA 10')
     kml_file.polyhedron(test_data.airspace.birmingham_cta_9, lower_layer=6500, upper_layer=8500,
                         name='Birmingham CTA 9')
@@ -94,4 +163,4 @@ if __name__ == '__main__':
     kml_file.polyhedron(test_data.airspace.prestwick_cta_4, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 4')
     kml_file.polyhedron(test_data.airspace.prestwick_cta_5, lower_layer=3500, upper_layer=5500, name='Prestwick CTA 5')
     kml_file.polyhedron(test_data.airspace.prestwick_cta_6, lower_layer=4000, upper_layer=5500, name='Prestwick CTA 6')
-    kml_file.polyhedron(test_data.airspace.prestwick_ctr, upper_layer=5500, name='Prestwick CTR')
+    kml_file.polyhedron(test_data.airspace.prestwick_ctr, upper_layer=5500, name='Prestwick CTR')"""

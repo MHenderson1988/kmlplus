@@ -16,7 +16,7 @@ class Point:
         return f'{self.y} {self.x} {self.z}'
 
     def __repr__(self):
-        return f'{__class__} y: {self.y} x: {self.x} z: {self.z}'
+        return f'{__class__} x: {self.x} y: {self.y} z: {self.z}'
 
     def __eq__(self, other):
         return self.__str__ == other.__str__
@@ -79,7 +79,7 @@ class Point:
 
     @classmethod
     def from_point_bearing_and_distance(cls, point, bearing: float, distance: float, **kwargs):
-        radius_dict = {'km': 0.001, 'mi': 0.000621371, 'nm': 0.000539957, 'm': 1}
+        radius_dict = {'km': 1000, 'mi': 1609.34, 'nm': 1852, 'm': 1}
         # PyProj gives distance in metres
         distance = distance * radius_dict[kwargs.pop('uom', 'm')]
 

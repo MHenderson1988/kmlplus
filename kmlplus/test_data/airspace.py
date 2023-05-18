@@ -24,7 +24,7 @@ london_fir = [
     '550000N 0050000E'
 ]
 
-beccles_parachute = '522612N 0013710E'
+beccles_parachute = ['522612N 0013710E']
 
 birmingham_cta_9 = [
     '524025N 0021135W',

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from kmlplus.geo import Point
-from kmlplus.shapes import Circle, Polygon, Kml3D
+from kmlplus.shapes import Circle, Polygon, Polyhedron
 
 
 class TestCircle(TestCase):
@@ -10,13 +10,13 @@ class TestCircle(TestCase):
         self.circle_height = Circle('28.132212 2.332782', 10, sample=150, z=20)
 
     def test_create(self):
-        self.assertTrue(isinstance(self.circle_no_height.points, list))
-        self.assertEqual(len(self.circle_no_height.points), 102)
-        self.assertTrue(isinstance(self.circle_no_height.points[2], Point))
+        self.assertTrue(isinstance(self.circle_no_height.point_list, list))
+        self.assertEqual(len(self.circle_no_height.point_list), 102)
+        self.assertTrue(isinstance(self.circle_no_height.point_list[2], Point))
 
-        self.assertTrue(isinstance(self.circle_height.points, list))
-        self.assertEqual(len(self.circle_height.points), 152)
-        self.assertTrue(isinstance(self.circle_height.points[2], Point))
+        self.assertTrue(isinstance(self.circle_height.point_list, list))
+        self.assertEqual(len(self.circle_height.point_list), 152)
+        self.assertTrue(isinstance(self.circle_height.point_list[2], Point))
 
 
 class TestPolygon(TestCase):
@@ -91,14 +91,14 @@ class TestThreeDimensionShape(TestCase):
     def test_generate_sides(self):
         test_list = ['22.323232 -4.287282 20', '23.323232 -5.328723', '22.112333 -6.23789238923',
                      '22.323232 -4.287282 20']
-        poly = Kml3D(test_list, test_list, upper_layer=100)
-        self.assertTrue(isinstance(poly, Kml3D))
+        poly = Polyhedron(test_list, test_list, upper_layer=100)
+        self.assertTrue(isinstance(poly, Polyhedron))
         self.assertTrue(isinstance(poly.sides, list))
         self.assertEqual(3, len(poly.sides))
 
     def test_to_kml(self):
         test_list = ['22.323232 -4.287282 20', '23.323232 -5.328723', '22.112333 -6.23789238923']
-        poly = Kml3D(test_list, test_list, upper_layer=100)
+        poly = Polyhedron(test_list, test_list, upper_layer=100)
         lower, upper, sides = poly.to_kml()
 
         self.assertTrue(isinstance(lower, list))
