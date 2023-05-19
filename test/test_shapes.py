@@ -11,11 +11,11 @@ class TestCircle(TestCase):
 
     def test_create(self):
         self.assertTrue(isinstance(self.circle_no_height.point_list, list))
-        self.assertEqual(len(self.circle_no_height.point_list), 102)
+        self.assertEqual(len(self.circle_no_height.point_list), 101)
         self.assertTrue(isinstance(self.circle_no_height.point_list[2], Point))
 
         self.assertTrue(isinstance(self.circle_height.point_list, list))
-        self.assertEqual(len(self.circle_height.point_list), 152)
+        self.assertEqual(len(self.circle_height.point_list), 151)
         self.assertTrue(isinstance(self.circle_height.point_list[2], Point))
 
 

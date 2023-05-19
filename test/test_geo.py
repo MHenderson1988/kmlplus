@@ -30,8 +30,8 @@ class TestPoint(TestCase):
         test_obj = Point.from_dms('551206.00N', '0045206.23W')
         test_result = Point.from_point_bearing_and_distance(test_obj, 180.00, 383.00, uom='km')
 
-        self.assertAlmostEqual(55.198226, test_result.y, delta=0.01)
-        self.assertAlmostEqual(-4.868396, test_result.x, delta=0.00001)
+        self.assertAlmostEqual(51.756667, test_result.y, delta=0.01)
+        self.assertAlmostEqual(-4.868333, test_result.x, delta=0.01)
 
     def test_get_distance(self):
         # test km

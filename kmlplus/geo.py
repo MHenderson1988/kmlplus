@@ -120,6 +120,17 @@ class PointFactory:
         self.coordinate_list = coordinate_list
         self.z_override = kwargs.pop('z', None)
 
+    @property
+    def coordinate_list(self):
+        return self._coordinate_list
+
+    @coordinate_list.setter
+    def coordinate_list(self, coordinate_list):
+        if isinstance(coordinate_list, list):
+            self._coordinate_list = coordinate_list
+        else:
+            self._coordinate_list = [coordinate_list]
+
     def process_coordinates(self):
         point_list = self.populate_point_list()
         return point_list
