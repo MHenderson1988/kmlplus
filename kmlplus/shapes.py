@@ -394,3 +394,38 @@ class Polyhedron:
             # side_coordinates.append(Polygon(polygon_coordinate_list))
 
             return side_coordinates
+
+class LineString:
+    def __init__(self, coordinate_list):
+        self.point_list = self.create(coordinate_list)
+
+    def __len__(self):
+        return len(self.point_list)
+
+    def __iter__(self):
+        self.n = 0
+        return self
+
+    def __next__(self):
+        if self.n < len(self.point_list):
+            result = self.point_list[self.n]
+            self.n += 1
+            return result
+        else:
+            raise StopIteration
+
+    def __getitem__(self, index):
+        return self.point_list[index]
+
+    def __setitem__(self, index, point):
+        if isinstance(point, Point):
+            self.point_list[index] = point
+        else:
+            raise TypeError('Polygon will only accept objects of type kmlplus.geo.Point')
+
+    def __ne__(self, another_polygon):
+        return self.__len__() != another_polygon.__len__()
+
+    def create(self, coordinate_list):
+        point_list = PointFactory(coordinate_list).process_coordinates()
+        return point_list
