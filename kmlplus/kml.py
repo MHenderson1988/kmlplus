@@ -36,6 +36,8 @@ class KmlPlus:
         s.style.linestyle.width = kwargs.get('width', 1)
         s.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
 
+        self.kml.save(self.save_name)
+
     def polyhedron(self, coordinate_list, **kwargs):
         poly = Polyhedron(coordinate_list, coordinate_list, lower_layer=kwargs.get('lower_layer', None),
                           upper_layer=kwargs.get('upper_layer', None))

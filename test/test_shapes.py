@@ -13,10 +13,14 @@ class TestCircle(TestCase):
         self.assertTrue(isinstance(self.circle_no_height.point_list, list))
         self.assertEqual(len(self.circle_no_height.point_list), 101)
         self.assertTrue(isinstance(self.circle_no_height.point_list[2], Point))
+        for i in self.circle_no_height.point_list:
+            self.assertEqual(i.z, 0)
 
         self.assertTrue(isinstance(self.circle_height.point_list, list))
         self.assertEqual(len(self.circle_height.point_list), 151)
         self.assertTrue(isinstance(self.circle_height.point_list[2], Point))
+        for i in self.circle_height.point_list:
+            self.assertEqual(i.z, 20)
 
 
 class TestPolygon(TestCase):
