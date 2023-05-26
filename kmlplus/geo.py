@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 
 from pyproj import Geod
-
-import util
-from kmlplus.util import dms_to_decimal, detect_coordinate_type
+from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_string
 
 
 class Point:
@@ -187,7 +185,7 @@ class CurvedSegmentFactory:
         self.z_override = kwargs.get('z_override', None)
 
     def process_segment(self):
-        string_dict = util.split_segment_string(self.coordinate_string)
+        string_dict = split_segment_string(self.coordinate_string)
         direction = string_dict.setdefault('direction', 'clockwise')
 
         # Check coordinate type and create point objects

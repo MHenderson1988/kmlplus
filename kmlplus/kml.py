@@ -1,8 +1,6 @@
 from typing import Union
 
 import simplekml
-
-import test_data.airspace
 from kmlplus.shapes import Polyhedron, Circle, Cylinder, LineString
 from kmlplus.geo import PointFactory
 
@@ -17,13 +15,14 @@ class KmlPlus:
         """
 
         Args:
-            coordinate_list: A list containing a single coordinate
-            **kwargs:
-                fol: A string to name the folder in which the point is stored.
-                point_name: String to name the point object
-                colour_hex: String representing a colour hex
-                extrude: 1 or 0, Whether to extrude the point
-                altitude_mode: Accepts simplekml Altitude mode options
+            coordinate_list (list): A list containing a single coordinate
+
+        Keyword Args:
+            fol (str): A string to name the folder in which the point is stored.
+            point_name (str): String to name the point object
+            colour_hex (str): String representing a colour hex
+            extrude (int): 1 or 0, Whether to extrude the point
+            altitude_mode (str): Accepts simplekml Altitude mode options
 
 
         Returns:
@@ -46,14 +45,14 @@ class KmlPlus:
         """
 
         Args:
-            coordinate_list: A list containing a single coordinate
-            **kwargs:
-                fol: A string to name the folder in which the point is stored.
-                linestring_name: String to name the LineString object
-                colour_hex: String representing a colour hex
-                extrude: 1 or 0, Whether to extrude the point
-                width: Line width
-                altitude_mode: Accepts simplekml Altitude mode options
+            coordinate_list (list): A list containing a single coordinate
+        Keyword Args:
+            fol (str): A string to name the folder in which the point is stored.
+            linestring_name (str): String to name the LineString object
+            colour_hex (str): String representing a colour hex
+            extrude (int): 1 or 0, Whether to extrude the point
+            width(int): Line width
+            altitude_mode(str): Accepts simplekml Altitude mode options
 
 
         Returns:
@@ -78,16 +77,16 @@ class KmlPlus:
         """
 
         Args:
-            coordinate_list: A list of coordinates
-            **kwargs:
-                fol: A string to name the folder in which the point is stored.
-                lower_polygon_name: Lower polygon object name
-                upper_polygon_name: Upper polygon object name
-                colour_hex: String representing a colour hex
-                fill: 1 or 0, whether or not to fill the polygon
-                outline: 1 or 0, whether to include outline of polygon
-                extrude: 1 or 0, Whether to extrude the point
-                altitude_mode: Accepts simplekml Altitude mode options
+            coordinate_list (list): A list of coordinates
+        Keyword Args:
+            fol (str): A string to name the folder in which the point is stored.
+            lower_polygon_name (str): Lower polygon object name
+            upper_polygon_name (str): Upper polygon object name
+            colour_hex (str): String representing a colour hex
+            fill (str): 1 or 0, whether or not to fill the polygon
+            outline (str): 1 or 0, whether to include outline of polygon
+            extrude (str): 1 or 0, Whether to extrude the point
+            altitude_mode (str): Accepts simplekml Altitude mode options
 
         Returns:
             None
@@ -128,21 +127,22 @@ class KmlPlus:
         """
 
         Args:
-            coordinate_list: A list containing a single set of coordinates which is the centre point of the circle
-            radius: The radius of the circle
-            **kwargs:
-                fol: Name of the folder in which the KML objects are stored.
-                name: What to name the Circle object
-                uom: The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
-                    Defaults to 'NM'
-                colour_hex: String representing a colour hex
-                extrude: 1 or 0, Whether to extrude the point
-                altitude_mode: Accepts simplekml Altitude mode options
-
+            coordinate_list (list): A list containing a single set of coordinates which is the centre point of the circle
+            radius (float): The radius of the circle
+        Keyword Args:
+            fol (str): Name of the folder in which the KML objects are stored.
+            name (str): What to name the Circle object
+            uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
+               Defaults to 'NM'
+            colour_hex (str): String representing a colour hex
+            extrude (int): 1 or 0, Whether to extrude the point
+            altitude_mode (str): Accepts simplekml Altitude mode options
 
         Returns:
             None
+
         """
+
         points = Circle(coordinate_list, radius).create()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Circle'))
@@ -161,19 +161,19 @@ class KmlPlus:
         Args:
             coordinate_list: A list containing a single set of coordinates representing the centre of the circle
             radius: The radius of the circle
-            **kwargs:
-                lower_layer: Height/Altitude of the lower layer
-                upper_layer: Height/Altitude of the upper layer
-                sample: How many points to use when creating the circles which make up the cylinder
-                lower_circle_name: Lower circle object name
-                upper_circle_name: Upper circle object name
-                fol: Name of the folder in which the KML objects are stored.
-                uom: The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
-                    Defaults to 'NM'
-                colour_hex: String representing a colour hex
-                fill: 1 or 0, whether or not to fill the polygon
-                outline: 1 or 0, whether to include outline of polygon
-                altitude_mode: Accepts simplekml Altitude mode options
+        Keyword Args:
+            lower_layer (float): Height/Altitude of the lower layer
+            upper_layer (float): Height/Altitude of the upper layer
+            sample (int): How many points to use when creating the circles which make up the cylinder
+            lower_circle_name (str): Lower circle object name
+            upper_circle_name (str): Upper circle object name
+            fol (str): Name of the folder in which the KML objects are stored.
+            uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
+              Defaults to 'NM'
+            colour_hex (str): String representing a colour hex
+            fill (str): 1 or 0, whether or not to fill the polygon
+            outline (str): 1 or 0, whether to include outline of polygon
+            altitude_mode (str): Accepts simplekml Altitude mode options
 
         Returns:
             None
@@ -212,25 +212,26 @@ class KmlPlus:
 
 
 if __name__ == '__main__':
+    from test_data import airspace as test_data
     kml_file = KmlPlus('Point Styling.kml')
 
     """kml_file.polyhedron(test_data.airspace.london_fir, lower_layer=19500, upper_layer=24500, name='London FIR')"""
 
-    kml_file.linestring(test_data.airspace.birmingham_cta_9)
-    kml_file.cylinder(test_data.airspace.beccles_parachute, 1, upper_layer=5000)
-    kml_file.point(test_data.airspace.beccles_parachute)
+    kml_file.linestring(test_data.birmingham_cta_9)
+    kml_file.cylinder(test_data.beccles_parachute, 1, upper_layer=5000)
+    kml_file.point(test_data.beccles_parachute)
 
-    kml_file.polyhedron(test_data.airspace.birmingham_cta_10, lower_layer=6500, upper_layer=10500,
+    kml_file.polyhedron(test_data.birmingham_cta_10, lower_layer=6500, upper_layer=10500,
                         name='Birmingham CTA 10')
-    kml_file.polyhedron(test_data.airspace.birmingham_cta_9, lower_layer=6500, upper_layer=8500,
+    kml_file.polyhedron(test_data.birmingham_cta_9, lower_layer=6500, upper_layer=8500,
                         name='Birmingham CTA 9')
 
-    kml_file.polyhedron(test_data.airspace.prestwick_cta_1, lower_layer=1500, upper_layer=5500, name='Prestwick CTA 1')
-    kml_file.polyhedron(test_data.airspace.prestwick_cta_2, lower_layer=2000, upper_layer=5500, name='Prestwick CTA 2')
-    kml_file.polyhedron(test_data.airspace.prestwick_cta_3, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 3')
-    kml_file.polyhedron(test_data.airspace.prestwick_cta_4, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 4')
-    kml_file.polyhedron(test_data.airspace.prestwick_cta_5, lower_layer=3500, upper_layer=5500, name='Prestwick CTA 5')
-    kml_file.polyhedron(test_data.airspace.prestwick_cta_6, lower_layer=4000, upper_layer=5500, name='Prestwick CTA 6')
-    kml_file.polyhedron(test_data.airspace.prestwick_ctr, upper_layer=5500, name='Prestwick CTR')
-    kml_file.polyhedron(test_data.airspace.test_airspace, upper_layer=50000, lower_layer=0, name='EG D406C ESKMEALS')
+    kml_file.polyhedron(test_data.prestwick_cta_1, lower_layer=1500, upper_layer=5500, name='Prestwick CTA 1')
+    kml_file.polyhedron(test_data.prestwick_cta_2, lower_layer=2000, upper_layer=5500, name='Prestwick CTA 2')
+    kml_file.polyhedron(test_data.prestwick_cta_3, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 3')
+    kml_file.polyhedron(test_data.prestwick_cta_4, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 4')
+    kml_file.polyhedron(test_data.prestwick_cta_5, lower_layer=3500, upper_layer=5500, name='Prestwick CTA 5')
+    kml_file.polyhedron(test_data.prestwick_cta_6, lower_layer=4000, upper_layer=5500, name='Prestwick CTA 6')
+    kml_file.polyhedron(test_data.prestwick_ctr, upper_layer=5500, name='Prestwick CTR')
+    kml_file.polyhedron(test_data.test_airspace, upper_layer=50000, lower_layer=0, name='EG D406C ESKMEALS')
 
