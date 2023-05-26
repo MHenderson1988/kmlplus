@@ -43,6 +43,24 @@ class KmlPlus:
         self.kml.save(self.save_name)
 
     def linestring(self, coordinate_list: list, **kwargs: str) -> None:
+        """
+
+        Args:
+            coordinate_list: A list containing a single coordinate
+            **kwargs:
+                fol: A string to name the folder in which the point is stored.
+                linestring_name: String to name the LineString object
+                colour_hex: String representing a colour hex
+                extrude: 1 or 0, Whether to extrude the point
+                width: Line width
+                altitude_mode: Accepts simplekml Altitude mode options
+
+
+        Returns:
+            None
+
+        """
+
         fol = self.kml.newfolder(name=kwargs.get('name', 'KmlPlus LineString'))
 
         linestring = LineString(coordinate_list)
@@ -129,7 +147,7 @@ class KmlPlus:
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Circle'))
 
-        pol = fol.newpolygon(name=kwargs.get('name'))
+        pol = fol.newpolygon(name=kwargs.get('name', 'KmlPlus Circle'))
         pol.outerboundaryis = points
         pol.polystyle.colour = kwargs.get('colour_hex', '7Fc0c0c0')
         pol.extrude = kwargs.get('extrude', 0)

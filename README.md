@@ -106,25 +106,7 @@ KmlPlus(self, save_name, output_path=None)
 
 #### KmlPlus (functions)
 
-```
-from kmlplus.kml import KmlPlus
-
-kmlplus.point(coordinate, **kwargs)
-```
-
-The point function creates a single KML point. The coordinate is passed in a list as a single string with the latitude, longitude and
-height (optional) separated by a single space. For example '55.11111 -4.29292' or '55.11111 -4.29292 300'
-
-```
-from kmlplus.kml import KmlPlus
-
-KmlPlus.linestring(coordinate, **kwargs)
-```
-
-The linestring function creates a KML line string. It accepts a  
-
-
-
+v3 updatein progress.
 
 ## Acknowledgements
 
