@@ -137,6 +137,7 @@ class Cylinder:
         self.upper_circle = Circle(upper_tuple[0], upper_tuple[1], z=kwargs.get('upper_layer', None),
                                    sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'nm'))
         self._sample = kwargs.get('sample', 100)
+        self.uom = kwargs.get('uom', 'Ft')
         self.sides = self.generate_sides()
 
     @property
@@ -203,7 +204,7 @@ class Cylinder:
             circle = [Polygon(x) for x in coordinate_list]
         else:
             if layer_height:
-                circle = Circle(self.centre, self.radius, z=layer_height)
+                circle = Circle(self.centre, self.radius, z=layer_height, uom=self.uom)
             else:
                 circle = Circle(self.centre, self.radius)
         return circle
@@ -255,6 +256,7 @@ class IPolygon(ABC):
 
 class Polygon(IPolygon):
     def __init__(self, point_list, **kwargs):
+        self.uom = kwargs.get('uom', 'Ft')
         self._z = kwargs.get('z', None)
         self._point_list = PointFactory(point_list, z=self._z).process_coordinates()
 
@@ -328,6 +330,7 @@ class Polygon(IPolygon):
 
 class Polyhedron:
     def __init__(self, lower_coordinates, upper_coordinates, **kwargs):
+        self.uom = kwargs.get('uom', 'Ft')
         self._lower_polygon = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
         self._upper_polygon = self.create_layer(upper_coordinates, kwargs.get('upper_layer', None))
         self.sides = self.generate_sides()
@@ -367,7 +370,7 @@ class Polyhedron:
             poly = [Polygon(x) for x in coordinate_list]
         else:
             if layer_height:
-                poly = Polygon(coordinate_list, z=layer_height)
+                poly = Polygon(coordinate_list, z=layer_height, uom=self.uom)
             else:
                 poly = Polygon(coordinate_list)
         return poly
