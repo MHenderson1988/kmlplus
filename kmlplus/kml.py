@@ -6,9 +6,24 @@ from kmlplus.geo import PointFactory
 
 
 class KmlPlus:
-    def __init__(self, save_name, **kwargs):
+    """
+    KmlPlus is the main class for creating instance 2D and 3D shapes with KML. The class has methods for creating
+    Points, LineString, Circle, Cylinder, Polygon and Polyhedron shapes. Each invocation of a function will save and
+    update the outputted .kml file.
+
+    Attributes:
+        output_path (str): The location to save the created .kml file.
+        save_name (str): The name to be given to the .kml file
+        kml (simplekml.Kml()): The simpleKml file created.
+
+    Keyword Args:
+        output_path (str): The location to save the created .kml file.
+        save_name (str): Name for the new file
+    """
+
+    def __init__(self, **kwargs):
         self.output_path = kwargs.get('output', None)
-        self.save_name = save_name
+        self.save_name = kwargs.get('file_name', 'KmlPlus')
         self.kml = simplekml.Kml()
 
     def point(self, coordinate_list: list, **kwargs: str) -> None:
