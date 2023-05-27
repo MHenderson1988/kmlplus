@@ -92,12 +92,14 @@ If no z value is provided, defaults to 0.0.
 
 Example
 
+```
 [
     '553124N 0045830W',
     '552040N 0042722W',
     '551848N 0044702W',
     '553124N 0045830W'
 ]
+```
 
 #### Arcs
 
@@ -107,6 +109,7 @@ When creating a curved segment of a polygon, the string should be passed as foll
 
 Example  - 
 
+```
 [
      'start=54.32111 -3.98721, end=54.13447 -3.89329, centre=54.31667 -3.41806, direction=anticlockwise',
      '54.13444 -3.89333',
@@ -115,6 +118,7 @@ Example  -
      '54.23694 -4.17361',
      '54.32111 -3.98722',
 ]
+```
 
 ---
 
