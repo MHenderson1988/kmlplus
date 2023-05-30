@@ -11,11 +11,12 @@ class ICircle(ABC):
 
 class Circle(ICircle):
     def __init__(self, centre, radius, **kwargs):
-        self._centre = PointFactory(centre).process_coordinates()[0]
-        self._radius = radius
-        self.uom = kwargs.get('uom', 'nm')
+        self.radius_uom = kwargs.get('radius_uom', 'M')
+        self.uom = kwargs.get('uom', 'FT')
         self._z = kwargs.get('z', 0)
         self._sample = kwargs.get('sample', 100)
+        self._centre = PointFactory(centre, uom=self.uom).process_coordinates()[0]
+        self._radius = radius
         self.point_list = self.create()
 
     def __eq__(self, another_circle):
@@ -55,6 +56,7 @@ class Circle(ICircle):
     @z.setter
     def z(self, value):
         if isinstance(float, value):
+
             self._z = value
         else:
             self._z = float(value)
@@ -106,8 +108,13 @@ class Circle(ICircle):
         bearing_increment = 360 / self.sample
 
         for n in range(0, self.sample + 1):
-            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=self.z,
-                                                          uom=self.uom)
+            if self.z:
+                z = self.z
+            else:
+                z = self.centre.z
+
+            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=z,
+                                                          uom=self.uom, radius_uom=self.radius_uom)
             point_list.append(point)
             start_bearing -= bearing_increment
 
@@ -137,7 +144,8 @@ class Cylinder:
         self.upper_circle = Circle(upper_tuple[0], upper_tuple[1], z=kwargs.get('upper_layer', None),
                                    sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'nm'))
         self._sample = kwargs.get('sample', 100)
-        self.uom = kwargs.get('uom', 'Ft')
+        self.uom = kwargs.get('uom', 'FT')
+        self.radius_uom('radius_uom', 'M')
         self.sides = self.generate_sides()
 
     @property
@@ -256,7 +264,7 @@ class IPolygon(ABC):
 
 class Polygon(IPolygon):
     def __init__(self, point_list, **kwargs):
-        self.uom = kwargs.get('uom', 'Ft')
+        self.uom = kwargs.get('uom', 'FT')
         self._z = kwargs.get('z', None)
         self._point_list = PointFactory(point_list, z=self._z).process_coordinates()
 
@@ -330,7 +338,7 @@ class Polygon(IPolygon):
 
 class Polyhedron:
     def __init__(self, lower_coordinates, upper_coordinates, **kwargs):
-        self.uom = kwargs.get('uom', 'Ft')
+        self.uom = kwargs.get('uom', 'FT')
         self._lower_polygon = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
         self._upper_polygon = self.create_layer(upper_coordinates, kwargs.get('upper_layer', None))
         self.sides = self.generate_sides()

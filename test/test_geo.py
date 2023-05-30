@@ -16,7 +16,12 @@ class TestPoint(TestCase):
         self.assertEqual(test_obj.x, -4.868398333333333)
         self.assertEqual(test_obj.z, 0)
 
-        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383)
+        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, distance_uom='M')
+        self.assertEqual(test_obj.y, 50.20166666666667)
+        self.assertEqual(test_obj.x, -4.868398333333333)
+        self.assertAlmostEqual(test_obj.z, 116.738, delta=5)
+
+        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, uom='M',  distance_uom='M')
         self.assertEqual(test_obj.y, 50.20166666666667)
         self.assertEqual(test_obj.x, -4.868398333333333)
         self.assertEqual(test_obj.z, 383)
@@ -28,9 +33,9 @@ class TestPoint(TestCase):
 
     def test_from_point_bearing_and_distance(self):
         test_obj = Point.from_dms('551206.00N', '0045206.23W')
-        test_result = Point.from_point_bearing_and_distance(test_obj, 180.00, 383.00, uom='km')
+        test_result = Point.from_point_bearing_and_distance(test_obj, 180.00, 383.00, distance_uom='NM')
 
-        self.assertAlmostEqual(51.756667, test_result.y, delta=0.01)
+        self.assertAlmostEqual(48.821944, test_result.y, delta=0.01)
         self.assertAlmostEqual(-4.868333, test_result.x, delta=0.01)
 
     def test_get_distance(self):
@@ -41,8 +46,8 @@ class TestPoint(TestCase):
 
         # test miles
         test_obj = Point.from_dms('551206.00N', '0045206.234W')
-        distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W'), uom='km')
-        self.assertEqual(556.402304538113, distance)
+        distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W', distance_uom='KM'))
+        self.assertEqual(556402.304538113, distance)
 
     def test_get_bearing(self):
         result = self.test_point_1.get_bearing(self.test_point_2)
@@ -104,7 +109,7 @@ class TestPointFactory(TestCase):
         self.assertTrue(isinstance(dms_obj, Point))
 
         self.assertEqual(no_height_obj.z, 0.0)
-        self.assertEqual(with_height_obj.z, 8.0)
+        self.assertEqual(with_height_obj.z, 2.4384)
         self.assertEqual(dms_obj.y, 52.21222222222222)
 
 

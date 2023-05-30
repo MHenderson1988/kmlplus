@@ -6,21 +6,30 @@ from kmlplus.shapes import Circle, Polygon, Polyhedron
 
 class TestCircle(TestCase):
     def setUp(self):
-        self.circle_no_height = Circle('55.1111 -3.2311', 10, sample=100)
-        self.circle_height = Circle('28.132212 2.332782', 10, sample=150, z=20)
+        self.circle_height_args = Circle('55.1111 -3.2311 10', 10, sample=100, uom='M')
+        self.circle_height_kwargs = Circle('28.132212 2.332782', 10, sample=150, z=20, uom='M')
 
     def test_create(self):
-        self.assertTrue(isinstance(self.circle_no_height.point_list, list))
-        self.assertEqual(len(self.circle_no_height.point_list), 101)
-        self.assertTrue(isinstance(self.circle_no_height.point_list[2], Point))
-        for i in self.circle_no_height.point_list:
-            self.assertEqual(i.z, 0)
+        self.assertTrue(isinstance(self.circle_height_args.point_list, list))
+        self.assertEqual(len(self.circle_height_args.point_list), 101)
+        self.assertTrue(isinstance(self.circle_height_args.point_list[2], Point))
+        for i in self.circle_height_args.point_list:
+            self.assertEqual(10, i.z)
 
-        self.assertTrue(isinstance(self.circle_height.point_list, list))
-        self.assertEqual(len(self.circle_height.point_list), 151)
-        self.assertTrue(isinstance(self.circle_height.point_list[2], Point))
-        for i in self.circle_height.point_list:
+        self.assertTrue(isinstance(self.circle_height_kwargs.point_list, list))
+        self.assertEqual(len(self.circle_height_kwargs.point_list), 151)
+        self.assertTrue(isinstance(self.circle_height_kwargs.point_list[2], Point))
+        for i in self.circle_height_kwargs.point_list:
             self.assertEqual(i.z, 20)
+
+        # Test uom effects
+        c = Circle('55.1111 -3.2311 10', 10, sample=100, uom='FT')
+        for i in c:
+            self.assertEqual(0.9290304, i.z)
+
+        c = Circle('55.1111 -3.2311 10', 25, z=250, sample=100, uom='M')
+        for i in c:
+            self.assertEqual(250, i.z)
 
 
 class TestPolygon(TestCase):
@@ -64,7 +73,7 @@ class TestPolygon(TestCase):
         self.assertEqual(len(result_with_height_override), 3)
         for i in result_with_height_override:
             self.assertTrue(isinstance(i, Point))
-            self.assertEqual(500.11, i.z)
+            self.assertEqual(152.43352800000002, i.z)
 
         # Test with DMS
         result_dms_no_height = Polygon(test_dms)

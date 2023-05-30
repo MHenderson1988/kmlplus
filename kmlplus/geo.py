@@ -6,9 +6,10 @@ from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_s
 
 class Point:
     def __init__(self, y, x, **kwargs):
+        self.uom = kwargs.get('uom', 'FT')
         self.y = y
         self.x = x
-        self.z = kwargs.pop('z', 0.0)
+        self.z = kwargs.get('z', 0.0)
 
     def __str__(self):
         return f'{self.y} {self.x} {self.z}'
@@ -48,22 +49,23 @@ class Point:
     @z.setter
     def z(self, value):
         if isinstance(value, float):
-            self._z = value
+            conversion_dict = {'FT': 0.3048, 'M': 1}
+            self._z = value * conversion_dict[self.uom]
         else:
             if value is None:
                 self._z = 0.0
             else:
-                self._z = float(value)
+                self.z = float(value)
 
     @classmethod
     def from_decimal_degrees(cls, y, x, **kwargs):
-        return cls(y, x, z=kwargs.pop('z', 0))
+        return cls(y, x, z=kwargs.get('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
     def from_dms(cls, y, x, **kwargs):
         y = dms_to_decimal(y)
         x = dms_to_decimal(x)
-        return cls(y, x, z=kwargs.pop('z', 0))
+        return cls(y, x, z=kwargs.pop('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
     def find_midpoint(cls, point_1, point_2, **kwargs):
@@ -73,26 +75,29 @@ class Point:
         x = (x1 + x2) / 2
         y = (y1 + y2) / 2
 
-        return cls(y, x, z=kwargs.pop('z', 0))
+        return cls(y, x, z=kwargs.pop('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
     def from_point_bearing_and_distance(cls, point, bearing: float, distance: float, **kwargs):
-        radius_dict = {'km': 1000, 'mi': 1609.34, 'nm': 1852, 'm': 1}
+        radius_dict = {'KM': 1000, 'MI': 1609.34, 'NM': 1852, 'M': 1}
+        distance_uom = kwargs.get('distance_uom', 'M')
+        conversion_value = radius_dict.get(distance_uom)
         # PyProj gives distance in metres
-        distance = distance * radius_dict[kwargs.pop('uom', 'm')]
+        distance = distance * conversion_value
 
         g = Geod(ellps='WGS84')
         p = g.fwd(point.x, point.y, az=bearing, dist=distance)
 
-        return cls(p[1], p[0], z=kwargs.pop('z', 0))
+        return cls(p[1], p[0], z=kwargs.get('z', 0), uom=kwargs.get('uom', 'M'))
 
     def get_distance(self, another_point, **kwargs: str):
-        radius_dict = {'km': 0.001, 'mi': 0.000621371, 'nm': 0.000539957, 'm': 1}
+        radius_dict = {'KM': 1000, 'MI': 1609.34, 'NM': 1852, 'M': 1}
+        conversion_value = radius_dict.get(kwargs.get('distance_uom'), 1)
         g = Geod(ellps='WGS84')
         geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
 
         # PyProj gives distance in metres
-        distance = geo_tup[2] * radius_dict[kwargs.pop('uom', 'm')]
+        distance = geo_tup[2] * conversion_value
 
         return distance
 
@@ -116,7 +121,8 @@ class Point:
 class PointFactory:
     def __init__(self, coordinate_list: list, **kwargs):
         self.coordinate_list = coordinate_list
-        self.z_override = kwargs.pop('z', None)
+        self.uom = kwargs.get('uom', 'FT')
+        self.z_override = kwargs.get('z', None)
 
     @property
     def coordinate_list(self):
@@ -173,7 +179,7 @@ class PointFactory:
             if self.z_override is not None:
                 return func(split[0], split[1], z=self.z_override)
             else:
-                return func(split[0], split[1], z=split[2])
+                return func(split[0], split[1], z=split[2], uom=self.uom)
         else:
             raise IndexError('Coordinate strings should contain latitude and longitude or latitude, longitude'
                              'and height only.')
@@ -239,9 +245,9 @@ class ClockwiseCurvedSegment(ICurvedSegment):
     def __init__(self, start: str, end: str, **kwargs):
         self.start = start
         self.end = end
-        self.z = kwargs.pop('z', None)
-        self.centre = kwargs.pop('centre', Point.find_midpoint(self.start, self.end))
-        self.sample = kwargs.pop('sample', 100)
+        self.z = kwargs.get('z', None)
+        self.centre = kwargs.get('centre', Point.find_midpoint(self.start, self.end))
+        self.sample = kwargs.get('sample', 100)
         self.start_bearing = self.centre.get_bearing(self.start)
         self.end_bearing = self.centre.get_bearing(self.end)
 
