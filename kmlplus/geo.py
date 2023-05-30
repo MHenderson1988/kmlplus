@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Union
-
 from pyproj import Geod
+from simplekml import Point
+
 from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_string
 
 
@@ -17,45 +18,45 @@ class Point:
         uom (str): Unit of measure to be applied to elevation values.
         z (float): Elevation
     """
-    def __init__(self, y: str, x: str, **kwargs: Union[str, int, float]):
+    def __init__(self, y: Union[str, float], x: Union[str, float], **kwargs: Union[str, int, float]):
         self.uom = kwargs.get('uom', 'FT')
-        self.y = y
-        self.x = x
-        self.z = kwargs.get('z', 0.0)
+        self.y: Union[str, float] = y
+        self.x: Union[str, float] = x
+        self.z: Union[str, float] = kwargs.get('z', 0.0)
 
     def __str__(self) -> str:
         return f'{self.y} {self.x} {self.z}'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{__class__} x: {self.x} y: {self.y} z: {self.z}'
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.__str__ == other.__str__
 
     @property
-    def y(self):
+    def y(self) -> Union[str, float]:
         return self._y
 
     @y.setter
-    def y(self, value):
+    def y(self, value) -> None:
         if isinstance(value, float):
             self._y = value
         else:
             self._y = float(value)
 
     @property
-    def x(self):
+    def x(self) -> Union[str, float]:
         return self._x
 
     @x.setter
-    def x(self, value):
+    def x(self, value: float) -> None:
         if isinstance(value, float):
             self._x = value
         else:
             self._x = float(value)
 
     @property
-    def z(self):
+    def z(self) -> Union[str, float]:
         """
         If z value is not a float, casts and then converts to M (KML default uom)
 
@@ -68,7 +69,7 @@ class Point:
         return self._z
 
     @z.setter
-    def z(self, value):
+    def z(self, value) -> None:
         if isinstance(value, float):
             conversion_dict = {'FT': 0.3048, 'M': 1}
             self._z = value * conversion_dict[self.uom]
@@ -79,7 +80,7 @@ class Point:
                 self.z = float(value)
 
     @classmethod
-    def from_decimal_degrees(cls, y, x, **kwargs):
+    def from_decimal_degrees(cls, y:Union[str, float], x: Union[str, float], **kwargs: Union[int, float]) -> Point:
         """
         Args:
             y (str): Latitude value
@@ -89,18 +90,44 @@ class Point:
             z (int | float):
 
         Returns:
-
+            A Point object
         """
         return cls(y, x, z=kwargs.get('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
-    def from_dms(cls, y, x, **kwargs):
+    def from_dms(cls, y: Union[str, float], x: Union[str, float], **kwargs: Union[float, int, str]) -> Point:
+        """
+        Creates a Point object from coordinates in Degrees Minutes Seconds format.
+
+        Args:
+            y (str, float): Latitude value
+            x (str, float): Longitude value
+
+        Keyword Args:
+            z (str, float): Elevation value
+            uom (str): Unit of measurement for elevation
+
+        Returns:
+            A Point object
+        """
         y = dms_to_decimal(y)
         x = dms_to_decimal(x)
         return cls(y, x, z=kwargs.pop('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
-    def find_midpoint(cls, point_1, point_2, **kwargs):
+    def find_midpoint(cls, point_1: Point, point_2: Point, **kwargs: Union[int, float, str]) -> Point:
+        """
+        Args:
+            point_1 (Point):
+            point_2 (Point):
+
+        Keyword Args:
+            z (str, float): Elevation value
+
+
+        Returns:
+            Returns a Point object representing the midpoint between two Point objects.
+        """
         x1, x2 = float(point_1.x), float(point_2.x)
         y1, y2 = float(point_1.y), float(point_2.y)
 
@@ -110,7 +137,21 @@ class Point:
         return cls(y, x, z=kwargs.pop('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
-    def from_point_bearing_and_distance(cls, point, bearing: float, distance: float, **kwargs):
+    def from_point_bearing_and_distance(cls, point: Point, bearing: float, distance: float, **kwargs) -> Point:
+        """
+        Calculates a new Point based upon the bearing and distance from an existing one.
+
+        Args:
+            point (Point): A Point object
+            bearing (float): A bearing
+            distance (float): A distance (Defaults to M)
+
+        Keyword Args:
+            distance_uom (str): Unit of measurement for distance. Options - 'M', 'KM, 'MI', 'NM'.
+
+        Returns:
+            A Point object at the declared bearing and distance from another Point object.
+        """
         radius_dict = {'KM': 1000, 'MI': 1609.34, 'NM': 1852, 'M': 1}
         distance_uom = kwargs.get('distance_uom', 'M')
         conversion_value = radius_dict.get(distance_uom)
@@ -122,7 +163,19 @@ class Point:
 
         return cls(p[1], p[0], z=kwargs.get('z', 0), uom=kwargs.get('uom', 'M'))
 
-    def get_distance(self, another_point, **kwargs: str):
+    def get_distance(self, another_point: Point, **kwargs: str) -> float:
+        """
+        Calculates the distance between two points.
+        Args:
+            another_point (Point): A Point object.
+
+        Keyword Args:
+            distance_uom (str): Unit of measurement for distance. Options - 'M', 'KM, 'MI', 'NM'.
+
+        Returns:
+            distance (float): The distance between two points.
+
+        """
         radius_dict = {'KM': 1000, 'MI': 1609.34, 'NM': 1852, 'M': 1}
         conversion_value = radius_dict.get(kwargs.get('distance_uom'), 1)
         g = Geod(ellps='WGS84')
@@ -133,19 +186,37 @@ class Point:
 
         return distance
 
-    def get_bearing(self, another_point) -> float:
+    def get_bearing(self, another_point: Point) -> float:
+        """
+        Calculates the bearing between one kmlplus.geo.Point object and another.
+
+        Args:
+            another_point (kmlplus.geo.Point): kmlplus.geo.Point object.
+
+        Returns:
+            bearing (float): The bearing between two points
+        """
         g = Geod(ellps='WGS84')
         geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
         bearing = geo_tup[0]
         return bearing
 
-    def get_inverse_bearing(self, another_point) -> float:
+    def get_inverse_bearing(self, another_point: Point) -> float:
+        """
+        Calculates the inverse bearing between one kmlplus.geo.Point object and another.
+
+        Args:
+            another_point (kmlplus.geo.Point): kmlplus.geo.Point object.
+
+        Returns:
+            bearing (float): The inverse bearing between two points
+        """
         g = Geod(ellps='WGS84')
         geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
         bearing = geo_tup[1]
         return bearing
 
-    def kml_friendly(self):
+    def kml_friendly(self) -> tuple:
         kml_tuple = (self.x, self.y, self.z)
         return kml_tuple
 
