@@ -1,17 +1,29 @@
 from abc import ABC, abstractmethod
+from typing import Union
 
 from pyproj import Geod
 from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_string
 
 
 class Point:
-    def __init__(self, y, x, **kwargs):
+    """
+    A class for representing a coordinate using y, x, z representation.
+
+    Attributes:
+        y (str): Latitude
+        x (str): Longitude
+
+    Keyword Args:
+        uom (str): Unit of measure to be applied to elevation values.
+        z (float): Elevation
+    """
+    def __init__(self, y: str, x: str, **kwargs: Union[str, int, float]):
         self.uom = kwargs.get('uom', 'FT')
         self.y = y
         self.x = x
         self.z = kwargs.get('z', 0.0)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.y} {self.x} {self.z}'
 
     def __repr__(self):
@@ -44,6 +56,15 @@ class Point:
 
     @property
     def z(self):
+        """
+        If z value is not a float, casts and then converts to M (KML default uom)
+
+        Args:
+            value (float)
+
+        Returns:
+            z (float)
+        """
         return self._z
 
     @z.setter
@@ -59,6 +80,17 @@ class Point:
 
     @classmethod
     def from_decimal_degrees(cls, y, x, **kwargs):
+        """
+        Args:
+            y (str): Latitude value
+            x (str): Longitude value
+
+        Keyword Args:
+            z (int | float):
+
+        Returns:
+
+        """
         return cls(y, x, z=kwargs.get('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod

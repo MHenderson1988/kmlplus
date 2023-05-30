@@ -158,9 +158,8 @@ class KmlPlus:
 
         """
 
-        uom = kwargs.pop('uom')
-
-        points = Circle(coordinate_list, radius).create()
+        points = Circle(coordinate_list, radius, radius_uom=kwargs.get('radius_uom', 'M'),
+                        uom=('uom', 'FT')).create()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Circle'))
 

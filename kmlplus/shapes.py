@@ -145,7 +145,7 @@ class Cylinder:
                                    sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'nm'))
         self._sample = kwargs.get('sample', 100)
         self.uom = kwargs.get('uom', 'FT')
-        self.radius_uom('radius_uom', 'M')
+        self.radius_uom = kwargs.get('radius_uom', 'M')
         self.sides = self.generate_sides()
 
     @property
@@ -264,9 +264,8 @@ class IPolygon(ABC):
 
 class Polygon(IPolygon):
     def __init__(self, point_list, **kwargs):
-        self.uom = kwargs.get('uom', 'FT')
         self._z = kwargs.get('z', None)
-        self._point_list = PointFactory(point_list, z=self._z).process_coordinates()
+        self._point_list = PointFactory(point_list, z=self._z, uom=kwargs.get('uom', 'FT')).process_coordinates()
 
     def __len__(self):
         return len(self.point_list)
@@ -406,9 +405,11 @@ class Polyhedron:
 
             return side_coordinates
 
+
 class LineString:
-    def __init__(self, coordinate_list):
+    def __init__(self, coordinate_list, **kwargs):
         self.point_list = self.create(coordinate_list)
+        self.uom = kwargs.get('uom', 'FT')
 
     def __len__(self):
         return len(self.point_list)
@@ -438,5 +439,5 @@ class LineString:
         return self.__len__() != another_polygon.__len__()
 
     def create(self, coordinate_list):
-        point_list = PointFactory(coordinate_list).process_coordinates()
+        point_list = PointFactory(coordinate_list, uom=self.uom).process_coordinates()
         return point_list
