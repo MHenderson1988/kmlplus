@@ -266,6 +266,7 @@ class Polygon(IPolygon, I2DObject):
         self.z = kwargs.get('z', None)
         self.point_list = self.process_points(point_list, uom=self.uom)
         self.centroid = self.calculate_centroid()
+        self.sorted_point_list = self.point_list
 
     def __len__(self) -> int:
         return len(self.point_list)
@@ -322,6 +323,15 @@ class Polygon(IPolygon, I2DObject):
         else:
             raise ValueError('Cannot process_points a polygon from less than 2 points')
 
+    @property
+    def sorted_point_list(self):
+        return self._sorted_point_list
+
+    @sorted_point_list.setter
+    def sorted_point_list(self, unsorted_point_list):
+        self._sorted_point_list = unsorted_point_list.sort(reverse=True,
+                                                           key=lambda x: self.calculate_bearing_from_centroid(x))
+
     def calculate_centroid(self) -> ILocation:
         latitude_total, longitude_total = 0, 0
         for coordinate_instance in self.point_list:
@@ -333,7 +343,8 @@ class Polygon(IPolygon, I2DObject):
         return Point(latitude_average, longitude_average)
 
     def calculate_bearing_from_centroid(self, point: ILocation) -> ILocation:
-        return point.get_bearing()
+        bearing = point.get_bearing(self.centroid)
+        return point
 
     def process_points(self, point_list: list[ILocation], **kwargs: str) -> list[ILocation]:
         points = PointFactory(
