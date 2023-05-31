@@ -19,20 +19,24 @@ class ILocation(ABC):
 
     @classmethod
     @abstractmethod
-    def from_decimal_degrees(cls):
+    def from_decimal_degrees(cls, y, x, **kwargs):
         pass
 
     @classmethod
     @abstractmethod
-    def from_dms(cls):
+    def from_dms(cls, y, x, **kwargs):
         pass
 
     @abstractmethod
-    def get_bearing(self):
+    def get_bearing(self, another_location):
         pass
 
     @abstractmethod
-    def get_distance(self):
+    def get_inverse_bearing(self, another_location):
+        pass
+
+    @abstractmethod
+    def get_distance(self, another_location, **kwargs):
         pass
 
 
@@ -49,16 +53,32 @@ class ICurvedSegmentFactory(ABC):
 
 
 class ICurvedSegment(ABC):
+    @property
+    @abstractmethod
+    def start(self):
+        pass
+
+    @property
+    @abstractmethod
+    def end(self):
+        pass
+
+    @property
+    @abstractmethod
+    def midpoint(self):
+        pass
+
+    @property
+    @abstractmethod
+    def sample(self):
+        pass
+
     @abstractmethod
     def get_points(self) -> list:
         pass
 
     @abstractmethod
     def get_bearing_increment(self):
-        pass
-
-    @abstractmethod
-    def get_height_increment(self):
         pass
 
     @abstractmethod
@@ -74,28 +94,7 @@ class ICurvedSegment(ABC):
         pass
 
 
-class ICircle(ABC):
-    @property
-    @abstractmethod
-    def radius(self):
-        pass
-
-    @property
-    @abstractmethod
-    def centre(self):
-        pass
-
-    @property
-    @abstractmethod
-    def sample(self):
-        pass
-
-    @abstractmethod
-    def create(self):
-        pass
-
-
-class IPolygon(ABC):
+class I2DObject(ABC):
     @abstractmethod
     def __len__(self):
         pass
@@ -116,6 +115,76 @@ class IPolygon(ABC):
     def __setitem__(self, index, point):
         pass
 
+
+class ICircle(ABC):
+    @property
     @abstractmethod
-    def __ne__(self, another_polygon):
+    def radius(self):
+        pass
+
+    @property
+    @abstractmethod
+    def centre(self):
+        pass
+
+    @property
+    @abstractmethod
+    def sample(self):
+        pass
+
+    @abstractmethod
+    def process_points(self):
+        pass
+
+
+class IPolygon(ABC):
+    @property
+    @abstractmethod
+    def z(self):
+        pass
+
+    @property
+    @abstractmethod
+    def point_list(self):
+        pass
+
+
+class I3DObject(ABC):
+    @property
+    @abstractmethod
+    def lower_layer(self):
+        pass
+
+    @property
+    @abstractmethod
+    def upper_layer(self):
+        pass
+
+    @property
+    @abstractmethod
+    def sides(self):
+        pass
+
+    @abstractmethod
+    def create_layer(self, coordinate_list, layer_height):
+        pass
+
+    @abstractmethod
+    def generate_sides(self):
+        pass
+
+    @abstractmethod
+    def to_kml(self):
+        pass
+
+
+class ICylinder(ABC):
+    @property
+    @abstractmethod
+    def lower_radius(self):
+        pass
+
+    @property
+    @abstractmethod
+    def upper_radius(self):
         pass

@@ -142,7 +142,7 @@ class KmlPlus:
         """
 
         Args:
-            coordinate_list (list): A list containing a single set of coordinates which is the centre point of the circle
+            coordinate_list (list): A list containing a single set of coordinates which is the midpoint point of the circle
             radius (float): The radius of the circle
         Keyword Args:
             fol (str): Name of the folder in which the KML objects are stored.
@@ -159,7 +159,7 @@ class KmlPlus:
         """
 
         points = Circle(coordinate_list, radius, radius_uom=kwargs.get('radius_uom', 'M'),
-                        uom=('uom', 'FT')).create()
+                        uom=('uom', 'FT')).process_points()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Circle'))
 
@@ -175,7 +175,7 @@ class KmlPlus:
         """
 
         Args:
-            coordinate_list: A list containing a single set of coordinates representing the centre of the circle
+            coordinate_list: A list containing a single set of coordinates representing the midpoint of the circle
             radius: The radius of the circle
         Keyword Args:
             lower_layer (float): Height/Altitude of the lower layer
@@ -197,7 +197,7 @@ class KmlPlus:
 
         cylinder = Cylinder((coordinate_list, radius), (coordinate_list, radius),
                             lower_layer=kwargs.get('lower_layer', None), upper_layer=kwargs.get('upper_layer', None),
-                            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'nm'))
+                            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'))
         lower, upper, sides = cylinder.to_kml()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Cylinder'))
@@ -229,11 +229,11 @@ class KmlPlus:
 
 if __name__ == '__main__':
     from test_data import airspace as test_data
-    kml_file = KmlPlus('Point Styling.kml')
+    kml_file = KmlPlus(save_name='Point Styling.kml')
 
     """kml_file.polyhedron(test_data.airspace.london_fir, lower_layer=19500, upper_layer=24500, name='London FIR')"""
 
-    kml_file.linestring(test_data.birmingham_cta_9)
+    kml_file.linestring(test_data.birmingham_cta_9, uom='FT')
     kml_file.cylinder(test_data.beccles_parachute, 1, upper_layer=5000)
     kml_file.point(test_data.beccles_parachute)
 
