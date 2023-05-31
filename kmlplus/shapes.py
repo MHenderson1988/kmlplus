@@ -1,25 +1,18 @@
-from abc import abstractmethod, ABC
-
 from kmlplus.geo import PointFactory, Point
-
-
-class ICircle(ABC):
-    @abstractmethod
-    def create(self):
-        pass
+from kmlplus.interface import ICircle
 
 
 class Circle(ICircle):
-    def __init__(self, centre, radius, **kwargs):
+    def __init__(self, centre: str, radius, **kwargs):
         self.radius_uom = kwargs.get('radius_uom', 'M')
         self.uom = kwargs.get('uom', 'FT')
         self._z = kwargs.get('z', 0)
         self._sample = kwargs.get('sample', 100)
-        self._centre = PointFactory(centre, uom=self.uom).process_coordinates()[0]
+        self._centre = self.plot_centre(centre)
         self._radius = radius
         self.point_list = self.create()
 
-    def __eq__(self, another_circle):
+    def __eq__(self, another_circle: ICircle):
         if self.centre and self.radius == another_circle.centre and another_circle.radius:
             return True
         else:
@@ -100,6 +93,10 @@ class Circle(ICircle):
         else:
             raise ValueError(
                 'Radius must be greater than 0 and of type float or other type which can be cast to float.')
+
+    def plot_centre(self, central_location):
+        coordinates = PointFactory(central_location, uom=self.uom).process_coordinates()[0]
+        return coordinates
 
     def create(self):
         point_list = []
@@ -236,30 +233,6 @@ class Cylinder:
             return side_coordinates
 
 
-class IPolygon(ABC):
-    @abstractmethod
-    def __len__(self):
-        pass
-
-    @abstractmethod
-    def __iter__(self):
-        pass
-
-    @abstractmethod
-    def __next__(self):
-        pass
-
-    @abstractmethod
-    def __getitem__(self, index):
-        pass
-
-    @abstractmethod
-    def __setitem__(self, index, point):
-        pass
-
-    @abstractmethod
-    def __ne__(self, another_polygon):
-        pass
 
 
 class Polygon(IPolygon):

@@ -1,12 +1,10 @@
-from abc import ABC, abstractmethod
 from typing import Union
 from pyproj import Geod
-from simplekml import Point
-
 from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_string
+from kmlplus.interface import ILocation, ILocationFactory, ICurvedSegmentFactory, ICurvedSegment
 
 
-class Point:
+class Point(ILocation):
     """
     A class for representing a coordinate using y, x, z representation.
 
@@ -18,6 +16,7 @@ class Point:
         uom (str): Unit of measure to be applied to elevation values.
         z (float): Elevation
     """
+
     def __init__(self, y: Union[str, float], x: Union[str, float], **kwargs: Union[str, int, float]):
         self.uom = kwargs.get('uom', 'FT')
         self.y: Union[str, float] = y
@@ -80,7 +79,7 @@ class Point:
                 self.z = float(value)
 
     @classmethod
-    def from_decimal_degrees(cls, y:Union[str, float], x: Union[str, float], **kwargs: Union[int, float]) -> Point:
+    def from_decimal_degrees(cls, y: Union[str, float], x: Union[str, float], **kwargs: Union[int, float]) -> ILocation:
         """
         Args:
             y (str): Latitude value
@@ -90,12 +89,12 @@ class Point:
             z (int | float):
 
         Returns:
-            A Point object
+            An ILocation object
         """
         return cls(y, x, z=kwargs.get('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
-    def from_dms(cls, y: Union[str, float], x: Union[str, float], **kwargs: Union[float, int, str]) -> Point:
+    def from_dms(cls, y: Union[str, float], x: Union[str, float], **kwargs: Union[float, int, str]) -> ILocation:
         """
         Creates a Point object from coordinates in Degrees Minutes Seconds format.
 
@@ -108,14 +107,14 @@ class Point:
             uom (str): Unit of measurement for elevation
 
         Returns:
-            A Point object
+            An ILocation object
         """
         y = dms_to_decimal(y)
         x = dms_to_decimal(x)
         return cls(y, x, z=kwargs.pop('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
-    def find_midpoint(cls, point_1: Point, point_2: Point, **kwargs: Union[int, float, str]) -> Point:
+    def find_midpoint(cls, point_1: ILocation, point_2: ILocation, **kwargs: Union[int, float, str]) -> ILocation:
         """
         Args:
             point_1 (Point):
@@ -126,7 +125,7 @@ class Point:
 
 
         Returns:
-            Returns a Point object representing the midpoint between two Point objects.
+            Returns an ILocation object representing the midpoint between two Point objects.
         """
         x1, x2 = float(point_1.x), float(point_2.x)
         y1, y2 = float(point_1.y), float(point_2.y)
@@ -137,7 +136,7 @@ class Point:
         return cls(y, x, z=kwargs.pop('z', 0), uom=kwargs.get('uom', 'FT'))
 
     @classmethod
-    def from_point_bearing_and_distance(cls, point: Point, bearing: float, distance: float, **kwargs) -> Point:
+    def from_point_bearing_and_distance(cls, point: ILocation, bearing: float, distance: float, **kwargs) -> ILocation:
         """
         Calculates a new Point based upon the bearing and distance from an existing one.
 
@@ -163,7 +162,7 @@ class Point:
 
         return cls(p[1], p[0], z=kwargs.get('z', 0), uom=kwargs.get('uom', 'M'))
 
-    def get_distance(self, another_point: Point, **kwargs: str) -> float:
+    def get_distance(self, another_point: ILocation, **kwargs: str) -> float:
         """
         Calculates the distance between two points.
         Args:
@@ -186,7 +185,7 @@ class Point:
 
         return distance
 
-    def get_bearing(self, another_point: Point) -> float:
+    def get_bearing(self, another_point: ILocation) -> float:
         """
         Calculates the bearing between one kmlplus.geo.Point object and another.
 
@@ -201,7 +200,7 @@ class Point:
         bearing = geo_tup[0]
         return bearing
 
-    def get_inverse_bearing(self, another_point: Point) -> float:
+    def get_inverse_bearing(self, another_point: ILocation) -> float:
         """
         Calculates the inverse bearing between one kmlplus.geo.Point object and another.
 
@@ -221,7 +220,7 @@ class Point:
         return kml_tuple
 
 
-class PointFactory:
+class PointFactory(ILocationFactory):
     def __init__(self, coordinate_list: list, **kwargs):
         self.coordinate_list = coordinate_list
         self.uom = kwargs.get('uom', 'FT')
@@ -288,12 +287,12 @@ class PointFactory:
                              'and height only.')
 
 
-class CurvedSegmentFactory:
+class CurvedSegmentFactory(ICurvedSegmentFactory):
     def __init__(self, coordinate_string, **kwargs):
         self.coordinate_string = coordinate_string
         self.z_override = kwargs.get('z_override', None)
 
-    def process_segment(self):
+    def process_segment(self) -> ICurvedSegment:
         string_dict = split_segment_string(self.coordinate_string)
         direction = string_dict.setdefault('direction', 'clockwise')
 
@@ -330,29 +329,15 @@ class CurvedSegmentFactory:
         return segment_points
 
 
-class ICurvedSegment(ABC):
-    @abstractmethod
-    def get_points(self) -> list:
-        pass
-
-    @abstractmethod
-    def get_bearing_increment(self):
-        pass
-
-    @abstractmethod
-    def get_height_increment(self):
-        pass
-
-
 class ClockwiseCurvedSegment(ICurvedSegment):
     def __init__(self, start: str, end: str, **kwargs):
         self.start = start
         self.end = end
         self.z = kwargs.get('z', None)
-        self.centre = kwargs.get('centre', Point.find_midpoint(self.start, self.end))
+        self.centre = kwargs.get('centre', self.find_midpoint())
         self.sample = kwargs.get('sample', 100)
-        self.start_bearing = self.centre.get_bearing(self.start)
-        self.end_bearing = self.centre.get_bearing(self.end)
+        self.start_bearing = self.find_start_bearing()
+        self.end_bearing = self.find_end_bearing()
 
     @property
     def start(self):
@@ -399,6 +384,18 @@ class ClockwiseCurvedSegment(ICurvedSegment):
             self._sample = int(value)
         else:
             raise TypeError('Sample can only be an int or castable string')
+
+    def find_midpoint(self):
+        p = Point.find_midpoint(self.start, self.end)
+        return p
+
+    def find_start_bearing(self):
+        bearing = self.centre.get_bearing(self.start)
+        return bearing
+
+    def find_end_bearing(self):
+        bearing = self.centre.get_bearing(self.end)
+        return bearing
 
     def get_points(self):
         # How many plots to point on the arc, default 100.
@@ -447,10 +444,10 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         self.start = start
         self.end = end
         self.z = kwargs.pop('z', None)
-        self.centre = kwargs.pop('centre', Point.find_midpoint(self.start, self.end))
+        self.centre = kwargs.pop('centre', self.find_midpoint())
         self.sample = kwargs.pop('sample', 100)
-        self.start_bearing = self.centre.get_bearing(self.start)
-        self.end_bearing = self.centre.get_bearing(self.end)
+        self.start_bearing = self.find_start_bearing()
+        self.end_bearing = self.find_end_bearing()
 
     @property
     def start(self):
@@ -497,6 +494,18 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
             self._sample = value
         else:
             raise TypeError('Sample can only be an int or castable string')
+
+    def find_midpoint(self):
+        p = Point.find_midpoint(self.start, self.end)
+        return p
+
+    def find_start_bearing(self):
+        bearing = self.centre.get_bearing(self.start)
+        return bearing
+
+    def find_end_bearing(self):
+        bearing = self.centre.get_bearing(self.end)
+        return bearing
 
     def get_points(self):
         # How many plots to point on the arc, default 100.
