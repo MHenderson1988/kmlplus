@@ -8,9 +8,9 @@ class Circle(ICircle, I2DObject):
     def __init__(self, centre: str, radius, **kwargs):
         self.radius_uom = kwargs.get('radius_uom', 'M')
         self.uom = kwargs.get('uom', 'FT')
-        self._z = kwargs.get('z', 0)
-        self._sample = kwargs.get('sample', 100)
-        self._centre = self.plot_centre(
+        self.z = kwargs.get('z', 0)
+        self.sample = kwargs.get('sample', 100)
+        self.centre = self.plot_centre(
             centre
         )
         self._radius = radius
@@ -47,12 +47,12 @@ class Circle(ICircle, I2DObject):
             raise TypeError('Polygon will only accept objects of type kmlplus.geo.Point')
 
     @property
-    def z(self):
+    def z(self) -> float:
         return self._z
 
     @z.setter
     def z(self, value):
-        if isinstance(float, value):
+        if isinstance(value, float):
             self._z = value
         else:
             self._z = float(value)
@@ -63,7 +63,7 @@ class Circle(ICircle, I2DObject):
 
     @sample.setter
     def sample(self, value: int) -> None:
-        if isinstance(int, value):
+        if isinstance(value, int):
             self._sample = value
         else:
             self._sample = int(value)
@@ -138,13 +138,13 @@ class Circle(ICircle, I2DObject):
 
 
 class Cylinder(I3DObject, ICylinder):
-    def __init__(self, lower_coordinates, upper_coordinates, **kwargs):
+    def __init__(self, lower_coordinates: list, upper_coordinates: list, **kwargs):
         self.uom = kwargs.get('uom', 'FT')
-        self._sample = kwargs.get('sample', 100)
+        self.sample = kwargs.get('sample', 100)
         self.radius_uom = kwargs.get('radius_uom', 'M')
-        self._lower_radius = lower_coordinates[1]
-        self._upper_radius = upper_coordinates[1]
-        self._lower_layer = self.create_layer(
+        self.lower_radius = lower_coordinates[1]
+        self.upper_radius = upper_coordinates[1]
+        self.lower_layer = self.create_layer(
             (lower_coordinates[0], self.lower_radius),
             kwargs.get('lower_layer', None),
             sample=kwargs.get('sample', 100),
@@ -159,37 +159,37 @@ class Cylinder(I3DObject, ICylinder):
         self._sides = self.generate_sides()
 
     @property
-    def lower_radius(self):
+    def lower_radius(self) -> float:
         return self._lower_radius
 
     @lower_radius.setter
-    def lower_radius(self, value):
+    def lower_radius(self, value: float):
         if isinstance(value, (int, float)):
             self._lower_radius = value
         else:
             try:
                 value = float(value)
-                self._lower_radius = value
+                self.lower_radius = value
             except TypeError:
                 print('Radius must be given as float, int or a castable type.')
 
     @property
-    def upper_radius(self):
+    def upper_radius(self) -> float:
         return self._upper_radius
 
     @upper_radius.setter
-    def upper_radius(self, value):
+    def upper_radius(self, value: float):
         if isinstance(value, (int, float)):
             self._upper_radius = value
         else:
             try:
                 value = float(value)
-                self._upper_radius = value
+                self.upper_radius = value
             except TypeError:
                 print('Radius must be given as float, int or a castable type.')
 
     @property
-    def sides(self):
+    def sides(self) -> list:
         return self._sides
 
     @sides.setter
@@ -221,7 +221,7 @@ class Cylinder(I3DObject, ICylinder):
         else:
             raise TypeError('Cylinder layers must be type ICircle')
 
-    def to_kml(self):
+    def to_kml(self) -> Union[tuple[list, list, list]]:
         lower = [(p.x, p.y, p.z) for p in self.lower_layer]
         upper = [(p.x, p.y, p.z) for p in self.upper_layer]
         sides = []
@@ -234,14 +234,14 @@ class Cylinder(I3DObject, ICylinder):
 
         return lower, upper, sides
 
-    def create_layer(self, coordinate_list, layer_height, **kwargs):
+    def create_layer(self, coordinate_list, layer_height, **kwargs) -> ICircle:
         if layer_height:
             circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=self.uom)
         else:
             circle = Circle(coordinate_list[0], coordinate_list[1])
         return circle
 
-    def generate_sides(self):
+    def generate_sides(self) -> list:
         if len(self.lower_layer) != len(self.upper_layer):
             raise IndexError(f'Lower and upper polygon must contain the same amount of points.  Point count - lower'
                              f'polygon: {len(self.lower_layer)} upper polygon: {len(self.upper_layer)}')
@@ -261,12 +261,13 @@ class Cylinder(I3DObject, ICylinder):
 
 
 class Polygon(IPolygon, I2DObject):
-    def __init__(self, point_list, **kwargs):
+    def __init__(self, point_list: list, **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
-        self._z = kwargs.get('z', None)
-        self._point_list = self.process_points(point_list, uom=self.uom)
+        self.z = kwargs.get('z', None)
+        self.point_list = self.process_points(point_list, uom=self.uom)
+        self.centroid = self.calculate_centroid()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.point_list)
 
     def __iter__(self):
@@ -299,28 +300,29 @@ class Polygon(IPolygon, I2DObject):
 
     @z.setter
     def z(self, value):
-        if isinstance(value, float):
+        if not value:
+            self._z = 0.0
+        elif isinstance(value, float):
             self._z = value
         else:
-            self._z = float(value)
+            self.z = float(value)
 
     @property
     def point_list(self):
         return self._point_list
 
     @point_list.setter
-    def point_list(self, a_point_list):
-        if len(a_point_list) > 2:
+    def point_list(self, a_point_list: list):
+        if len(a_point_list) > 2 and isinstance(a_point_list, list):
             # Close the polygon, if it is not already
             if a_point_list[0] != a_point_list[-1]:
                 first_vertice = a_point_list[0]
                 a_point_list.append(first_vertice)
             self._point_list = a_point_list
-
         else:
             raise ValueError('Cannot process_points a polygon from less than 2 points')
 
-    def calculate_centroid(self):
+    def calculate_centroid(self) -> ILocation:
         latitude_total, longitude_total = 0, 0
         for coordinate_instance in self.point_list:
             latitude_total += coordinate_instance.y
@@ -330,10 +332,10 @@ class Polygon(IPolygon, I2DObject):
 
         return Point(latitude_average, longitude_average)
 
-    def calculate_bearing_from_centroid(self, point):
-        return point.get_bearing(self.calculate_centroid())
+    def calculate_bearing_from_centroid(self, point: ILocation) -> ILocation:
+        return point.get_bearing()
 
-    def process_points(self, point_list, **kwargs):
+    def process_points(self, point_list: list[ILocation], **kwargs: str) -> list[ILocation]:
         points = PointFactory(
             point_list,
             z=self._z,
@@ -344,19 +346,22 @@ class Polygon(IPolygon, I2DObject):
 
 
 class Polyhedron(I3DObject):
-    def __init__(self, lower_coordinates, upper_coordinates, **kwargs):
+    def __init__(self, lower_coordinates: list[str], upper_coordinates: list[str], **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
-        self._lower_layer = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
-        self._upper_layer = self.create_layer(upper_coordinates, kwargs.get('upper_layer', None))
-        self._sides = self.generate_sides()
+        self.lower_layer = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
+        self.upper_layer = self.create_layer(upper_coordinates, kwargs.get('upper_layer', None))
+        self.sides = self.generate_sides()
 
     @property
-    def lower_layer(self):
+    def lower_layer(self) -> I2DObject:
         return self._lower_layer
 
     @lower_layer.setter
-    def lower_layer(self, a_polygon):
-        self._lower_layer = a_polygon.sort(reverse=True, key=lambda x: a_polygon.calculate_bearing_from_centroid(x))
+    def lower_layer(self, a_polygon: I2DObject):
+        if isinstance(a_polygon, I2DObject):
+            self._lower_layer = a_polygon
+        else:
+            raise TypeError('Lower layer must be a type of I2DObject')
 
     @property
     def upper_layer(self):

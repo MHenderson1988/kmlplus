@@ -317,7 +317,7 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
 
         return segment
 
-    def construct_point_list(self, string_dict):
+    def construct_point_list(self, string_dict: dict) -> list:
         if string_dict.get('midpoint') is not None:
             point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}",
                                        f"{string_dict.get('midpoint')}"], z=self.z_override).process_coordinates()
@@ -326,7 +326,7 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
                                       z=self.z_override).process_coordinates()
         return point_list
 
-    def create_clockwise_segment(self, point_list, string_dict):
+    def create_clockwise_segment(self, point_list: list, string_dict: dict) -> ICurvedSegment:
         if string_dict.get('midpoint') is not None:
             segment = ClockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
                                              sample=string_dict.get('sample', 100),
@@ -336,7 +336,7 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
                                              z=self.z_override)
         return segment
 
-    def create_anticlockwise_segment(self, point_list, string_dict):
+    def create_anticlockwise_segment(self, point_list: list, string_dict: dict) -> ICurvedSegment:
         if string_dict.get('midpoint') is not None:
             segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
                                                  sample=string_dict.get('sample', 100), z=self.z_override)
@@ -413,19 +413,19 @@ class ClockwiseCurvedSegment(ICurvedSegment):
             except TypeError:
                 print('Sample can only be an int or castable string')
 
-    def find_midpoint(self):
+    def find_midpoint(self) -> ILocation:
         p = Point.find_midpoint(self.start, self.end)
         return p
 
-    def find_start_bearing(self):
+    def find_start_bearing(self) -> float:
         bearing = self.midpoint.get_bearing(self.start)
         return bearing
 
-    def find_end_bearing(self):
+    def find_end_bearing(self) -> float:
         bearing = self.midpoint.get_bearing(self.end)
         return bearing
 
-    def get_points(self):
+    def get_points(self) -> list:
         # How many plots to point on the arc, default 100.
         bearing_inc = self.get_bearing_increment()
         if self.z is None:
@@ -451,14 +451,14 @@ class ClockwiseCurvedSegment(ICurvedSegment):
 
         return point_list
 
-    def get_bearing_increment(self):
+    def get_bearing_increment(self) -> float:
         difference = (self.end_bearing - self.start_bearing) % 360
         # number points + 1 so it plots points between start and end points
         incremental_value = difference / (self.sample + 1)
 
         return incremental_value
 
-    def get_height_increment(self):
+    def get_height_increment(self) -> float:
         if self.start.z > self.end.z:
             difference = -abs(self.start.z - self.end.z) / self.sample
             return difference
@@ -468,7 +468,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
 
 
 class AnticlockwiseCurvedSegment(ICurvedSegment):
-    def __init__(self, start: str, end: str, **kwargs):
+    def __init__(self, start: ILocation, end: ILocation, **kwargs):
         self.start = start
         self.end = end
         self.z = kwargs.pop('z', None)
@@ -478,40 +478,40 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         self.end_bearing = self.find_end_bearing()
 
     @property
-    def start(self):
+    def start(self) -> ILocation:
         return self._start
 
     @start.setter
-    def start(self, value):
+    def start(self, value: ILocation):
         if isinstance(value, Point):
             self._start = value
         else:
             raise TypeError('CurvedSegment will only accept either Point or str for its start.')
 
     @property
-    def end(self):
+    def end(self) -> ILocation:
         return self._end
 
     @end.setter
-    def end(self, value):
+    def end(self, value: ILocation):
         if isinstance(value, Point):
             self._end = value
         else:
             raise TypeError('CurvedSegment will only accept either Point or str for its start.')
 
     @property
-    def midpoint(self):
+    def midpoint(self) -> ILocation:
         return self._midpoint
 
     @midpoint.setter
-    def midpoint(self, value):
+    def midpoint(self, value: ILocation):
         if isinstance(value, Point):
             self._midpoint = value
         else:
             raise TypeError('CurvedSegment will only accept either Point or str for its start.')
 
     @property
-    def sample(self):
+    def sample(self) -> int:
         return self._sample
 
     @sample.setter
@@ -524,19 +524,19 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
             except TypeError:
                 print('Sample can only be an int or castable string')
 
-    def find_midpoint(self):
+    def find_midpoint(self) -> ILocation:
         p = Point.find_midpoint(self.start, self.end)
         return p
 
-    def find_start_bearing(self):
+    def find_start_bearing(self) -> float:
         bearing = self.midpoint.get_bearing(self.start)
         return bearing
 
-    def find_end_bearing(self):
+    def find_end_bearing(self) -> float:
         bearing = self.midpoint.get_bearing(self.end)
         return bearing
 
-    def get_points(self):
+    def get_points(self) -> list:
         # How many plots to point on the arc, default 100.
         bearing_inc = self.get_bearing_increment()
         if self.z is None:
@@ -562,17 +562,16 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
 
         return point_list
 
-    def get_bearing_increment(self):
+    def get_bearing_increment(self) -> float:
         difference = (self.start_bearing - self.end_bearing) % 360
         # number points + 1 so it plots points between start and end points
         incremental_value = difference / (self.sample + 1)
 
         return incremental_value
 
-    def get_height_increment(self):
+    def get_height_increment(self) -> float:
         if self.start.z > self.end.z:
             difference = -abs(self.start.z - self.end.z) / self.sample
-            return difference
         else:
             difference = abs(self.start.z - self.end.z) / self.sample
-            return difference
+        return difference
