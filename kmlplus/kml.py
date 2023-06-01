@@ -1,8 +1,9 @@
 from typing import Union
 
 import simplekml
-from kmlplus.shapes import Polyhedron, Circle, Cylinder, LineString
+
 from kmlplus.geo import PointFactory
+from kmlplus.shapes import Polyhedron, Circle, Cylinder, LineString
 
 
 class KmlPlus:
@@ -23,7 +24,7 @@ class KmlPlus:
 
     def __init__(self, **kwargs):
         self.output_path = kwargs.get('output', None)
-        self.save_name = kwargs.get('file_name', 'KmlPlus')
+        self.save_name = kwargs.get('file_name', 'KmlPlus.kml')
         self.kml = simplekml.Kml()
 
     def point(self, coordinate_list: list, **kwargs: str) -> None:
@@ -158,9 +159,8 @@ class KmlPlus:
 
         """
 
-        uom = kwargs.pop('uom')
-
-        points = Circle(coordinate_list, radius).create()
+        points = Circle(coordinate_list, radius, radius_uom=kwargs.get('radius_uom', 'M'),
+                        uom=('uom', 'FT')).process_points()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Circle'))
 
@@ -198,7 +198,7 @@ class KmlPlus:
 
         cylinder = Cylinder((coordinate_list, radius), (coordinate_list, radius),
                             lower_layer=kwargs.get('lower_layer', None), upper_layer=kwargs.get('upper_layer', None),
-                            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'nm'))
+                            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'), )
         lower, upper, sides = cylinder.to_kml()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Cylinder'))
@@ -230,12 +230,13 @@ class KmlPlus:
 
 if __name__ == '__main__':
     from test_data import airspace as test_data
-    kml_file = KmlPlus('Point Styling.kml')
+
+    kml_file = KmlPlus(file_name='Point Styling.kml')
 
     """kml_file.polyhedron(test_data.airspace.london_fir, lower_layer=19500, upper_layer=24500, name='London FIR')"""
 
-    kml_file.linestring(test_data.birmingham_cta_9)
-    kml_file.cylinder(test_data.beccles_parachute, 1, upper_layer=5000)
+    kml_file.linestring(test_data.birmingham_cta_9, uom='FT')
+    kml_file.cylinder(test_data.beccles_parachute, 50000, upper_layer=5000)
     kml_file.point(test_data.beccles_parachute)
 
     kml_file.polyhedron(test_data.birmingham_cta_10, lower_layer=6500, upper_layer=10500,
@@ -251,4 +252,3 @@ if __name__ == '__main__':
     kml_file.polyhedron(test_data.prestwick_cta_6, lower_layer=4000, upper_layer=5500, name='Prestwick CTA 6')
     kml_file.polyhedron(test_data.prestwick_ctr, upper_layer=5500, name='Prestwick CTR')
     kml_file.polyhedron(test_data.test_airspace, upper_layer=50000, lower_layer=0, name='EG D406C ESKMEALS')
-

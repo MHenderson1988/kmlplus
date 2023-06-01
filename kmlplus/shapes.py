@@ -1,31 +1,39 @@
-from abc import abstractmethod, ABC
+from typing import Union
 
 from kmlplus.geo import PointFactory, Point
+from kmlplus.interface import ICircle, ILocation, I3DObject, IPolygon, ICylinder, I2DObject
 
 
-class ICircle(ABC):
-    @abstractmethod
-    def create(self):
-        pass
+class Circle(ICircle, I2DObject):
+    """
+    Plots the coordinates for a 2D circular object.
 
+    Args:
+        centre (str): A string representing the central coordinate (focus) of the circle.
+        radius (float): The radius of the circle to be draw
 
-class Circle(ICircle):
-    def __init__(self, centre, radius, **kwargs):
-        self.radius_uom = kwargs.get('radius_uom', 'M')
-        self.uom = kwargs.get('uom', 'FT')
-        self._z = kwargs.get('z', 0)
-        self._sample = kwargs.get('sample', 100)
-        self._centre = PointFactory(centre, uom=self.uom).process_coordinates()[0]
-        self._radius = radius
-        self.point_list = self.create()
+    Keyword Args:
+        radius_uom (str): Unit of measure for the radius. Accepts and defaults to metres ('M'), statute miles ('MI'),
+         kilometres ('KM') and nautical miles ('NM')
+        uom (str): Unit of measure for elevation. Accepts and defaults to feet ('FT') and metres ('M')
+    """
 
-    def __eq__(self, another_circle):
+    def __init__(self, centre: list, radius: float, **kwargs):
+        self.radius_uom: str = kwargs.get('radius_uom', 'M')
+        self.uom: str = kwargs.get('uom', 'FT')
+        self.z: float = kwargs.get('z', None)
+        self.sample: int = kwargs.get('sample', 100)
+        self.centre: ILocation = self.plot_centre(centre)
+        self.radius: float = radius
+        self.point_list: list[ILocation] = self.process_points()
+
+    def __eq__(self, another_circle: ICircle) -> bool:
         if self.centre and self.radius == another_circle.centre and another_circle.radius:
             return True
         else:
             return False
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.point_list)
 
     def __iter__(self):
@@ -43,52 +51,54 @@ class Circle(ICircle):
     def __getitem__(self, index):
         return self.point_list[index]
 
-    def __setitem__(self, index, point):
+    def __setitem__(self, index, point) -> None:
         if isinstance(point, Point):
             self.point_list[index] = point
         else:
             raise TypeError('Polygon will only accept objects of type kmlplus.geo.Point')
 
     @property
-    def z(self):
+    def z(self) -> float:
         return self._z
 
     @z.setter
     def z(self, value):
-        if isinstance(float, value):
-
-            self._z = value
+        if not value:
+            self._z = None
+        elif isinstance(value, float):
+            conversion_dict = {'FT': 0.3048, 'M': 1}
+            self._z = value * conversion_dict[self.uom]
         else:
-            self._z = float(value)
+            self.z = float(value)
 
     @property
-    def sample(self):
+    def sample(self) -> int:
         return self._sample
 
     @sample.setter
-    def sample(self, value):
-        if isinstance(int, value):
+    def sample(self, value: int) -> None:
+        if isinstance(value, int):
             self._sample = value
         else:
             self._sample = int(value)
 
     @property
-    def centre(self):
+    def centre(self) -> ILocation:
         return self._centre
 
     @centre.setter
-    def centre(self, a_point):
+    def centre(self, a_point: ILocation):
         if isinstance(a_point, Point):
             self._centre = a_point
         else:
             raise TypeError('Centre must be passed a kmlplus.geo.Point object.')
 
     @property
-    def radius(self):
+    def radius(self) -> float:
         return self._radius
 
     @radius.setter
-    def radius(self, a_radius):
+    def radius(self, a_radius: Union[float, int, str]):
         if a_radius > 0 and isinstance(a_radius, float):
             self._radius = a_radius
         elif a_radius > 0:
@@ -101,7 +111,26 @@ class Circle(ICircle):
             raise ValueError(
                 'Radius must be greater than 0 and of type float or other type which can be cast to float.')
 
-    def create(self):
+    def plot_centre(self, central_location: list[str]) -> ILocation:
+        """
+        Takes the list passed at construction and creates an ILocation object to represent it
+
+        Args:
+            central_location (list): List with a single string representing x, y, z coordinate
+
+        Returns:
+            coordinates(ILocation): ILocation object representing the focus of the circle.
+        """
+        coordinates = PointFactory(central_location, uom=self.uom).process_coordinates()[0]
+        return coordinates
+
+    def process_points(self) -> list[ILocation]:
+        """
+        Plots and creates each ILocation point of the circle.
+
+        Returns:
+            point_list (list[ILocation]): List of ILocation objects which form the circle.
+        """
         point_list = []
 
         start_bearing = 0
@@ -120,7 +149,13 @@ class Circle(ICircle):
 
         return point_list
 
-    def to_kml(self):
+    def to_kml(self) -> list[tuple]:
+        """
+        Processes ILocation objects to give kml formatted string output
+
+        Returns:
+            circle (list[tuple]): A list of tuples containing x, y, z coordinate strings.
+        """
         point_list = []
 
         start_bearing = 0
@@ -137,65 +172,111 @@ class Circle(ICircle):
         return circle
 
 
-class Cylinder:
-    def __init__(self, lower_tuple, upper_tuple, **kwargs):
-        self.lower_circle = Circle(lower_tuple[0], lower_tuple[1], z=kwargs.get('lower_layer', None),
-                                   sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'nm'))
-        self.upper_circle = Circle(upper_tuple[0], upper_tuple[1], z=kwargs.get('upper_layer', None),
-                                   sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'nm'))
-        self._sample = kwargs.get('sample', 100)
+class Cylinder(I3DObject, ICylinder):
+    """
+    Represents a 3D cylindrical object. Top and bottom layers are made up of 2x Circle objects of equal sample size.
+
+    Args:
+        lower_coordinates (list[str]): List of string representations of coordinates.
+        upper_coordinates (list[str]): List of string representations of coordinates
+
+    Keyword Args:
+        radius_uom (str): Unit of measure for the radius. Accepts and defaults to metres ('M'), statute miles ('MI'),
+         kilometres ('KM') and nautical miles ('NM')
+        uom (str): Unit of measure for elevation. Accepts and defaults to feet ('FT') and metres ('M')
+        lower_radius (float): Overrides any radius in the string for the lower circle.
+        upper_radius (float): Overrides any radius in the string for the upper circle.
+
+    """
+
+    def __init__(self, lower_coordinates: list, upper_coordinates: list, **kwargs):
         self.uom = kwargs.get('uom', 'FT')
-        self.radius_uom('radius_uom', 'M')
-        self.sides = self.generate_sides()
+        self.sample = kwargs.get('sample', 100)
+        self.radius_uom = kwargs.get('radius_uom', 'M')
+        self.lower_radius = lower_coordinates[1]
+        self.upper_radius = upper_coordinates[1]
+        self.lower_layer = self.create_layer(
+            (lower_coordinates[0], self.lower_radius),
+            kwargs.get('lower_layer', None)
+        )
+        self._upper_layer = self.create_layer(
+            (upper_coordinates[0], self.upper_radius),
+            kwargs.get('upper_layer', None)
+        )
+        self._sides = self.generate_sides()
 
     @property
-    def lower_circle(self):
-        return self._lower_polygon
+    def lower_radius(self) -> float:
+        return self._lower_radius
 
-    @lower_circle.setter
-    def lower_circle(self, list_of_points):
-        self._lower_polygon = list_of_points
-
-    @property
-    def upper_circle(self):
-        return self._upper_polygon
-
-    @upper_circle.setter
-    def upper_circle(self, list_of_points):
-        self._upper_polygon = list_of_points
-
-    @property
-    def centre(self):
-        return self._centre
-
-    @centre.setter
-    def centre(self, a_point):
-        if isinstance(a_point, Point):
-            self._centre = a_point
+    @lower_radius.setter
+    def lower_radius(self, value: float):
+        if isinstance(value, (int, float)):
+            self._lower_radius = value
         else:
-            raise TypeError('Centre must be passed a kmlplus.geo.Point object.')
-
-    @property
-    def radius(self):
-        return self._radius
-
-    @radius.setter
-    def radius(self, a_radius):
-        if a_radius > 0 and isinstance(a_radius, float):
-            self._radius = a_radius
-        elif a_radius > 0:
             try:
-                converted_radius = float(a_radius)
-                self._radius = converted_radius
+                value = float(value)
+                self.lower_radius = value
             except TypeError:
-                print('Radius must be a float or type which can be converted to float eg int or string.')
-        else:
-            raise ValueError(
-                'Radius must be greater than 0 and of type float or other type which can be cast to float.')
+                print('Radius must be given as float, int or a castable type.')
 
-    def to_kml(self):
-        lower = [(p.x, p.y, p.z) for p in self.lower_circle]
-        upper = [(p.x, p.y, p.z) for p in self.upper_circle]
+    @property
+    def upper_radius(self) -> float:
+        return self._upper_radius
+
+    @upper_radius.setter
+    def upper_radius(self, value: float):
+        if isinstance(value, (int, float)):
+            self._upper_radius = value
+        else:
+            try:
+                value = float(value)
+                self.upper_radius = value
+            except TypeError:
+                print('Radius must be given as float, int or a castable type.')
+
+    @property
+    def sides(self) -> list:
+        return self._sides
+
+    @sides.setter
+    def sides(self, sides: list):
+        if isinstance(sides, list):
+            self._sides = sides
+        else:
+            raise TypeError('Sides can only be passed in a list')
+
+    @property
+    def lower_layer(self) -> ICircle:
+        return self._lower_layer
+
+    @lower_layer.setter
+    def lower_layer(self, circle: ICircle):
+        if isinstance(circle, ICircle):
+            self._lower_layer = circle
+        else:
+            raise TypeError('Cylinder layers must be type ICircle')
+
+    @property
+    def upper_layer(self) -> ICircle:
+        return self._upper_layer
+
+    @upper_layer.setter
+    def upper_layer(self, circle: ICircle):
+        if isinstance(circle, ICircle):
+            self._upper_layer = circle
+        else:
+            raise TypeError('Cylinder layers must be type ICircle')
+
+    def to_kml(self) -> Union[tuple[list, list, list]]:
+        """
+        Returns kml formatted coordinates in a list for the lower layer, upper layer and sides.
+        Returns:
+            lower, upper, sides (tuple[list, list, list]): Lists of kml formatted tuples.
+
+        """
+        lower = [(p.x, p.y, p.z) for p in self.lower_layer]
+        upper = [(p.x, p.y, p.z) for p in self.upper_layer]
         sides = []
 
         for polygon in self.sides:
@@ -206,69 +287,70 @@ class Cylinder:
 
         return lower, upper, sides
 
-    def create_layer(self, coordinate_list, layer_height, **kwargs):
-        is_side = kwargs.get('sides', False)
-        if is_side:
-            circle = [Polygon(x) for x in coordinate_list]
+    def create_layer(self, coordinate_list: tuple[list[str, float, int]], layer_height) -> ICircle:
+        """
+        Creates a 2D circle to act as the top or bottom layer of the cylinder
+        Args:
+            coordinate_list (tuple[list[str, float, int]]): Contains string information for coordinate and radius
+            layer_height: The z value of the layer
+
+        Returns:
+            circle (ICircle): A circle object
+        """
+        if layer_height:
+            circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=self.uom,
+                            radius_uom=self.radius_uom)
         else:
-            if layer_height:
-                circle = Circle(self.centre, self.radius, z=layer_height, uom=self.uom)
-            else:
-                circle = Circle(self.centre, self.radius)
+            circle = Circle(coordinate_list[0], coordinate_list[1], uom=self.uom, radius_uom=self.radius_uom)
         return circle
 
-    def generate_sides(self):
-        if len(self.lower_circle) != len(self.upper_circle.point_list):
+    def generate_sides(self) -> list[IPolygon]:
+        """
+        Creates the sides of the cylinder. Requires both layers to contain the same amount of points.
+
+        Returns:
+            side_coordinates (list[IPolygon]): A list of polygons joining the upper and lower layers together.
+
+        Raises:
+            IndexError: If lower layer and upper layer do not have the same quantity of points.
+        """
+        if len(self.lower_layer) != len(self.upper_layer):
             raise IndexError(f'Lower and upper polygon must contain the same amount of points.  Point count - lower'
-                             f'polygon: {len(self.lower_circle)} upper polygon: {len(self.upper_circle)}')
+                             f'polygon: {len(self.lower_layer)} upper polygon: {len(self.upper_layer)}')
         else:
             side_coordinates = []
             i = 0
-            while i < len(self.lower_circle) - 1:
-                polygon_coordinate_list = [self.lower_circle[i].__str__(), self.lower_circle[i + 1].__str__(),
-                                           self.upper_circle[i + 1].__str__(), self.upper_circle[i].__str__(),
-                                           self.lower_circle[i].__str__()]
+            while i < len(self.lower_layer) - 1:
+                polygon_coordinate_list = [self.lower_layer.point_list[i].__str__(), self.lower_layer[i + 1].__str__(),
+                                           self.upper_layer[i + 1].__str__(), self.upper_layer[i].__str__(),
+                                           self.lower_layer[i].__str__()]
 
-                side_coordinates.append(Polygon(polygon_coordinate_list))
+                side_coordinates.append(Polygon(polygon_coordinate_list, uom=self.uom))
 
                 i += 1
 
             return side_coordinates
 
 
-class IPolygon(ABC):
-    @abstractmethod
-    def __len__(self):
-        pass
+class Polygon(IPolygon, I2DObject):
+    """
+    Creates a polygon made of 2 or more vertices
 
-    @abstractmethod
-    def __iter__(self):
-        pass
+    Args:
+        coordinate_list (list[str]): A list of strings representing coordinates of vertices.
 
-    @abstractmethod
-    def __next__(self):
-        pass
+    Keyword Args:
+        uom (str): Unit of measure for elevation, FT or M
+        z (float): Override all string elevation values with a single blanket value.
+    """
 
-    @abstractmethod
-    def __getitem__(self, index):
-        pass
-
-    @abstractmethod
-    def __setitem__(self, index, point):
-        pass
-
-    @abstractmethod
-    def __ne__(self, another_polygon):
-        pass
-
-
-class Polygon(IPolygon):
-    def __init__(self, point_list, **kwargs):
+    def __init__(self, coordinate_list: list, **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
-        self._z = kwargs.get('z', None)
-        self._point_list = PointFactory(point_list, z=self._z).process_coordinates()
+        self.z = kwargs.get('z', None)
+        self.point_list = self.process_points(coordinate_list)
+        self.centroid = self.calculate_centroid()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.point_list)
 
     def __iter__(self):
@@ -292,8 +374,8 @@ class Polygon(IPolygon):
         else:
             raise TypeError('Polygon will only accept objects of type kmlplus.geo.Point')
 
-    def __ne__(self, another_polygon):
-        return self.__len__() != another_polygon.__len__()
+    def __eq__(self, another_2D_object: I2DObject) -> bool:
+        return self.__len__() != another_2D_object.__len__()
 
     @property
     def z(self):
@@ -301,28 +383,37 @@ class Polygon(IPolygon):
 
     @z.setter
     def z(self, value):
-        if isinstance(value, float):
-            self._z = value
+        if not value:
+            self._z = None
+        elif isinstance(value, float):
+            conversion_dict = {'FT': 0.3048, 'M': 1}
+            self._z = value * conversion_dict[self.uom]
         else:
-            self._z = float(value)
+            self.z = float(value)
 
     @property
     def point_list(self):
         return self._point_list
 
     @point_list.setter
-    def point_list(self, a_point_list):
-        if len(a_point_list) > 2:
+    def point_list(self, a_point_list: list):
+        if len(a_point_list) > 2 and isinstance(a_point_list, list):
             # Close the polygon, if it is not already
             if a_point_list[0] != a_point_list[-1]:
                 first_vertice = a_point_list[0]
                 a_point_list.append(first_vertice)
             self._point_list = a_point_list
-
         else:
-            raise ValueError('Cannot create a polygon from less than 2 points')
+            raise ValueError('Cannot process_points a polygon from less than 2 points')
 
-    def calculate_centroid(self):
+    def calculate_centroid(self) -> ILocation:
+        """
+        Calculates the centre (centroid) of the polygon's area. This is used for sorting the polygons so that they are
+        drawn correctly in Google Earth.
+
+        Returns:
+            point (ILocation)
+        """
         latitude_total, longitude_total = 0, 0
         for coordinate_instance in self.point_list:
             latitude_total += coordinate_instance.y
@@ -330,38 +421,98 @@ class Polygon(IPolygon):
         latitude_average, longitude_average = latitude_total / len(self.point_list), \
                                               longitude_total / len(self.point_list)
 
-        return Point(latitude_average, longitude_average)
+        point = Point(latitude_average, longitude_average)
+        return point
 
-    def calculate_bearing_from_centroid(self, point):
-        return point.get_bearing(self.calculate_centroid())
+    def calculate_bearing_from_centroid(self, point: ILocation) -> ILocation:
+        """
+        Calculates the bearing to the point from the centre of the polygon (Centroid)
+
+        Args:
+            point (ILocation): The point to find the bearing to
+
+        Returns:
+            bearing (float): The bearing in degrees
+
+        """
+        bearing = point.get_bearing(self.centroid)
+        return bearing
+
+    def process_points(self, point_list: list[str]) -> list[ILocation]:
+        """
+        Creates ILocation objects from the list of coordinates supplied.
+        Args:
+            point_list (list[str]): A list of coordinate information in string format
+
+        Returns:
+            points (list[ILocation]): A list of ILocation objects representing the vertices of the polygon
+        """
+        points = PointFactory(
+            point_list,
+            z=self._z,
+            uom=self.uom
+        ).process_coordinates()
+
+        return points
 
 
-class Polyhedron:
-    def __init__(self, lower_coordinates, upper_coordinates, **kwargs):
+class Polyhedron(I3DObject):
+    """
+    A Polyhedron (3D object) comprised of a lower layer, upper layer and sides.
+
+    Args:
+        lower_coordinates (list[str]): A list of str representation of coordinates.
+        upper_coordinates (list[str]): A list of str representation of coordinates.
+
+    Keyword Args:
+        uom = Unit of measure for elevation, FT or M
+    """
+
+    def __init__(self, lower_coordinates: list[str], upper_coordinates: list[str], **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
-        self._lower_polygon = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
-        self._upper_polygon = self.create_layer(upper_coordinates, kwargs.get('upper_layer', None))
+        self.lower_layer = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
+        self.upper_layer = self.create_layer(upper_coordinates, kwargs.get('upper_layer', None))
         self.sides = self.generate_sides()
 
     @property
-    def lower_polygon(self):
-        return self._lower_polygon
+    def lower_layer(self) -> I2DObject:
+        return self._lower_layer
 
-    @lower_polygon.setter
-    def lower_polygon(self, a_polygon):
-        self._lower_polygon = a_polygon.sort(reverse=True, key=lambda x: a_polygon.calculate_bearing_from_centroid(x))
+    @lower_layer.setter
+    def lower_layer(self, a_polygon: I2DObject):
+        if isinstance(a_polygon, I2DObject):
+            self._lower_layer = a_polygon
+        else:
+            raise TypeError('Lower layer must be a type of I2DObject')
 
     @property
-    def upper_polygon(self):
-        return self._upper_polygon
+    def upper_layer(self):
+        return self._upper_layer
 
-    @upper_polygon.setter
-    def upper_polygon(self, a_polygon):
-        self._upper_polygon = a_polygon.sort(reverse=True, key=lambda x: a_polygon.calculate_bearing_from_centroid(x))
+    @upper_layer.setter
+    def upper_layer(self, a_polygon):
+        self._upper_layer = a_polygon
 
-    def to_kml(self):
-        lower = [(p.x, p.y, p.z) for p in self.lower_polygon]
-        upper = [(p.x, p.y, p.z) for p in self.upper_polygon]
+    @property
+    def sides(self):
+        return self._sides
+
+    @sides.setter
+    def sides(self, sides: list):
+        if isinstance(sides, list):
+            self._sides = sides
+        else:
+            raise TypeError('Sides can only be passed in a list')
+
+    def to_kml(self) -> tuple:
+        """
+        Processes the upper, lower layers and sides. Converts their data to a KML friendly format.
+
+        Returns:
+            lower, upper, sides (tuple):
+        """
+        lower = [(p.x, p.y, p.z) for p in self.lower_layer]
+        upper = [(p.x, p.y, p.z) for p in self.upper_layer]
         sides = []
 
         for polygon in self.sides:
@@ -372,42 +523,63 @@ class Polyhedron:
 
         return lower, upper, sides
 
-    def create_layer(self, coordinate_list, layer_height, **kwargs):
-        is_side = kwargs.get('sides', False)
-        if is_side:
-            poly = [Polygon(x) for x in coordinate_list]
+    def create_layer(self, coordinate_list: list[str], layer_height: str) -> IPolygon:
+        """
+        Creates a layer for the polygon
+        Args:
+            coordinate_list (list): List containing a string of coordinate information
+            layer_height (str): The elevation value of the layer
+
+        Returns:
+
+        """
+        if layer_height:
+            poly = Polygon(coordinate_list, z=layer_height, uom=self.uom)
         else:
-            if layer_height:
-                poly = Polygon(coordinate_list, z=layer_height, uom=self.uom)
-            else:
-                poly = Polygon(coordinate_list)
+            poly = Polygon(coordinate_list)
         return poly
 
-    def generate_sides(self):
-        if self.lower_polygon != self.upper_polygon:
-            raise IndexError(f'Lower and upper polygon must contain the same amount of points.  Point count - lower'
-                             f'polygon: {len(self.lower_polygon)} upper polygon: {len(self.upper_polygon)}')
+    def generate_sides(self) -> list[IPolygon]:
+        """
+        Creates the side polygons to connect the upper and lower layers. Requires upper and lower layers to have
+        matching amount of vertices
+
+        Returns:
+            side_coordinates (list[IPolygon]): List of polygons which make up the sides of the polyhedron.
+        """
+        if len(self.lower_layer) != len(self.upper_layer):
+            raise IndexError(f'Lower and upper polygon must contain the same amount of points.  Point count - lower '
+                             f'polygon: {len(self.lower_layer)} upper polygon: {len(self.upper_layer)}')
         else:
             side_coordinates = []
             i = 0
-            while i < len(self.lower_polygon) - 1:
-                polygon_coordinate_list = [self.lower_polygon[i].__str__(), self.lower_polygon[i + 1].__str__(),
-                                           self.upper_polygon[i + 1].__str__(), self.upper_polygon[i].__str__(),
-                                           self.lower_polygon[i].__str__()]
+            while i < len(self.lower_layer) - 1:
+                polygon_coordinate_list = [self.lower_layer[i].__str__(), self.lower_layer[i + 1].__str__(),
+                                           self.upper_layer[i + 1].__str__(), self.upper_layer[i].__str__(),
+                                           self.lower_layer[i].__str__()]
 
-                side_coordinates.append(Polygon(polygon_coordinate_list))
+                side_polygon = Polygon(polygon_coordinate_list, uom=self.uom)
+
+                side_coordinates.append(side_polygon)
 
                 i += 1
 
-            # When you reach the last point, join it up to the first
-            # polygon_coordinate_list = [self.lower_circle[i].__str__(), self.lower_circle[0].__str__(), self.upper_circle[0].__str__(), self.upper_circle[i].__str__(), self.lower_circle[i].__str__()]
-
-            # side_coordinates.append(Polygon(polygon_coordinate_list))
-
             return side_coordinates
 
-class LineString:
-    def __init__(self, coordinate_list):
+
+class LineString(I2DObject):
+    """
+    Represents a kml LineString.
+
+    Args:
+        coordinate_list (list[str]): A list containing two or more strings representing coordinates
+
+    Keyword Args:
+        uom (str): Unit of measure for elevation, FT or M.
+    """
+
+    def __init__(self, coordinate_list, **kwargs):
+        self.uom = kwargs.get('uom', 'FT')
         self.point_list = self.create(coordinate_list)
 
     def __len__(self):
@@ -434,9 +606,6 @@ class LineString:
         else:
             raise TypeError('Polygon will only accept objects of type kmlplus.geo.Point')
 
-    def __ne__(self, another_polygon):
-        return self.__len__() != another_polygon.__len__()
-
-    def create(self, coordinate_list):
-        point_list = PointFactory(coordinate_list).process_coordinates()
+    def create(self, coordinate_list: list[str]) -> list[ILocation]:
+        point_list = PointFactory(coordinate_list, uom=self.uom).process_coordinates()
         return point_list
