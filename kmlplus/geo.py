@@ -1,7 +1,9 @@
 from typing import Union
+
 from pyproj import Geod
-from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_string
+
 from kmlplus.interface import ILocation, ILocationFactory, ICurvedSegmentFactory, ICurvedSegment
+from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_string
 
 
 class Point(ILocation):
@@ -566,6 +568,7 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
     """
     Creates an AnticlockwiseCurvedSegment. For documentation, see ClockwiseCurvedSegment.
     """
+
     def __init__(self, start: ILocation, end: ILocation, **kwargs):
         self.start = start
         self.end = end

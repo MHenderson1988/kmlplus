@@ -1,8 +1,9 @@
 from typing import Union
 
 import simplekml
-from kmlplus.shapes import Polyhedron, Circle, Cylinder, LineString
+
 from kmlplus.geo import PointFactory
+from kmlplus.shapes import Polyhedron, Circle, Cylinder, LineString
 
 
 class KmlPlus:
@@ -229,6 +230,7 @@ class KmlPlus:
 
 if __name__ == '__main__':
     from test_data import airspace as test_data
+
     kml_file = KmlPlus(save_name='Point Styling.kml')
 
     """kml_file.polyhedron(test_data.airspace.london_fir, lower_layer=19500, upper_layer=24500, name='London FIR')"""
@@ -250,4 +252,3 @@ if __name__ == '__main__':
     kml_file.polyhedron(test_data.prestwick_cta_6, lower_layer=4000, upper_layer=5500, name='Prestwick CTA 6')
     kml_file.polyhedron(test_data.prestwick_ctr, upper_layer=5500, name='Prestwick CTR')
     kml_file.polyhedron(test_data.test_airspace, upper_layer=50000, lower_layer=0, name='EG D406C ESKMEALS')
-

@@ -17,6 +17,7 @@ class Circle(ICircle, I2DObject):
          kilometres ('KM') and nautical miles ('NM')
         uom (str): Unit of measure for elevation. Accepts and defaults to feet ('FT') and metres ('M')
     """
+
     def __init__(self, centre: list, radius: float, **kwargs: Union[str, float, int]):
         self.radius_uom = kwargs.get('radius_uom', 'M')
         self.uom = kwargs.get('uom', 'FT')
@@ -107,17 +108,26 @@ class Circle(ICircle, I2DObject):
             raise ValueError(
                 'Radius must be greater than 0 and of type float or other type which can be cast to float.')
 
-    def plot_centre(self, central_location: list) -> ILocation:
+    def plot_centre(self, central_location: list[str]) -> ILocation:
         """
         Takes the list passed at construction and creates an ILocation object to represent it
 
         Args:
             central_location (list): List with a single string representing x, y, z coordinate
+
+        Returns:
+            coordinates(ILocation): ILocation object representing the focus of the circle.
         """
         coordinates = PointFactory(central_location, uom=self.uom).process_coordinates()[0]
         return coordinates
 
-    def process_points(self) -> list:
+    def process_points(self) -> list[ILocation]:
+        """
+        Plots and creates each ILocation point of the circle.
+
+        Returns:
+            point_list (list[ILocation]): List of ILocation objects which form the circle.
+        """
         point_list = []
 
         start_bearing = 0
@@ -137,6 +147,12 @@ class Circle(ICircle, I2DObject):
         return point_list
 
     def to_kml(self) -> list[tuple]:
+        """
+        Processes ILocation objects to give kml formatted string output
+
+        Returns:
+            circle (list[tuple]): A list of tuples containing x, y, z coordinate strings.
+        """
         point_list = []
 
         start_bearing = 0
@@ -154,6 +170,22 @@ class Circle(ICircle, I2DObject):
 
 
 class Cylinder(I3DObject, ICylinder):
+    """
+    Represents a 3D cylindrical object. Top and bottom layers are made up of 2x Circle objects of equal sample size.
+
+    Args:
+        lower_coordinates (list[str]): List of string representations of coordinates.
+        upper_coordinates (list[str]): List of string representations of coordinates
+
+    Keyword Args:
+        radius_uom (str): Unit of measure for the radius. Accepts and defaults to metres ('M'), statute miles ('MI'),
+         kilometres ('KM') and nautical miles ('NM')
+        uom (str): Unit of measure for elevation. Accepts and defaults to feet ('FT') and metres ('M')
+        lower_radius (float): Overrides any radius in the string for the lower circle.
+        upper_radius (float): Overrides any radius in the string for the upper circle.
+
+    """
+
     def __init__(self, lower_coordinates: list, upper_coordinates: list, **kwargs):
         self.uom = kwargs.get('uom', 'FT')
         self.sample = kwargs.get('sample', 100)
@@ -162,15 +194,11 @@ class Cylinder(I3DObject, ICylinder):
         self.upper_radius = upper_coordinates[1]
         self.lower_layer = self.create_layer(
             (lower_coordinates[0], self.lower_radius),
-            kwargs.get('lower_layer', None),
-            sample=kwargs.get('sample', 100),
-            uom=kwargs.get('uom', 'nm')
+            kwargs.get('lower_layer', None)
         )
         self._upper_layer = self.create_layer(
             (upper_coordinates[0], self.upper_radius),
-            kwargs.get('upper_layer', None),
-            sample=kwargs.get('sample', 100),
-            uom=kwargs.get('uom', 'nm')
+            kwargs.get('upper_layer', None)
         )
         self._sides = self.generate_sides()
 
@@ -238,6 +266,12 @@ class Cylinder(I3DObject, ICylinder):
             raise TypeError('Cylinder layers must be type ICircle')
 
     def to_kml(self) -> Union[tuple[list, list, list]]:
+        """
+        Returns kml formatted coordinates in a list for the lower layer, upper layer and sides.
+        Returns:
+            lower, upper, sides (tuple[list, list, list]): Lists of kml formatted tuples.
+
+        """
         lower = [(p.x, p.y, p.z) for p in self.lower_layer]
         upper = [(p.x, p.y, p.z) for p in self.upper_layer]
         sides = []
@@ -250,14 +284,33 @@ class Cylinder(I3DObject, ICylinder):
 
         return lower, upper, sides
 
-    def create_layer(self, coordinate_list, layer_height, **kwargs) -> ICircle:
+    def create_layer(self, coordinate_list: tuple[list[str, float, int]], layer_height) -> ICircle:
+        """
+        Creates a 2D circle to act as the top or bottom layer of the cylinder
+        Args:
+            coordinate_list (tuple[list[str, float, int]]): Contains string information for coordinate and radius
+            layer_height: The z value of the layer
+
+        Returns:
+            circle (ICircle): A circle object
+        """
         if layer_height:
-            circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=self.uom)
+            circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=self.uom,
+                            radius_uom=self.radius_uom)
         else:
-            circle = Circle(coordinate_list[0], coordinate_list[1])
+            circle = Circle(coordinate_list[0], coordinate_list[1], uom=self.uom, radius_uom=self.radius_uom)
         return circle
 
-    def generate_sides(self) -> list:
+    def generate_sides(self) -> list[IPolygon]:
+        """
+        Creates the sides of the cylinder. Requires both layers to contain the same amount of points.
+
+        Returns:
+            side_coordinates (list[IPolygon]): A list of polygons joining the upper and lower layers together.
+
+        Raises:
+            IndexError: If lower layer and upper layer do not have the same quantity of points.
+        """
         if len(self.lower_layer) != len(self.upper_layer):
             raise IndexError(f'Lower and upper polygon must contain the same amount of points.  Point count - lower'
                              f'polygon: {len(self.lower_layer)} upper polygon: {len(self.upper_layer)}')
@@ -277,6 +330,17 @@ class Cylinder(I3DObject, ICylinder):
 
 
 class Polygon(IPolygon, I2DObject):
+    """
+    Creates a polygon made of 2 or more vertices
+
+    Args:
+        point_list (list[str]): A list of strings representing coordinates of vertices.
+
+    Keyword Args:
+        uom (str): Unit of measure for elevation, FT or M
+        z (float): Override all string elevation values with a single blanket value.
+    """
+
     def __init__(self, point_list: list, **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
         self.z = kwargs.get('z', None)
@@ -353,6 +417,13 @@ class Polygon(IPolygon, I2DObject):
         self._sorted_point_list = sorted_list
 
     def calculate_centroid(self) -> ILocation:
+        """
+        Calculates the centre (centroid) of the polygon's area. This is used for sorting the polygons so that they are
+        drawn correctly in Google Earth.
+
+        Returns:
+            point (ILocation)
+        """
         latitude_total, longitude_total = 0, 0
         for coordinate_instance in self.point_list:
             latitude_total += coordinate_instance.y
@@ -360,23 +431,53 @@ class Polygon(IPolygon, I2DObject):
         latitude_average, longitude_average = latitude_total / len(self.point_list), \
                                               longitude_total / len(self.point_list)
 
-        return Point(latitude_average, longitude_average)
+        point = Point(latitude_average, longitude_average)
+        return point
 
     def calculate_bearing_from_centroid(self, point: ILocation) -> ILocation:
+        """
+        Calculates the bearing to the point from the centre of the polygon (Centroid)
+
+        Args:
+            point (ILocation): The point to find the bearing to
+
+        Returns:
+            bearing (float): The bearing in degrees
+
+        """
         bearing = point.get_bearing(self.centroid)
         return bearing
 
-    def process_points(self, point_list: list[ILocation], **kwargs: str) -> list[ILocation]:
+    def process_points(self, point_list: list[str]) -> list[ILocation]:
+        """
+        Creates ILocation objects from the list of coordinates supplied.
+        Args:
+            point_list (list[str]): A list of coordinate information in string format
+
+        Returns:
+            points (list[ILocation]): A list of ILocation objects representing the vertices of the polygon
+        """
         points = PointFactory(
             point_list,
             z=self._z,
-            uom=kwargs.get('uom', 'FT')
+            uom=self.uom
         ).process_coordinates()
 
         return points
 
 
 class Polyhedron(I3DObject):
+    """
+    A Polyhedron (3D object) comprised of a lower layer, upper layer and sides.
+
+    Args:
+        lower_coordinates (list[str]): A list of str representation of coordinates.
+        upper_coordinates (list[str]): A list of str representation of coordinates.
+
+    Keyword Args:
+        uom = Unit of measure for elevation, FT or M
+    """
+
     def __init__(self, lower_coordinates: list[str], upper_coordinates: list[str], **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
         self.lower_layer = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
@@ -413,7 +514,13 @@ class Polyhedron(I3DObject):
         else:
             raise TypeError('Sides can only be passed in a list')
 
-    def to_kml(self):
+    def to_kml(self) -> tuple:
+        """
+        Processes the upper, lower layers and sides. Converts their data to a KML friendly format.
+
+        Returns:
+            lower, upper, sides (tuple):
+        """
         lower = [(p.x, p.y, p.z) for p in self.lower_layer]
         upper = [(p.x, p.y, p.z) for p in self.upper_layer]
         sides = []
@@ -426,14 +533,30 @@ class Polyhedron(I3DObject):
 
         return lower, upper, sides
 
-    def create_layer(self, coordinate_list, layer_height, **kwargs):
+    def create_layer(self, coordinate_list: list[str], layer_height: str) -> IPolygon:
+        """
+        Creates a layer for the polygon
+        Args:
+            coordinate_list (list): List containing a string of coordinate information
+            layer_height (str): The elevation value of the layer
+
+        Returns:
+
+        """
         if layer_height:
             poly = Polygon(coordinate_list, z=layer_height, uom=self.uom)
         else:
             poly = Polygon(coordinate_list)
         return poly
 
-    def generate_sides(self):
+    def generate_sides(self) -> list[IPolygon]:
+        """
+        Creates the side polygons to connect the upper and lower layers. Requires upper and lower layers to have
+        matching amount of vertices
+
+        Returns:
+            side_coordinates (list[IPolygon]): List of polygons which make up the sides of the polyhedron.
+        """
         if len(self.lower_layer) != len(self.upper_layer):
             raise IndexError(f'Lower and upper polygon must contain the same amount of points.  Point count - lower '
                              f'polygon: {len(self.lower_layer)} upper polygon: {len(self.upper_layer)}')
@@ -453,6 +576,16 @@ class Polyhedron(I3DObject):
 
 
 class LineString(I2DObject):
+    """
+    Represents a kml LineString.
+
+    Args:
+        coordinate_list (list[str]): A list containing two or more strings representing coordinates
+
+    Keyword Args:
+        uom (str): Unit of measure for elevation, FT or M.
+    """
+
     def __init__(self, coordinate_list, **kwargs):
         self.uom = kwargs.get('uom', 'FT')
         self.point_list = self.create(coordinate_list)
