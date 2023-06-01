@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-import util
+from kmlplus import util
 from kmlplus.geo import Point, PointFactory, ClockwiseCurvedSegment, AnticlockwiseCurvedSegment, CurvedSegmentFactory
 
 
@@ -19,7 +19,7 @@ class TestPoint(TestCase):
         test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, distance_uom='M')
         self.assertEqual(test_obj.y, 50.20166666666667)
         self.assertEqual(test_obj.x, -4.868398333333333)
-        self.assertAlmostEqual(test_obj.z, 116.73840000000001, delta=5)
+        self.assertAlmostEqual(test_obj.z, 383.0, delta=5)
 
         test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, uom='M', distance_uom='M')
         self.assertEqual(test_obj.y, 50.20166666666667)
@@ -109,7 +109,7 @@ class TestPointFactory(TestCase):
         self.assertTrue(isinstance(dms_obj, Point))
 
         self.assertEqual(no_height_obj.z, 0.0)
-        self.assertEqual(with_height_obj.z, 2.4384)
+        self.assertEqual(with_height_obj.z, 8.0)
         self.assertEqual(dms_obj.y, 52.21222222222222)
 
 
@@ -139,9 +139,11 @@ class TestClockwiseCurvedSegment(TestCase):
     def setUp(self):
         self.test_obj = ClockwiseCurvedSegment(Point.from_dms('551206.00N', '0045206.234W'),
                                                Point.from_dms('501206.00N', '0045206.234W'),
+                                               'FT',
                                                sample=100)
         self.inverse_test_obj = ClockwiseCurvedSegment(Point.from_dms('501206.00N', '0045206.234W'),
                                                        Point.from_dms('551206.00N', '0045206.234W'),
+                                                       'FT',
                                                        sample=2)
 
     def test_get_points(self):
@@ -170,10 +172,14 @@ class TestClockwiseCurvedSegment(TestCase):
 class TestAnticlockwiseCurvedSegment(TestCase):
     def setUp(self):
         self.test_obj = AnticlockwiseCurvedSegment(Point.from_dms('551206.00N', '0045206.234W'),
-                                                   Point.from_dms('501206.00N', '0045206.234W'), sample=100)
+                                                   Point.from_dms('501206.00N', '0045206.234W'),
+                                                   'FT',
+                                                   sample=100)
 
         self.inverse_test_obj = AnticlockwiseCurvedSegment(Point.from_dms('501206.00N', '0045206.234W'),
-                                                           Point.from_dms('551206.00N', '0045206.234W', sample=100))
+                                                           Point.from_dms('551206.00N', '0045206.234W'),
+                                                           'FT',
+                                                           sample=100)
 
     def test_get_points(self):
         result = self.test_obj.get_points()

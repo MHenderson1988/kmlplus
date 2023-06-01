@@ -25,7 +25,7 @@ class TestCircle(TestCase):
         # Test uom effects
         c = Circle('55.1111 -3.2311 10', 10, sample=100, uom='FT')
         for i in c:
-            self.assertEqual(0.9290304, i.z)
+            self.assertEqual(10, i.z)
 
         c = Circle('55.1111 -3.2311 10', 25, z=250, sample=100, uom='M')
         for i in c:
