@@ -47,7 +47,8 @@ Installing
 ### Pip
 
 ```
-pip install kmlplus
+pip install kmlplus==2.1.0  <--- last stable release
+pip install kmlplus <--- Current v3.0.0-beta.1
 ```
 
 ### Clone
