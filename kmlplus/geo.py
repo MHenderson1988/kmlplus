@@ -72,8 +72,7 @@ class Point(ILocation):
     @z.setter
     def z(self, value) -> None:
         if isinstance(value, float):
-            conversion_dict = {'FT': 0.3048, 'M': 1}
-            self._z = value * conversion_dict[self.uom]
+            self._z = value
         else:
             if value is None:
                 self._z = 0.0
@@ -127,7 +126,7 @@ class Point(ILocation):
 
 
         Returns:
-            Returns an ILocation object representing the midpoint between two Point objects.
+            Returns an ILocation object representing the centre between two Point objects.
         """
         x1, x2 = float(point_1.x), float(point_2.x)
         y1, y2 = float(point_1.y), float(point_2.y)
@@ -153,11 +152,10 @@ class Point(ILocation):
         Returns:
             A Point object at the declared bearing and distance from another Point object.
         """
-        radius_dict = {'KM': 1000, 'MI': 1609.34, 'NM': 1852, 'M': 1}
+        radius_dict = {'KM': 0.01, 'MI': 0.000621371, 'NM': 0.000539957, 'M': 1}
         distance_uom = kwargs.get('distance_uom', 'M')
-        conversion_value = radius_dict.get(distance_uom)
         # PyProj gives distance in metres
-        distance = distance * conversion_value
+        distance = distance * radius_dict[distance_uom]
 
         g = Geod(ellps='WGS84')
         p = g.fwd(point.x, point.y, az=bearing, dist=distance)
@@ -177,13 +175,13 @@ class Point(ILocation):
             distance (float): The distance between two points.
 
         """
-        radius_dict = {'KM': 1000, 'MI': 1609.34, 'NM': 1852, 'M': 1}
-        conversion_value = radius_dict.get(kwargs.get('distance_uom'), 1)
+        radius_dict = {'KM': 0.01, 'MI': 0.000621371, 'NM': 0.000539957, 'M': 1}
         g = Geod(ellps='WGS84')
         geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
 
         # PyProj gives distance in metres
-        distance = geo_tup[2] * conversion_value
+        distance_uom = kwargs.get('distance_uom', 'M')
+        distance = geo_tup[2] * radius_dict[distance_uom]
 
         return distance
 
@@ -279,7 +277,8 @@ class PointFactory(ILocationFactory):
         for i in self.coordinate_list:
             # Check if a curved segment
             if is_curved_segment(i):
-                curved_segment_points = CurvedSegmentFactory(i, z_override=self.z_override).generate_segment()
+                curved_segment_points = CurvedSegmentFactory(i, z_override=self.z_override, uom=self.uom).\
+                    generate_segment()
                 point_list += curved_segment_points
             else:
                 coordinate_type = detect_coordinate_type(i)
@@ -341,6 +340,7 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
     def __init__(self, coordinate_string: str, **kwargs: str):
         self.coordinate_string = coordinate_string
         self.z_override = kwargs.get('z_override', None)
+        self.uom = kwargs.get('uom', 'FT')
 
     def process_segment(self) -> ICurvedSegment:
         """
@@ -373,31 +373,31 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
         Returns:
             point_list (list[ILocation])
         """
-        if string_dict.get('midpoint') is not None:
+        if string_dict.get('centre') is not None:
             point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}",
-                                       f"{string_dict.get('midpoint')}"], z=self.z_override).process_coordinates()
+                                       f"{string_dict.get('centre')}"], z=self.z_override).process_coordinates()
         else:
             point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}"],
                                       z=self.z_override).process_coordinates()
         return point_list
 
     def create_clockwise_segment(self, point_list: list, string_dict: dict) -> ICurvedSegment:
-        if string_dict.get('midpoint') is not None:
-            segment = ClockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
+        if string_dict.get('centre') is not None:
+            segment = ClockwiseCurvedSegment(point_list[0], point_list[1], self.uom, centre=point_list[2],
                                              sample=string_dict.get('sample', 100),
                                              z=self.z_override)
         else:
-            segment = ClockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100),
-                                             z=self.z_override)
+            segment = ClockwiseCurvedSegment(point_list[0], point_list[1], self.uom,
+                                             sample=string_dict.get('sample', 100), z=self.z_override)
         return segment
 
     def create_anticlockwise_segment(self, point_list: list, string_dict: dict) -> ICurvedSegment:
-        if string_dict.get('midpoint') is not None:
-            segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
+        if string_dict.get('centre') is not None:
+            segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], self.uom, centre=point_list[2],
                                                  sample=string_dict.get('sample', 100), z=self.z_override)
         else:
-            segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100),
-                                                 z=self.z_override)
+            segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], self.uom,
+                                                 sample=string_dict.get('sample', 100), z=self.z_override)
         return segment
 
     def generate_segment(self) -> list:
@@ -412,11 +412,12 @@ class ClockwiseCurvedSegment(ICurvedSegment):
     A class for creating curved segments in a clockwise direction.
     """
 
-    def __init__(self, start: ILocation, end: ILocation, **kwargs):
+    def __init__(self, start: ILocation, end: ILocation, uom: str, **kwargs):
         self.z = kwargs.get('z', None)
+        self.uom = uom
         self.start = start
         self.end = end
-        self.midpoint = kwargs.get('midpoint', self.find_midpoint())
+        self.centre = kwargs.get('centre', self.find_midpoint())
         self.sample = kwargs.get('sample', 100)
         self.start_bearing = self.find_start_bearing()
         self.end_bearing = self.find_end_bearing()
@@ -444,17 +445,17 @@ class ClockwiseCurvedSegment(ICurvedSegment):
             raise TypeError('CurvedSegment will only accept either Point or str for its start.')
 
     @property
-    def midpoint(self) -> ILocation:
+    def centre(self) -> ILocation:
         """
-        The midpoint between the start and end ILocations
+        The centre between the start and end ILocations
 
         Returns:
-            midpoint (ILocation)
+            centre (ILocation)
         """
         return self._midpoint
 
-    @midpoint.setter
-    def midpoint(self, value: ILocation):
+    @centre.setter
+    def centre(self, value: ILocation):
         if isinstance(value, ILocation):
             self._midpoint = value
         else:
@@ -480,8 +481,13 @@ class ClockwiseCurvedSegment(ICurvedSegment):
                 print('Sample can only be an int or castable string')
 
     def find_midpoint(self) -> ILocation:
-        p = Point.find_midpoint(self.start, self.end)
-        return p
+        """
+        Finds the centre between the start and end of the segment.
+        Returns:
+            centre (ILocation): The centre.
+        """
+        midpoint = Point.find_midpoint(self.start, self.end)
+        return midpoint
 
     def find_start_bearing(self) -> float:
         """
@@ -490,7 +496,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         Returns:
             bearing (float): A bearing in degrees.
         """
-        bearing = self.midpoint.get_bearing(self.start)
+        bearing = self.centre.get_bearing(self.start)
         return bearing
 
     def find_end_bearing(self) -> float:
@@ -500,7 +506,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         Returns:
             bearing (float): A bearing in degrees.
         """
-        bearing = self.midpoint.get_bearing(self.end)
+        bearing = self.centre.get_bearing(self.end)
         return bearing
 
     def get_points(self) -> list:
@@ -518,7 +524,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
             height_inc = 0
 
         start_bearing = self.start_bearing
-        distance = self.midpoint.get_distance(self.start)
+        distance = self.centre.get_distance(self.start)
 
         point_list = []
 
@@ -526,7 +532,8 @@ class ClockwiseCurvedSegment(ICurvedSegment):
             if self.z is None:
                 self.z = self.start.z
 
-            arc_point = Point.from_point_bearing_and_distance(self.midpoint, start_bearing, distance, z=self.z)
+            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, uom=self.uom,
+                                                              z=self.z)
             point_list.append(arc_point)
             start_bearing += bearing_inc
             self.z += height_inc
@@ -569,11 +576,12 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
     Creates an AnticlockwiseCurvedSegment. For documentation, see ClockwiseCurvedSegment.
     """
 
-    def __init__(self, start: ILocation, end: ILocation, **kwargs):
+    def __init__(self, start: ILocation, end: ILocation, uom: str, **kwargs):
+        self.uom = uom
         self.start = start
         self.end = end
         self.z = kwargs.pop('z', None)
-        self.midpoint = kwargs.pop('midpoint', self.find_midpoint())
+        self.centre = kwargs.pop('centre', self.find_midpoint())
         self.sample = kwargs.pop('sample', 100)
         self.start_bearing = self.find_start_bearing()
         self.end_bearing = self.find_end_bearing()
@@ -601,11 +609,11 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
             raise TypeError('CurvedSegment will only accept either Point or str for its start.')
 
     @property
-    def midpoint(self) -> ILocation:
+    def centre(self) -> ILocation:
         return self._midpoint
 
-    @midpoint.setter
-    def midpoint(self, value: ILocation):
+    @centre.setter
+    def centre(self, value: ILocation):
         if isinstance(value, Point):
             self._midpoint = value
         else:
@@ -626,15 +634,15 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
                 print('Sample can only be an int or castable string')
 
     def find_midpoint(self) -> ILocation:
-        p = Point.find_midpoint(self.start, self.end)
-        return p
+        midpoint = Point.find_midpoint(self.start, self.end)
+        return midpoint
 
     def find_start_bearing(self) -> float:
-        bearing = self.midpoint.get_bearing(self.start)
+        bearing = self.centre.get_bearing(self.start)
         return bearing
 
     def find_end_bearing(self) -> float:
-        bearing = self.midpoint.get_bearing(self.end)
+        bearing = self.centre.get_bearing(self.end)
         return bearing
 
     def get_points(self) -> list:
@@ -645,8 +653,8 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
         else:
             height_inc = 0
 
-        start_bearing = self.midpoint.get_bearing(self.start)
-        distance = self.midpoint.get_distance(self.start)
+        start_bearing = self.centre.get_bearing(self.start)
+        distance = self.centre.get_distance(self.start)
 
         point_list = []
 
@@ -654,7 +662,8 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
             if self.z is None:
                 self.z = self.start.z
 
-            arc_point = Point.from_point_bearing_and_distance(self.midpoint, start_bearing, distance, z=self.z)
+            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z,
+                                                              uom=self.uom)
             point_list.append(arc_point)
             start_bearing -= bearing_inc
             self.z += height_inc

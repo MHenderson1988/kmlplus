@@ -18,13 +18,13 @@ class Circle(ICircle, I2DObject):
         uom (str): Unit of measure for elevation. Accepts and defaults to feet ('FT') and metres ('M')
     """
 
-    def __init__(self, centre: list, radius: float, **kwargs: Union[str, float, int]):
-        self.radius_uom = kwargs.get('radius_uom', 'M')
-        self.uom = kwargs.get('uom', 'FT')
-        self.z = kwargs.get('z', 0)
-        self.sample = kwargs.get('sample', 100)
+    def __init__(self, centre: list, radius: float, **kwargs):
+        self.radius_uom: str = kwargs.get('radius_uom', 'M')
+        self.uom: str = kwargs.get('uom', 'FT')
+        self.z: float = kwargs.get('z', None)
+        self.sample: int = kwargs.get('sample', 100)
         self.centre: ILocation = self.plot_centre(centre)
-        self._radius = radius
+        self.radius: float = radius
         self.point_list: list[ILocation] = self.process_points()
 
     def __eq__(self, another_circle: ICircle) -> bool:
@@ -63,10 +63,13 @@ class Circle(ICircle, I2DObject):
 
     @z.setter
     def z(self, value):
-        if isinstance(value, float):
-            self._z = value
+        if not value:
+            self._z = None
+        elif isinstance(value, float):
+            conversion_dict = {'FT': 0.3048, 'M': 1}
+            self._z = value * conversion_dict[self.uom]
         else:
-            self._z = float(value)
+            self.z = float(value)
 
     @property
     def sample(self) -> int:
@@ -318,11 +321,11 @@ class Cylinder(I3DObject, ICylinder):
             side_coordinates = []
             i = 0
             while i < len(self.lower_layer) - 1:
-                polygon_coordinate_list = [self.lower_layer[i].__str__(), self.lower_layer[i + 1].__str__(),
+                polygon_coordinate_list = [self.lower_layer.point_list[i].__str__(), self.lower_layer[i + 1].__str__(),
                                            self.upper_layer[i + 1].__str__(), self.upper_layer[i].__str__(),
                                            self.lower_layer[i].__str__()]
 
-                side_coordinates.append(Polygon(polygon_coordinate_list))
+                side_coordinates.append(Polygon(polygon_coordinate_list, uom=self.uom))
 
                 i += 1
 
@@ -334,19 +337,18 @@ class Polygon(IPolygon, I2DObject):
     Creates a polygon made of 2 or more vertices
 
     Args:
-        point_list (list[str]): A list of strings representing coordinates of vertices.
+        coordinate_list (list[str]): A list of strings representing coordinates of vertices.
 
     Keyword Args:
         uom (str): Unit of measure for elevation, FT or M
         z (float): Override all string elevation values with a single blanket value.
     """
 
-    def __init__(self, point_list: list, **kwargs: str):
+    def __init__(self, coordinate_list: list, **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
         self.z = kwargs.get('z', None)
-        self.point_list = self.process_points(point_list, uom=self.uom)
+        self.point_list = self.process_points(coordinate_list)
         self.centroid = self.calculate_centroid()
-        self.sorted_point_list = self.point_list
 
     def __len__(self) -> int:
         return len(self.point_list)
@@ -384,7 +386,8 @@ class Polygon(IPolygon, I2DObject):
         if not value:
             self._z = None
         elif isinstance(value, float):
-            self._z = value
+            conversion_dict = {'FT': 0.3048, 'M': 1}
+            self._z = value * conversion_dict[self.uom]
         else:
             self.z = float(value)
 
@@ -402,19 +405,6 @@ class Polygon(IPolygon, I2DObject):
             self._point_list = a_point_list
         else:
             raise ValueError('Cannot process_points a polygon from less than 2 points')
-
-    @property
-    def sorted_point_list(self):
-        return self._sorted_point_list
-
-    @sorted_point_list.setter
-    def sorted_point_list(self, unsorted_point_list):
-        for point in unsorted_point_list:
-            bearing = self.calculate_bearing_from_centroid(point)
-            setattr(point, 'bearing_from_centroid', bearing)
-
-        sorted_list = sorted(unsorted_point_list, reverse=True, key=lambda x: x.bearing_from_centroid)
-        self._sorted_point_list = sorted_list
 
     def calculate_centroid(self) -> ILocation:
         """
@@ -568,7 +558,9 @@ class Polyhedron(I3DObject):
                                            self.upper_layer[i + 1].__str__(), self.upper_layer[i].__str__(),
                                            self.lower_layer[i].__str__()]
 
-                side_coordinates.append(Polygon(polygon_coordinate_list))
+                side_polygon = Polygon(polygon_coordinate_list, uom=self.uom)
+
+                side_coordinates.append(side_polygon)
 
                 i += 1
 
@@ -614,6 +606,6 @@ class LineString(I2DObject):
         else:
             raise TypeError('Polygon will only accept objects of type kmlplus.geo.Point')
 
-    def create(self, coordinate_list):
+    def create(self, coordinate_list: list[str]) -> list[ILocation]:
         point_list = PointFactory(coordinate_list, uom=self.uom).process_coordinates()
         return point_list

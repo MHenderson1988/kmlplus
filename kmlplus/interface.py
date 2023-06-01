@@ -65,7 +65,7 @@ class ICurvedSegment(ABC):
 
     @property
     @abstractmethod
-    def midpoint(self):
+    def centre(self):
         pass
 
     @property
@@ -146,11 +146,6 @@ class IPolygon(ABC):
     @property
     @abstractmethod
     def point_list(self):
-        pass
-
-    @property
-    @abstractmethod
-    def sorted_point_list(self):
         pass
 
 
