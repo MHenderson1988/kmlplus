@@ -224,6 +224,13 @@ class PointFactory(ILocationFactory):
     """
     A class which interprets how to handle the coordinate strings provided. It deduces between DMS/DD and straight
     or curved lines.
+
+    Args:
+        coordinate_list (list): A list of strings containing coordinates in DMS or DD
+
+    Keyword Args:
+        z_override: A value with which to override all z values given in the string
+        uom (str): Unit of measure for height. Accepts 'FT' or 'M'.
     """
 
     def __init__(self, coordinate_list: list, **kwargs):
@@ -232,21 +239,33 @@ class PointFactory(ILocationFactory):
         self.coordinate_list = coordinate_list
 
     @property
-    def coordinate_list(self) -> list:
+    def coordinate_list(self) -> list[str]:
         return self._coordinate_list
 
     @coordinate_list.setter
-    def coordinate_list(self, coordinate_list: list) -> None:
+    def coordinate_list(self, coordinate_list: list[str]) -> None:
         if isinstance(coordinate_list, list):
             self._coordinate_list = coordinate_list
         else:
             self._coordinate_list = [coordinate_list]
 
-    def process_coordinates(self) -> list:
+    def process_coordinates(self) -> list[ILocation]:
+        """
+        Processes coordinate list passed to the factory
+
+        Returns:
+            point_list (list[ILocation]): A list of ILocation objects
+        """
         point_list = self.populate_point_list()
         return point_list
 
-    def populate_point_list(self) -> list:
+    def populate_point_list(self) -> list[ILocation]:
+        """
+        Deduces whether the string represents a single point or a curved segment.
+
+        Returns:
+            point_list (list[ILocation])
+        """
 
         def is_curved_segment(coordinate_string: str) -> bool:
             if 'start=' in coordinate_string:
@@ -271,30 +290,50 @@ class PointFactory(ILocationFactory):
         return point_list
 
     def process_string(self, coordinate_string: str, coordinate_type: str) -> ILocation:
+        """
+        Processes a single coordinate string as a single ILocation, ie - not a curved segment.
+        Args:
+            coordinate_string (str): A coordinate string in DD or DMS
+            coordinate_type (str): DD or DMS
+
+        Returns:
+            point (ILocation): An ILocation object
+        """
         type_dict = {'dd': 'from_decimal_degrees', 'dms': 'from_dms'}
 
         split = coordinate_string.split(' ')
         if len(split) == 2:
             func = getattr(Point, type_dict[coordinate_type])
             if self.z_override is not None:
-                return func(split[0], split[1], z=self.z_override)
+                point = func(split[0], split[1], z=self.z_override)
             else:
-                return func(split[0], split[1])
+                point = func(split[0], split[1])
 
         elif len(split) == 3:
             func = getattr(Point, type_dict[coordinate_type])
             if self.z_override is not None:
-                return func(split[0], split[1], z=self.z_override)
+                point = func(split[0], split[1], z=self.z_override)
             else:
-                return func(split[0], split[1], z=split[2], uom=self.uom)
+                if split[2]:
+                    point = func(split[0], split[1], z=split[2], uom=self.uom)
+                else:
+                    point = func(split[0], split[1], z=0.0, uom=self.uom)
         else:
             raise IndexError('Coordinate strings should contain latitude and longitude or latitude, longitude'
                              'and height only.')
+
+        return point
 
 
 class CurvedSegmentFactory(ICurvedSegmentFactory):
     """
     A factory for creating clockwise and anticlockwise curved segments.
+
+    Args:
+        coordinate_string (str): A string representing the curved segment
+
+    Keyword Args:
+        z_override (float|None): Overrides all z values passed within the string.
     """
 
     def __init__(self, coordinate_string: str, **kwargs: str):
@@ -302,6 +341,12 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
         self.z_override = kwargs.get('z_override', None)
 
     def process_segment(self) -> ICurvedSegment:
+        """
+        Populates all ILocation values within the segment string.
+
+        Returns:
+            segment (ICurvedSegment)
+        """
         string_dict = split_segment_string(self.coordinate_string)
         direction = string_dict.setdefault('direction', 'clockwise')
 
@@ -317,7 +362,15 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
 
         return segment
 
-    def construct_point_list(self, string_dict: dict) -> list:
+    def construct_point_list(self, string_dict: dict) -> list[ILocation]:
+        """
+        Creates each individual ILocation object in the segment.
+        Args:
+            string_dict (dict): A dict containing start, end and other optional data for the curved segment.
+
+        Returns:
+            point_list (list[ILocation])
+        """
         if string_dict.get('midpoint') is not None:
             point_list = PointFactory([f"{string_dict['start']}", f"{string_dict['end']}",
                                        f"{string_dict.get('midpoint')}"], z=self.z_override).process_coordinates()
@@ -390,6 +443,12 @@ class ClockwiseCurvedSegment(ICurvedSegment):
 
     @property
     def midpoint(self) -> ILocation:
+        """
+        The midpoint between the start and end ILocations
+
+        Returns:
+            midpoint (ILocation)
+        """
         return self._midpoint
 
     @midpoint.setter
@@ -401,6 +460,11 @@ class ClockwiseCurvedSegment(ICurvedSegment):
 
     @property
     def sample(self) -> int:
+        """
+        How many points to sample between the start and end points.
+        Returns:
+            sample (int)
+        """
         return self._sample
 
     @sample.setter
@@ -418,14 +482,32 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         return p
 
     def find_start_bearing(self) -> float:
+        """
+        Finds the start bearing of the segment
+
+        Returns:
+            bearing (float): A bearing in degrees.
+        """
         bearing = self.midpoint.get_bearing(self.start)
         return bearing
 
     def find_end_bearing(self) -> float:
+        """
+        As above, except the end bearing
+
+        Returns:
+            bearing (float): A bearing in degrees.
+        """
         bearing = self.midpoint.get_bearing(self.end)
         return bearing
 
     def get_points(self) -> list:
+        """
+        Creates the individual points of the segment
+        Returns:
+            point_list (list[ILocation])
+
+        """
         # How many plots to point on the arc, default 100.
         bearing_inc = self.get_bearing_increment()
         if self.z is None:
@@ -452,6 +534,12 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         return point_list
 
     def get_bearing_increment(self) -> float:
+        """
+        Calculates how much to increment the bearing value by, depending on the sample size.
+        Returns:
+            incremental_value (float)
+
+        """
         difference = (self.end_bearing - self.start_bearing) % 360
         # number points + 1 so it plots points between start and end points
         incremental_value = difference / (self.sample + 1)
@@ -459,6 +547,13 @@ class ClockwiseCurvedSegment(ICurvedSegment):
         return incremental_value
 
     def get_height_increment(self) -> float:
+        """
+        If start and end height are different, calculates how much to increment for each point to give a smooth
+        transition.
+
+        Returns:
+            difference (float)
+        """
         if self.start.z > self.end.z:
             difference = -abs(self.start.z - self.end.z) / self.sample
             return difference
@@ -468,6 +563,9 @@ class ClockwiseCurvedSegment(ICurvedSegment):
 
 
 class AnticlockwiseCurvedSegment(ICurvedSegment):
+    """
+    Creates an AnticlockwiseCurvedSegment. For documentation, see ClockwiseCurvedSegment.
+    """
     def __init__(self, start: ILocation, end: ILocation, **kwargs):
         self.start = start
         self.end = end

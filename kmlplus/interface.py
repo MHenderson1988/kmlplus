@@ -148,6 +148,11 @@ class IPolygon(ABC):
     def point_list(self):
         pass
 
+    @property
+    @abstractmethod
+    def sorted_point_list(self):
+        pass
+
 
 class I3DObject(ABC):
     @property

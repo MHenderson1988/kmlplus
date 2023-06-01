@@ -5,16 +5,26 @@ from kmlplus.interface import ICircle, ILocation, I3DObject, IPolygon, ICylinder
 
 
 class Circle(ICircle, I2DObject):
-    def __init__(self, centre: str, radius, **kwargs):
+    """
+    Plots the coordinates for a 2D circular object.
+
+    Args:
+        centre (str): A string representing the central coordinate (focus) of the circle.
+        radius (float): The radius of the circle to be draw
+
+    Keyword Args:
+        radius_uom (str): Unit of measure for the radius. Accepts and defaults to metres ('M'), statute miles ('MI'),
+         kilometres ('KM') and nautical miles ('NM')
+        uom (str): Unit of measure for elevation. Accepts and defaults to feet ('FT') and metres ('M')
+    """
+    def __init__(self, centre: list, radius: float, **kwargs: Union[str, float, int]):
         self.radius_uom = kwargs.get('radius_uom', 'M')
         self.uom = kwargs.get('uom', 'FT')
         self.z = kwargs.get('z', 0)
         self.sample = kwargs.get('sample', 100)
-        self.centre = self.plot_centre(
-            centre
-        )
+        self.centre: ILocation = self.plot_centre(centre)
         self._radius = radius
-        self.point_list = self.process_points()
+        self.point_list: list[ILocation] = self.process_points()
 
     def __eq__(self, another_circle: ICircle) -> bool:
         if self.centre and self.radius == another_circle.centre and another_circle.radius:
@@ -98,6 +108,12 @@ class Circle(ICircle, I2DObject):
                 'Radius must be greater than 0 and of type float or other type which can be cast to float.')
 
     def plot_centre(self, central_location: list) -> ILocation:
+        """
+        Takes the list passed at construction and creates an ILocation object to represent it
+
+        Args:
+            central_location (list): List with a single string representing x, y, z coordinate
+        """
         coordinates = PointFactory(central_location, uom=self.uom).process_coordinates()[0]
         return coordinates
 
@@ -302,7 +318,7 @@ class Polygon(IPolygon, I2DObject):
     @z.setter
     def z(self, value):
         if not value:
-            self._z = 0.0
+            self._z = None
         elif isinstance(value, float):
             self._z = value
         else:
@@ -329,8 +345,12 @@ class Polygon(IPolygon, I2DObject):
 
     @sorted_point_list.setter
     def sorted_point_list(self, unsorted_point_list):
-        self._sorted_point_list = unsorted_point_list.sort(reverse=True,
-                                                           key=lambda x: self.calculate_bearing_from_centroid(x))
+        for point in unsorted_point_list:
+            bearing = self.calculate_bearing_from_centroid(point)
+            setattr(point, 'bearing_from_centroid', bearing)
+
+        sorted_list = sorted(unsorted_point_list, reverse=True, key=lambda x: x.bearing_from_centroid)
+        self._sorted_point_list = sorted_list
 
     def calculate_centroid(self) -> ILocation:
         latitude_total, longitude_total = 0, 0
@@ -344,7 +364,7 @@ class Polygon(IPolygon, I2DObject):
 
     def calculate_bearing_from_centroid(self, point: ILocation) -> ILocation:
         bearing = point.get_bearing(self.centroid)
-        return point
+        return bearing
 
     def process_points(self, point_list: list[ILocation], **kwargs: str) -> list[ILocation]:
         points = PointFactory(
@@ -380,7 +400,7 @@ class Polyhedron(I3DObject):
 
     @upper_layer.setter
     def upper_layer(self, a_polygon):
-        self._upper_layer = a_polygon.sort(reverse=True, key=lambda x: a_polygon.calculate_bearing_from_centroid(x))
+        self._upper_layer = a_polygon
 
     @property
     def sides(self):
