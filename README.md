@@ -1,11 +1,8 @@
 KML+
 ===
 
-KMLPLUS IS CURRENTLY BEING UPDATED. UNTIL NEW VERSION IS RELEASED PLEASE CONTINUE TO USE V2.1.0 
-https://pypi.org/project/KMLPlus
-
-KML+ (KMLPlus) is library of code for Python which allows the user to easily create standard and 'floating' Polygons,
-Circles and Arcs.
+KML+ (KMLPlus) is library of code for Python which allows the user to easily process_points standard and 'floating'
+Polygons, Circles and Arcs.
 
 ---
 
@@ -22,7 +19,7 @@ Table of Contents
         - [Methods](#coordinate-methods)
     - [LinePath](#linepath)
         - [Creating a polygon using the LinePath class](#creating-a-polygon-using-the-linepath-class)
-        - [Automatically create LinePath objects without Coordinate objects](#automatically-create-linepath-objects-without-coordinate-objects)
+        - [Automatically process_points LinePath objects without Coordinate objects](#automatically-create-linepath-objects-without-coordinate-objects)
         - [Methods](#linepath-methods)
     - [ArcPath](#arcpath)
         - [Methods](#arcpath-methods)
@@ -35,8 +32,8 @@ Who is this for
 
 This is for anyone who wishes to easily render polygons, especially 'floating' or curved polygons within Google Earth.
 
-I work in the aviation industry and needed a reliable way to create models of our airspace. It its useful for creating
-models of airways and controlled airspace. It can be used for anything that takes your fancy!
+I work in the aviation industry and needed a reliable way to process_points models of our airspace. It its useful for
+creating models of airways and controlled airspace. It can be used for anything that takes your fancy!
 
 ![Prestwick airspace example](img/egpk_airspace_sideon.png)
 
@@ -82,7 +79,7 @@ recommend using it in conjunction with KML+ for the best experience.
 #### Coordinates
 
 Coordinates should always be passed as a single or multiple strings within a list in x, y, z(optional) format. Both
-Degrees Minutes Seconds (DDMMSS.ss) and Decimal Degres (DD.dd) are accepted.  DMS should be suffixed with N, W, S or E.
+Degrees Minutes Seconds (DDMMSS.ss) and Decimal Degres (DD.dd) are accepted. DMS should be suffixed with N, W, S or E.
 Decimal degrees are suffixed using -/+ convention.
 
 While a coordinate string must be passed using the same type of coordinate, lists can contain a mixture of DMS and DD
@@ -90,7 +87,7 @@ coordinates and will convert appropriately.
 
 If no z value is provided, defaults to 0.0.
 
-Example
+Example 
 
 ```
 [
@@ -101,13 +98,14 @@ Example
 ]
 ```
 
-#### Arcs
+#### Coordinates containing Arcs
 
-When creating a curved segment of a polygon, the string should be passed as follows - 
+When creating a curved segment of a polygon, the string should be passed as follows -
 
-'start=[starting_coordinate], end=[ending_coordinate], centre=[centre_coordinate], direction=[clockwise/anticlockwise]'
+'start=[starting_coordinate], end=[ending_coordinate], centre=[centre_coordinate],
+direction=[clockwise/anticlockwise]'
 
-Example  - 
+Example -
 
 ```
 [
@@ -130,8 +128,8 @@ To do
 
 ### Classes and functions
 
-v3.0 has stripped back to one single class which contains functions to create points, circles, cylinders, polygons,
-polyhedrons and linestrings.
+v3.0 has stripped back to one single class which contains functions to process_points points, circles, cylinders,
+polygons, polyhedrons and linestrings.
 
 #### KmlPlus (Class)
 
@@ -140,18 +138,17 @@ from kmlplus.kml import KmlPlus
 
 KmlPlus(self, save_name='KmlPlus', output_path=None)
 ```
-KmlPlus is the class through which you create your 2D and 3D geometries. 
+
+KmlPlus is the class through which you process_points your 2D and 3D geometries.
 
 * save_name accepts a string and is used for naming the resulting .kml file.
 * output_path accepts a string representing the directory the resulting .kml shall be saved to.
 
 #### KmlPlus (functions)
 
-v3 update in progress.
-
 linestring(coordinate_list, **kwargs)
 
-The linestring function updates the kml file with a KML linestring feature.  
+The linestring function updates the kml file with a KML linestring feature.
 
 ```
 from kmlplus.kml import KmlPlus
@@ -209,7 +206,7 @@ kml_file.polyhedron(coordinates_list, lower_layer = 2000, upper_layer = 5000)
 
 circle(coordinate_list, radius, **kwargs)
 
-Creates a 2D circle. Coordinate list contains a single set of coordinates in x, y, z format. 
+Creates a 2D circle. Coordinate list contains a single set of coordinates in x, y, z format.
 
 ```
 """
@@ -267,9 +264,11 @@ kml_file = KmlPlus('Point Styling.kml')
 kml_file.cylinder(coordinates_list, 500, lower_layer=50, upper_layer=500)   
 
 ```
+
 point(coordinate_list, **kwargs)
 
 Creates a single point from a single set of coordinates stored in a list in x, y, z format.
+
 ```
 
 """
@@ -304,9 +303,10 @@ Creates a single point from a single set of coordinates stored in a list in x, y
 kml_file = KmlPlus('Point Styling.kml')
 kml_file.point(coordinates_list)   
 ```
+
 ## Acknowledgements
 
-- [Simplekml](https://pypi.org/project/simplekml/) - for creating an awesome library which has helped me create many
-  things and also inspiring me to write this library.`
+- [Simplekml](https://pypi.org/project/simplekml/) - for creating an awesome library which has helped me process_points
+  many things and also inspiring me to write this library.`
 
 

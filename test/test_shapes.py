@@ -52,7 +52,7 @@ class TestPolygon(TestCase):
         result_no_height = Polygon(test_coordinates_no_height)
 
         self.assertTrue(isinstance(result_no_height, Polygon))
-        self.assertEqual(len(result_no_height), 3)
+        self.assertEqual(len(result_no_height), 4)
         for i in result_no_height:
             self.assertEqual(i.z, 0)
             self.assertTrue(isinstance(i, Point))
@@ -61,16 +61,16 @@ class TestPolygon(TestCase):
         result_with_height = Polygon(test_coordinates_with_height)
 
         self.assertTrue(isinstance(result_with_height, Polygon))
-        self.assertEqual(len(result_with_height), 3)
+        self.assertEqual(len(result_with_height), 4)
         for i in result_with_height:
             self.assertTrue(isinstance(i, Point))
-            self.assertNotEqual(i.z, 0)
+            self.assertNotEqual(i.z, 0.0)
 
         # Test results for coordinates with height overridden.
         result_with_height_override = Polygon(test_coordinates_with_height_override, z=500.11)
 
         self.assertTrue(isinstance(result_with_height_override, Polygon))
-        self.assertEqual(len(result_with_height_override), 3)
+        self.assertEqual(len(result_with_height_override), 4)
         for i in result_with_height_override:
             self.assertTrue(isinstance(i, Point))
             self.assertEqual(152.43352800000002, i.z)
@@ -78,7 +78,7 @@ class TestPolygon(TestCase):
         # Test with DMS
         result_dms_no_height = Polygon(test_dms)
         self.assertTrue(isinstance(result_dms_no_height, Polygon))
-        self.assertEqual(3, len(result_dms_no_height))
+        self.assertEqual(4, len(result_dms_no_height))
         for i in result_dms_no_height:
             self.assertTrue(isinstance(i, Point))
             self.assertEqual(0, i.z)
@@ -107,7 +107,7 @@ class TestThreeDimensionShape(TestCase):
         poly = Polyhedron(test_list, test_list, upper_layer=100)
         self.assertTrue(isinstance(poly, Polyhedron))
         self.assertTrue(isinstance(poly.sides, list))
-        self.assertEqual(3, len(poly.sides))
+        self.assertEqual(4, len(poly.sides))
 
     def test_to_kml(self):
         test_list = ['22.323232 -4.287282 20', '23.323232 -5.328723', '22.112333 -6.23789238923']

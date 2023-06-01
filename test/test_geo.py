@@ -19,12 +19,12 @@ class TestPoint(TestCase):
         test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, distance_uom='M')
         self.assertEqual(test_obj.y, 50.20166666666667)
         self.assertEqual(test_obj.x, -4.868398333333333)
-        self.assertAlmostEqual(test_obj.z, 116.738, delta=5)
+        self.assertAlmostEqual(test_obj.z, 116.73840000000001, delta=5)
 
-        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, uom='M',  distance_uom='M')
+        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, uom='M', distance_uom='M')
         self.assertEqual(test_obj.y, 50.20166666666667)
         self.assertEqual(test_obj.x, -4.868398333333333)
-        self.assertEqual(test_obj.z, 383)
+        self.assertEqual(test_obj.z, 383.0)
 
     def test_find_midpoint(self):
         mp = Point.find_midpoint(self.test_point_1, self.test_point_2)
