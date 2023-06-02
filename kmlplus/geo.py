@@ -1,4 +1,5 @@
 from typing import Union
+
 from pyproj import Geod
 
 from kmlplus.interface import ILocation, ILocationFactory, ICurvedSegmentFactory, ICurvedSegment

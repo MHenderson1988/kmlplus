@@ -304,7 +304,7 @@ class Cylinder(I3DObject, ICylinder):
             circle = Circle(coordinate_list[0], coordinate_list[1], uom=self.uom, radius_uom=self.radius_uom)
         return circle
 
-    def generate_sides(self) -> list[IPolygon]:
+    def generate_sides(self) -> list[ICircle]:
         """
         Creates the sides of the cylinder. Requires both layers to contain the same amount of points.
 

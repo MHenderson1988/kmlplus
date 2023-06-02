@@ -2,7 +2,6 @@ from unittest import TestCase
 
 from kmlplus import util
 from kmlplus.geo import Point, PointFactory, ClockwiseCurvedSegment, AnticlockwiseCurvedSegment, CurvedSegmentFactory
-from interface import ILocation, ILocationFactory
 
 
 class TestPoint(TestCase):
