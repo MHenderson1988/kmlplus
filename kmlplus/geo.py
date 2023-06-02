@@ -277,20 +277,23 @@ class PointFactory(ILocationFactory):
         for i in self.coordinate_list:
             # Check if a curved segment
             if is_curved_segment(i):
-                curved_segment_points = CurvedSegmentFactory(i, z_override=self.z_override, uom=self.uom).\
-                    generate_segment()
-                point_list += curved_segment_points
+                point_list += self.create_curved_segment(i)
             else:
-                coordinate_type = detect_coordinate_type(i)
-                if coordinate_type == 'dd' or coordinate_type == 'dms':
-                    point_obj = self.process_string(i, coordinate_type)
-                    point_list.append(point_obj)
-                else:
-                    raise TypeError('Coordinates must be DMS, decimal degrees or UTM')
+                point_list.append(self.create_new_point(i))
 
         return point_list
 
-    def process_string(self, coordinate_string: str, coordinate_type: str) -> ILocation:
+    def create_curved_segment(self, i: str) -> list[ILocation]:
+        curved_segment_points = CurvedSegmentFactory(i, z_override=self.z_override, uom=self.uom). \
+            generate_segment()
+
+        return curved_segment_points
+
+    def create_new_point(self, i: str) -> ILocation:
+        point_obj = self.process_string(i)
+        return point_obj
+
+    def process_string(self, coordinate_string: str) -> ILocation:
         """
         Processes a single coordinate string as a single ILocation, ie - not a curved segment.
         Args:
@@ -300,29 +303,60 @@ class PointFactory(ILocationFactory):
         Returns:
             point (ILocation): An ILocation object
         """
+        coordinate_type = detect_coordinate_type(coordinate_string)
         type_dict = {'dd': 'from_decimal_degrees', 'dms': 'from_dms'}
-
         split = coordinate_string.split(' ')
-        if len(split) == 2:
-            func = getattr(Point, type_dict[coordinate_type])
-            if self.z_override is not None:
-                point = func(split[0], split[1], z=self.z_override)
-            else:
-                point = func(split[0], split[1])
 
-        elif len(split) == 3:
-            func = getattr(Point, type_dict[coordinate_type])
-            if self.z_override is not None:
-                point = func(split[0], split[1], z=self.z_override)
+        if coordinate_type == 'dd' or coordinate_type == 'dms':
+            if len(split) == 2:
+                point = self.process_x_y(split, type_dict, coordinate_type)
+            elif len(split) == 3:
+                point = self.process_x_y_z(split, type_dict, coordinate_type)
             else:
-                if split[2]:
-                    point = func(split[0], split[1], z=split[2], uom=self.uom)
-                else:
-                    point = func(split[0], split[1], z=0.0, uom=self.uom)
+                raise IndexError('Coordinate strings should contain latitude and longitude or latitude, longitude'
+                                 'and height only.')
         else:
-            raise IndexError('Coordinate strings should contain latitude and longitude or latitude, longitude'
-                             'and height only.')
+            raise ValueError('Coordinates must be Decimal Degrees (DD.ddddd) or Degrees Minutes Seconds (DDMMSS.dd).')
 
+        return point
+
+    def process_x_y(self, split: list[str], type_dict: dict[str], coordinate_type: str) -> ILocation:
+        """
+        Processes coordinate strings which only supply latitude and longitude values.
+        Args:
+            split (list[str]): A list containing the split coordinate string
+            type_dict (dict[str]): Dict containing k, v pairs of coordinate type and their functions.
+            coordinate_type (str): Whether the coordinate is DD or DMS
+
+        Returns:
+            point (ILocation): An ILocation object created from the string.
+        """
+        func = getattr(Point, type_dict[coordinate_type])
+        if self.z_override is not None:
+            point = func(split[0], split[1], z=self.z_override)
+        else:
+            point = func(split[0], split[1])
+        return point
+
+    def process_x_y_z(self, split: list[str], type_dict: dict[str], coordinate_type: str) -> ILocation:
+        """
+        Processes coordinate strings which supply latitude, longitude and elevation values.
+        Args:
+            split (list[str]): A list containing the split coordinate string
+            type_dict (dict[str]): Dict containing k, v pairs of coordinate type and their functions.
+            coordinate_type (str): Whether the coordinate is DD or DMS
+
+        Returns:
+            point (ILocation): An ILocation object created from the string.
+        """
+        func = getattr(Point, type_dict[coordinate_type])
+        if self.z_override is not None:
+            point = func(split[0], split[1], z=self.z_override)
+        else:
+            if split[2]:
+                point = func(split[0], split[1], z=split[2], uom=self.uom)
+            else:
+                point = func(split[0], split[1], z=0.0, uom=self.uom)
         return point
 
 
