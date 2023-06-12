@@ -113,13 +113,18 @@ class KmlPlus:
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Polyhedron'))
 
+        if kwargs.get('altitude_mode') == 'relativetoground':
+            altitude_mode = simplekml.AltitudeMode.relativetoground
+        else:
+            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
+
         lower_pol = fol.newpolygon(name=kwargs.get('lower_polygon_name', 'Lower Polygon'))
         lower_pol.outerboundaryis = lower
         lower_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
         lower_pol.polystyle.fill = kwargs.get('fill', 1)
         lower_pol.style.polystyle.outline = kwargs.get('outline', 1)
         lower_pol.extrude = kwargs.get('extrude', 0)
-        lower_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        lower_pol.altitudemode = altitude_mode
 
         upper_pol = fol.newpolygon(name=kwargs.get('upper_polygon_name', 'Upper Polygon'))
         upper_pol.outerboundaryis = upper
@@ -127,7 +132,7 @@ class KmlPlus:
         upper_pol.polystyle.fill = kwargs.get('fill', 1)
         upper_pol.style.polystyle.outline = kwargs.get('outline', 1)
         upper_pol.extrude = kwargs.get('extrude', 0)
-        upper_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        upper_pol.altitudemode = altitude_mode
 
         for coords in sides:
             side_pol = fol.newpolygon(name='KmlPlus Polygon')
@@ -135,7 +140,7 @@ class KmlPlus:
             side_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
             side_pol.polystyle.fill = kwargs.get('fill', 1)
             side_pol.style.polystyle.outline = kwargs.get('outline', 1)
-            side_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+            side_pol.altitudemode = altitude_mode
 
         self.kml.save(self.save_name)
 
@@ -158,6 +163,10 @@ class KmlPlus:
             None
 
         """
+        if kwargs.get('altitude_mode') == 'relativetoground':
+            altitude_mode = simplekml.AltitudeMode.relativetoground
+        else:
+            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
 
         points = Circle(coordinate_list, radius, radius_uom=kwargs.get('radius_uom', 'M'),
                         uom=('uom', 'FT')).process_points()
@@ -168,7 +177,7 @@ class KmlPlus:
         pol.outerboundaryis = points
         pol.polystyle.colour = kwargs.get('colour_hex', '7Fc0c0c0')
         pol.extrude = kwargs.get('extrude', 0)
-        pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        pol.altitudemode = altitude_mode
 
         self.kml.save(self.save_name)
 
@@ -195,6 +204,10 @@ class KmlPlus:
         Returns:
             None
         """
+        if kwargs.get('altitude_mode') == 'relativetoground':
+            altitude_mode = simplekml.AltitudeMode.relativetoground
+        else:
+            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
 
         cylinder = Cylinder((coordinate_list, radius), (coordinate_list, radius),
                             lower_layer=kwargs.get('lower_layer', None), upper_layer=kwargs.get('upper_layer', None),
@@ -208,14 +221,14 @@ class KmlPlus:
         lower_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
         lower_pol.polystyle.fill = kwargs.get('fill', 1)
         lower_pol.style.polystyle.outline = kwargs.get('outline', 1)
-        lower_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        lower_pol.altitudemode = altitude_mode
 
         upper_pol = fol.newpolygon(name=kwargs.get('upper_name', 'Upper Circle'))
         upper_pol.outerboundaryis = upper
         upper_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
         upper_pol.polystyle.fill = kwargs.get('fill', 1)
         upper_pol.style.polystyle.outline = kwargs.get('outline', 1)
-        upper_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        upper_pol.altitudemode = altitude_mode
 
         for coords in sides:
             side_pol = fol.newpolygon(name='A side')
@@ -223,6 +236,6 @@ class KmlPlus:
             side_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
             side_pol.polystyle.fill = kwargs.get('fill', 1)
             side_pol.style.polystyle.outline = kwargs.get('outline', 1)
-            side_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+            side_pol.altitudemode = altitude_mode
 
         self.kml.save(self.save_name)

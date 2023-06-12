@@ -152,15 +152,15 @@ class Point(ILocation):
         Returns:
             A Point object at the declared bearing and distance from another Point object.
         """
-        radius_dict = {'KM': 1000, 'MI': 1609.34, 'NM': 1852, 'M': 1}
-        distance_uom = kwargs.get('distance_uom', 'M')
+        radius_dict = {'km': 1000, 'mi': 1609.34, 'nm': 1852, 'm': 1}
+        distance_uom = kwargs.get('distance_uom', 'm')
         # PyProj gives distance in metres
         distance = distance * radius_dict[distance_uom]
 
         g = Geod(ellps='WGS84')
         p = g.fwd(point.x, point.y, az=bearing, dist=distance)
 
-        return cls(p[1], p[0], z=kwargs.get('z', 0), uom=kwargs.get('uom', 'M'))
+        return cls(p[1], p[0], z=kwargs.get('z', 0), uom=kwargs.get('uom', 'm'))
 
     def get_distance(self, another_point: ILocation, **kwargs: str) -> float:
         """
@@ -175,12 +175,12 @@ class Point(ILocation):
             distance (float): The distance between two points.
 
         """
-        radius_dict = {'KM': 1000, 'MI': 1609.34, 'NM': 1852, 'M': 1}
+        radius_dict = {'km': 1000, 'mi': 1609.34, 'nm': 1852, 'm': 1}
         g = Geod(ellps='WGS84')
         geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
 
         # PyProj gives distance in metres
-        distance_uom = kwargs.get('distance_uom', 'M')
+        distance_uom = kwargs.get('distance_uom', 'm')
         distance = geo_tup[2] * radius_dict[distance_uom]
 
         return distance
