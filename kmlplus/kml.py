@@ -116,7 +116,7 @@ class KmlPlus:
         if kwargs.get('altitude_mode') == 'relativetoground':
             altitude_mode = simplekml.AltitudeMode.relativetoground
         else:
-            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
+            altitude_mode = simplekml.AltitudeMode.absolute
 
         lower_pol = fol.newpolygon(name=kwargs.get('lower_polygon_name', 'Lower Polygon'))
         lower_pol.outerboundaryis = lower
@@ -166,7 +166,7 @@ class KmlPlus:
         if kwargs.get('altitude_mode') == 'relativetoground':
             altitude_mode = simplekml.AltitudeMode.relativetoground
         else:
-            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
+            altitude_mode = simplekml.AltitudeMode.absolute
 
         points = Circle(coordinate_list, radius, radius_uom=kwargs.get('radius_uom', 'M'),
                         uom=('uom', 'FT')).process_points()
@@ -207,7 +207,7 @@ class KmlPlus:
         if kwargs.get('altitude_mode') == 'relativetoground':
             altitude_mode = simplekml.AltitudeMode.relativetoground
         else:
-            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
+            altitude_mode = simplekml.AltitudeMode.absolute
 
         cylinder = Cylinder((coordinate_list, radius), (coordinate_list, radius),
                             lower_layer=kwargs.get('lower_layer', None), upper_layer=kwargs.get('upper_layer', None),
