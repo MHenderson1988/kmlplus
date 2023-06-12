@@ -16,12 +16,12 @@ class TestPoint(TestCase):
         self.assertEqual(test_obj.x, -4.868398333333333)
         self.assertEqual(test_obj.z, 0)
 
-        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, distance_uom='M')
+        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, distance_uom='m')
         self.assertEqual(test_obj.y, 50.20166666666667)
         self.assertEqual(test_obj.x, -4.868398333333333)
         self.assertAlmostEqual(test_obj.z, 383.0, delta=5)
 
-        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, uom='M', distance_uom='M')
+        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, uom='M', distance_uom='m')
         self.assertEqual(test_obj.y, 50.20166666666667)
         self.assertEqual(test_obj.x, -4.868398333333333)
         self.assertEqual(test_obj.z, 383.0)
@@ -33,7 +33,7 @@ class TestPoint(TestCase):
 
     def test_from_point_bearing_and_distance(self):
         test_obj = Point.from_dms('551206.00N', '0045206.23W')
-        test_result = Point.from_point_bearing_and_distance(test_obj, 180.00, 383.00, distance_uom='NM')
+        test_result = Point.from_point_bearing_and_distance(test_obj, 180.00, 383.00, distance_uom='nm')
 
         self.assertAlmostEqual(48.821944, test_result.y, delta=0.01)
         self.assertAlmostEqual(-4.868333, test_result.x, delta=0.01)
@@ -46,7 +46,7 @@ class TestPoint(TestCase):
 
         # test miles
         test_obj = Point.from_dms('551206.00N', '0045206.234W')
-        distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W', distance_uom='KM'))
+        distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W', distance_uom='km'))
         self.assertEqual(556402.304538113, distance)
 
     def test_get_bearing(self):
@@ -93,6 +93,17 @@ class TestPointFactory(TestCase):
     def test_populate_point_list(self):
         test_point_list = self.pf.populate_point_list()
         self.assertTrue(isinstance(test_point_list, list))
+        self.assertEqual(3, len(test_point_list))
+
+    def test_create_curved_segment(self):
+        test_segment = self.pf.create_curved_segment('start=553322N 0043322W, centre=502211N 0043222W, end=510000N '
+                                                     '0040010W, direction=clockwise')
+
+        self.assertTrue(isinstance(test_segment, list))
+        self.assertEqual(102, len(test_segment))
+        for i in test_segment:
+            self.assertTrue(isinstance(i, Point))
+            self.assertEqual(0, i.z)
 
     def test_process_string(self):
         no_height = '22.323232 -4.287282'
@@ -100,9 +111,9 @@ class TestPointFactory(TestCase):
 
         dms_test = '521244N 0056555W'
 
-        no_height_obj = self.pf.process_string(no_height, 'dd')
-        with_height_obj = self.pf.process_string(with_height, 'dd')
-        dms_obj = self.pf.process_string(dms_test, 'dms')
+        no_height_obj = self.pf.process_string(no_height)
+        with_height_obj = self.pf.process_string(with_height)
+        dms_obj = self.pf.process_string(dms_test)
 
         self.assertTrue(isinstance(no_height_obj, Point))
         self.assertTrue(isinstance(with_height_obj, Point))
@@ -111,6 +122,25 @@ class TestPointFactory(TestCase):
         self.assertEqual(no_height_obj.z, 0.0)
         self.assertEqual(with_height_obj.z, 8.0)
         self.assertEqual(dms_obj.y, 52.21222222222222)
+
+    def test_process_x_y(self):
+        dd_xy = '22.323232 -4.287282'
+        dms_xy = '521244N 0056555W 50'
+
+        dd_xy_obj = self.pf.process_x_y(dd_xy.split(' '), getattr(Point, 'from_decimal_degrees'))
+        dms_xy_obj = self.pf.process_x_y(dms_xy.split(' '), getattr(Point, 'from_dms'))
+
+        self.assertTrue(isinstance(dd_xy_obj, Point))
+        self.assertTrue(isinstance(dms_xy_obj, Point))
+        self.assertEqual(0, dd_xy_obj.z)
+        self.assertEqual(0, dms_xy_obj.z)
+
+    def test_process_x_y_z(self):
+        with_height = '22.323232 -4.287282 8'
+        dms_xyz_obj = self.pf.process_x_y_z(with_height.split(' '), getattr(Point, 'from_decimal_degrees'))
+
+        self.assertTrue(isinstance(dms_xyz_obj, Point))
+        self.assertEqual(8.0, dms_xyz_obj.z)
 
 
 class TestCurvedSegmentFactory(TestCase):

@@ -115,3 +115,8 @@ class TestThreeDimensionShape(TestCase):
         lower, upper, sides = poly.to_kml()
 
         self.assertTrue(isinstance(lower, list))
+
+
+class TestLineString(TestCase):
+    def test_create(self):
+        coordinates = ['554433N 0031113W', '440000S 110202']

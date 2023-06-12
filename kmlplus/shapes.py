@@ -304,7 +304,7 @@ class Cylinder(I3DObject, ICylinder):
             circle = Circle(coordinate_list[0], coordinate_list[1], uom=self.uom, radius_uom=self.radius_uom)
         return circle
 
-    def generate_sides(self) -> list[IPolygon]:
+    def generate_sides(self) -> list[ICircle]:
         """
         Creates the sides of the cylinder. Requires both layers to contain the same amount of points.
 
@@ -580,6 +580,7 @@ class LineString(I2DObject):
 
     def __init__(self, coordinate_list, **kwargs):
         self.uom = kwargs.get('uom', 'FT')
+        self.z = kwargs.get('z', None)
         self.point_list = self.create(coordinate_list)
 
     def __len__(self):
@@ -607,5 +608,5 @@ class LineString(I2DObject):
             raise TypeError('Polygon will only accept objects of type kmlplus.geo.Point')
 
     def create(self, coordinate_list: list[str]) -> list[ILocation]:
-        point_list = PointFactory(coordinate_list, uom=self.uom).process_coordinates()
+        point_list = PointFactory(coordinate_list, uom=self.uom, z=self.z).process_coordinates()
         return point_list

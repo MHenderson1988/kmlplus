@@ -17,12 +17,12 @@ Table of Contents
     - [Coordinates containing Arcs](#coordinates-containing-arcs)
 4. [Classes and functions](#classes-and-functions)
     - [KmlPlus](#kmlplus-class)
-      - [KmlPlus (functions)](#kmlplus-functions)
-        - [linestring](#linestring)
-        - [polyhedron](#polyhedron)
-        - [circle](#circle)
-        - [cylinder](#cylinder)
-        - [point](#point)
+        - [KmlPlus (functions)](#kmlplus-functions)
+            - [linestring](#linestring)
+            - [polyhedron](#polyhedron)
+            - [circle](#circle)
+            - [cylinder](#cylinder)
+            - [point](#point)
 5. [Acknowledgements](#acknowledgements)
 
 ---
@@ -88,7 +88,7 @@ coordinates and will convert appropriately.
 
 If no z value is provided, defaults to 0.0.
 
-Example 
+Example
 
 ```
 [
@@ -103,8 +103,7 @@ Example
 
 When creating a curved segment of a polygon, the string should be passed as follows -
 
-'start=[starting_coordinate], end=[ending_coordinate], centre=[centre_coordinate],
-direction=[clockwise/anticlockwise]'
+'start=[starting_coordinate], end=[ending_coordinate], centre=[centre_coordinate], direction=[clockwise/anticlockwise]'
 
 Example -
 

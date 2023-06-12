@@ -113,13 +113,18 @@ class KmlPlus:
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Polyhedron'))
 
+        if kwargs.get('altitude_mode') == 'relativetoground':
+            altitude_mode = simplekml.AltitudeMode.relativetoground
+        else:
+            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
+
         lower_pol = fol.newpolygon(name=kwargs.get('lower_polygon_name', 'Lower Polygon'))
         lower_pol.outerboundaryis = lower
         lower_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
         lower_pol.polystyle.fill = kwargs.get('fill', 1)
         lower_pol.style.polystyle.outline = kwargs.get('outline', 1)
         lower_pol.extrude = kwargs.get('extrude', 0)
-        lower_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        lower_pol.altitudemode = altitude_mode
 
         upper_pol = fol.newpolygon(name=kwargs.get('upper_polygon_name', 'Upper Polygon'))
         upper_pol.outerboundaryis = upper
@@ -127,7 +132,7 @@ class KmlPlus:
         upper_pol.polystyle.fill = kwargs.get('fill', 1)
         upper_pol.style.polystyle.outline = kwargs.get('outline', 1)
         upper_pol.extrude = kwargs.get('extrude', 0)
-        upper_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        upper_pol.altitudemode = altitude_mode
 
         for coords in sides:
             side_pol = fol.newpolygon(name='KmlPlus Polygon')
@@ -135,7 +140,7 @@ class KmlPlus:
             side_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
             side_pol.polystyle.fill = kwargs.get('fill', 1)
             side_pol.style.polystyle.outline = kwargs.get('outline', 1)
-            side_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+            side_pol.altitudemode = altitude_mode
 
         self.kml.save(self.save_name)
 
@@ -158,6 +163,10 @@ class KmlPlus:
             None
 
         """
+        if kwargs.get('altitude_mode') == 'relativetoground':
+            altitude_mode = simplekml.AltitudeMode.relativetoground
+        else:
+            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
 
         points = Circle(coordinate_list, radius, radius_uom=kwargs.get('radius_uom', 'M'),
                         uom=('uom', 'FT')).process_points()
@@ -168,7 +177,7 @@ class KmlPlus:
         pol.outerboundaryis = points
         pol.polystyle.colour = kwargs.get('colour_hex', '7Fc0c0c0')
         pol.extrude = kwargs.get('extrude', 0)
-        pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        pol.altitudemode = altitude_mode
 
         self.kml.save(self.save_name)
 
@@ -195,6 +204,10 @@ class KmlPlus:
         Returns:
             None
         """
+        if kwargs.get('altitude_mode') == 'relativetoground':
+            altitude_mode = simplekml.AltitudeMode.relativetoground
+        else:
+            altitude_mode = simplekml.GxAltitudeMode.relativetoseafloor
 
         cylinder = Cylinder((coordinate_list, radius), (coordinate_list, radius),
                             lower_layer=kwargs.get('lower_layer', None), upper_layer=kwargs.get('upper_layer', None),
@@ -208,14 +221,14 @@ class KmlPlus:
         lower_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
         lower_pol.polystyle.fill = kwargs.get('fill', 1)
         lower_pol.style.polystyle.outline = kwargs.get('outline', 1)
-        lower_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        lower_pol.altitudemode = altitude_mode
 
         upper_pol = fol.newpolygon(name=kwargs.get('upper_name', 'Upper Circle'))
         upper_pol.outerboundaryis = upper
         upper_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
         upper_pol.polystyle.fill = kwargs.get('fill', 1)
         upper_pol.style.polystyle.outline = kwargs.get('outline', 1)
-        upper_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        upper_pol.altitudemode = altitude_mode
 
         for coords in sides:
             side_pol = fol.newpolygon(name='A side')
@@ -223,32 +236,6 @@ class KmlPlus:
             side_pol.polystyle.color = kwargs.get('colour_hex', '7Fc0c0c0')
             side_pol.polystyle.fill = kwargs.get('fill', 1)
             side_pol.style.polystyle.outline = kwargs.get('outline', 1)
-            side_pol.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+            side_pol.altitudemode = altitude_mode
 
         self.kml.save(self.save_name)
-
-
-if __name__ == '__main__':
-    from test_data import airspace as test_data
-
-    kml_file = KmlPlus(file_name='Point Styling.kml')
-
-    """kml_file.polyhedron(test_data.airspace.london_fir, lower_layer=19500, upper_layer=24500, name='London FIR')"""
-
-    kml_file.linestring(test_data.birmingham_cta_9, uom='FT')
-    kml_file.cylinder(test_data.beccles_parachute, 50000, upper_layer=5000)
-    kml_file.point(test_data.beccles_parachute)
-
-    kml_file.polyhedron(test_data.birmingham_cta_10, lower_layer=6500, upper_layer=10500,
-                        name='Birmingham CTA 10')
-    kml_file.polyhedron(test_data.birmingham_cta_9, lower_layer=6500, upper_layer=8500,
-                        name='Birmingham CTA 9')
-
-    kml_file.polyhedron(test_data.prestwick_cta_1, lower_layer=1500, upper_layer=5500, name='Prestwick CTA 1')
-    kml_file.polyhedron(test_data.prestwick_cta_2, lower_layer=2000, upper_layer=5500, name='Prestwick CTA 2')
-    kml_file.polyhedron(test_data.prestwick_cta_3, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 3')
-    kml_file.polyhedron(test_data.prestwick_cta_4, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 4')
-    kml_file.polyhedron(test_data.prestwick_cta_5, lower_layer=3500, upper_layer=5500, name='Prestwick CTA 5')
-    kml_file.polyhedron(test_data.prestwick_cta_6, lower_layer=4000, upper_layer=5500, name='Prestwick CTA 6')
-    kml_file.polyhedron(test_data.prestwick_ctr, upper_layer=5500, name='Prestwick CTR')
-    kml_file.polyhedron(test_data.test_airspace, upper_layer=50000, lower_layer=0, name='EG D406C ESKMEALS')
