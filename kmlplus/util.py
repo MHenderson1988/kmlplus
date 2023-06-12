@@ -69,7 +69,7 @@ def detect_coordinate_type(coordinate_string):
 
     def match_regex(string_to_match):
         regex_dict = {'dms': '^\d{6,7}[.]\d{1,}\D{1}$|^\d{6,7}\D{1}$',
-                      'dd': '^[-?|+?]?\d{1,3}([.]\d+)?$'}
+                      'dd': '^[-?|+?]?\d{1,3}[.]\d+|[-?|+?]?\d{1,3}$'}
 
         if re.match(regex_dict['dms'], string_to_match):
             return 'dms'

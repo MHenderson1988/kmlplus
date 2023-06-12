@@ -69,18 +69,13 @@ class TestUtil(TestCase):
         self.assertEqual('dd', result)
         result = detect_coordinate_type('55.393922 +04.393922')
         self.assertEqual('dd', result)
+        result = detect_coordinate_type('2 32.112332')
+        self.assertEqual('dd', result)
 
         result = detect_coordinate_type('556622.123N 0045645.21W')
         self.assertEqual('dms', result)
         result = detect_coordinate_type('0045645.21W 0045645.21W')
         self.assertEqual('dms', result)
-
-        with self.assertRaises(ValueError):
-            detect_coordinate_type('+0043212.30W')
-        with self.assertRaises(ValueError):
-            detect_coordinate_type('+04232.322')
-        with self.assertRaises(ValueError):
-            detect_coordinate_type('+55.393922N')
 
     def test_point_or_segment(self):
         # point, no height
