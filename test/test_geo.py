@@ -16,12 +16,12 @@ class TestPoint(TestCase):
         self.assertEqual(test_obj.x, -4.868398333333333)
         self.assertEqual(test_obj.z, 0)
 
-        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, distance_uom='M')
+        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, distance_uom='m')
         self.assertEqual(test_obj.y, 50.20166666666667)
         self.assertEqual(test_obj.x, -4.868398333333333)
         self.assertAlmostEqual(test_obj.z, 383.0, delta=5)
 
-        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, uom='M', distance_uom='M')
+        test_obj = Point.from_dms('501206.00N', '0045206.234W', z=383, uom='M', distance_uom='m')
         self.assertEqual(test_obj.y, 50.20166666666667)
         self.assertEqual(test_obj.x, -4.868398333333333)
         self.assertEqual(test_obj.z, 383.0)
@@ -33,7 +33,7 @@ class TestPoint(TestCase):
 
     def test_from_point_bearing_and_distance(self):
         test_obj = Point.from_dms('551206.00N', '0045206.23W')
-        test_result = Point.from_point_bearing_and_distance(test_obj, 180.00, 383.00, distance_uom='NM')
+        test_result = Point.from_point_bearing_and_distance(test_obj, 180.00, 383.00, distance_uom='nm')
 
         self.assertAlmostEqual(48.821944, test_result.y, delta=0.01)
         self.assertAlmostEqual(-4.868333, test_result.x, delta=0.01)
@@ -46,7 +46,7 @@ class TestPoint(TestCase):
 
         # test miles
         test_obj = Point.from_dms('551206.00N', '0045206.234W')
-        distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W', distance_uom='KM'))
+        distance = test_obj.get_distance(Point.from_dms('501206.00N', '0045206.234W', distance_uom='km'))
         self.assertEqual(556402.304538113, distance)
 
     def test_get_bearing(self):
