@@ -193,6 +193,7 @@ class KmlPlus:
             sample (int): How many points to use when creating the circles which make up the cylinder
             lower_circle_name (str): Lower circle object name
             upper_circle_name (str): Upper circle object name
+            radius_uom (str): Radius unit of measure.
             fol (str): Name of the folder in which the KML objects are stored.
             uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
               Defaults to 'NM'
@@ -211,7 +212,8 @@ class KmlPlus:
 
         cylinder = Cylinder((coordinate_list, radius), (coordinate_list, radius),
                             lower_layer=kwargs.get('lower_layer', None), upper_layer=kwargs.get('upper_layer', None),
-                            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'), )
+                            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'),
+                            radius_uom=kwargs.get('radius_uom', 'M'))
         lower, upper, sides = cylinder.to_kml()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Cylinder'))

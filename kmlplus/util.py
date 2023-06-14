@@ -1,6 +1,5 @@
 import re
 
-
 def dms_to_decimal(latitude_or_longitude):
     slice_dms = get_dms_slice_dict(latitude_or_longitude)
     calculated_dms_dict = calculate_dms_to_decimal(slice_dms)
