@@ -6,8 +6,8 @@ from kmlplus.shapes import Circle, Polygon, Polyhedron
 
 class TestCircle(TestCase):
     def setUp(self):
-        self.circle_height_args = Circle('55.1111 -3.2311 10', 10, sample=100, uom='M')
-        self.circle_height_kwargs = Circle('28.132212 2.332782', 10, sample=150, z=20, uom='M')
+        self.circle_height_args = Circle(['55.1111 -3.2311 10'], 10, sample=100, uom='M')
+        self.circle_height_kwargs = Circle(['28.132212 2.332782'], 10, sample=150, z=20, uom='M')
 
     def test_create(self):
         self.assertTrue(isinstance(self.circle_height_args.point_list, list))
@@ -23,11 +23,11 @@ class TestCircle(TestCase):
             self.assertEqual(i.z, 20)
 
         # Test uom effects
-        c = Circle('55.1111 -3.2311 10', 10, sample=100, uom='FT')
+        c = Circle(['55.1111 -3.2311 10'], 10, sample=100, uom='FT')
         for i in c:
             self.assertEqual(10, i.z)
 
-        c = Circle('55.1111 -3.2311 10', 25, z=250, sample=100, uom='M')
+        c = Circle(['55.1111 -3.2311 10'], 25, z=250, sample=100, uom='M')
         for i in c:
             self.assertEqual(250, i.z)
 

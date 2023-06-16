@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from kmlplus.util import dms_to_decimal, get_dms_slice_dict, calculate_dms_to_decimal, get_earth_radius, \
-    detect_coordinate_type, point_or_segment, split_segment_string
+    detect_coordinate_type, point_or_segment, split_segment_string, convert_to_metres
 
 
 class TestUtil(TestCase):
@@ -94,3 +94,25 @@ class TestUtil(TestCase):
         self.assertEqual(d.get('direction'), 'clockwise')
         self.assertEqual(d.get('centre'), '502211N 0043212W')
         self.assertEqual(d.get('sample'), '50')
+
+    def test_convert_to_metres(self):
+        result = convert_to_metres(1, 'KM')
+        self.assertEqual(1000, result)
+
+        result = convert_to_metres(1, 'km')
+        self.assertEqual(1000, result)
+
+        result = convert_to_metres(1, 'mi')
+        self.assertEqual(1609.34, result)
+
+        result = convert_to_metres(1, 'nm')
+        self.assertEqual(1852, result)
+
+        result = convert_to_metres(1, 'm')
+        self.assertEqual(1, result)
+
+        result = convert_to_metres(1, 'Ft')
+        self.assertEqual(0.3048, result)
+
+        with self.assertRaises(TypeError):
+            convert_to_metres(20, 'fdskl;jfdasjkl;adf')
