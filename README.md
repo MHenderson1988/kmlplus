@@ -48,7 +48,7 @@ Installing
 
 ```
 pip install kmlplus==2.1.0  <--- last stable release
-pip install kmlplus==3.0.0b1 <--- Current v3.0.0-beta.1
+pip install kmlplus==3.0.0b3 <--- Current v3.0.0-beta.3
 ```
 
 ### Clone
