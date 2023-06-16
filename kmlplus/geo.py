@@ -15,12 +15,11 @@ class Point(ILocation):
         x (str): Longitude
 
     Keyword Args:
-        uom (str): Unit of measure to be applied to elevation values.
         z (float): Elevation
     """
+    __slots__ = ('_y', '_x', '_z')
 
     def __init__(self, y: Union[str, float], x: Union[str, float], **kwargs: Union[str, int, float]):
-        self.uom = kwargs.get('uom', 'FT')
         self.y: Union[str, float] = y
         self.x: Union[str, float] = x
         self.z: Union[str, float] = kwargs.get('z', 0.0)
@@ -59,8 +58,6 @@ class Point(ILocation):
     @property
     def z(self) -> Union[str, float]:
         """
-        If z value is not a float, casts and then converts to M (KML default uom)
-
         Args:
             value (float)
 
@@ -92,7 +89,7 @@ class Point(ILocation):
         Returns:
             An ILocation object
         """
-        return cls(y, x, z=kwargs.get('z', 0), uom=kwargs.get('uom', 'FT'))
+        return cls(y, x, z=kwargs.get('z', 0))
 
     @classmethod
     def from_dms(cls, y: Union[str, float], x: Union[str, float], **kwargs: Union[float, int, str]) -> ILocation:
@@ -105,14 +102,13 @@ class Point(ILocation):
 
         Keyword Args:
             z (str, float): Elevation value
-            uom (str): Unit of measurement for elevation
 
         Returns:
             An ILocation object
         """
         y = dms_to_decimal(y)
         x = dms_to_decimal(x)
-        return cls(y, x, z=kwargs.pop('z', 0), uom=kwargs.get('uom', 'FT'))
+        return cls(y, x, z=kwargs.pop('z', 0))
 
     @classmethod
     def find_midpoint(cls, point_1: ILocation, point_2: ILocation, **kwargs: Union[int, float, str]) -> ILocation:
@@ -134,7 +130,7 @@ class Point(ILocation):
         x = (x1 + x2) / 2
         y = (y1 + y2) / 2
 
-        return cls(y, x, z=kwargs.pop('z', 0), uom=kwargs.get('uom', 'FT'))
+        return cls(y, x, z=kwargs.pop('z', 0))
 
     @classmethod
     def from_point_bearing_and_distance(cls, point: ILocation, bearing: float, distance: float, **kwargs) -> ILocation:
@@ -152,15 +148,10 @@ class Point(ILocation):
         Returns:
             A Point object at the declared bearing and distance from another Point object.
         """
-        radius_dict = {'km': 1000, 'mi': 1609.34, 'nm': 1852, 'm': 1}
-        distance_uom = kwargs.get('distance_uom', 'm')
-        # PyProj gives distance in metres
-        distance = distance * radius_dict[distance_uom]
-
         g = Geod(ellps='WGS84')
         p = g.fwd(point.x, point.y, az=bearing, dist=distance)
 
-        return cls(p[1], p[0], z=kwargs.get('z', 0), uom=kwargs.get('uom', 'm'))
+        return cls(p[1], p[0], z=kwargs.get('z', 0))
 
     def get_distance(self, another_point: ILocation, **kwargs: str) -> float:
         """
@@ -175,13 +166,10 @@ class Point(ILocation):
             distance (float): The distance between two points.
 
         """
-        radius_dict = {'km': 1000, 'mi': 1609.34, 'nm': 1852, 'm': 1}
         g = Geod(ellps='WGS84')
         geo_tup = g.inv(self.x, self.y, another_point.x, another_point.y)
-
         # PyProj gives distance in metres
-        distance_uom = kwargs.get('distance_uom', 'm')
-        distance = geo_tup[2] * radius_dict[distance_uom]
+        distance = geo_tup[2]
 
         return distance
 
@@ -230,11 +218,11 @@ class PointFactory(ILocationFactory):
 
     Keyword Args:
         z_override: A value with which to override all z values given in the string
-        uom (str): Unit of measure for height. Accepts 'FT' or 'M'.
     """
 
+    __slots__ = ('_coordinate_list', 'z_override')
+
     def __init__(self, coordinate_list: list, **kwargs):
-        self.uom = kwargs.get('uom', 'FT')
         self.z_override = kwargs.get('z', None)
         self.coordinate_list = coordinate_list
 
@@ -284,7 +272,7 @@ class PointFactory(ILocationFactory):
         return point_list
 
     def create_curved_segment(self, i: str) -> list[ILocation]:
-        curved_segment_points = CurvedSegmentFactory(i, z_override=self.z_override, uom=self.uom). \
+        curved_segment_points = CurvedSegmentFactory(i, z_override=self.z_override). \
             generate_segment()
 
         return curved_segment_points
@@ -351,9 +339,9 @@ class PointFactory(ILocationFactory):
             point = func(split[0], split[1], z=self.z_override)
         else:
             if split[2]:
-                point = func(split[0], split[1], z=split[2], uom=self.uom)
+                point = func(split[0], split[1], z=split[2])
             else:
-                point = func(split[0], split[1], z=0.0, uom=self.uom)
+                point = func(split[0], split[1], z=0.0)
         return point
 
 
@@ -368,10 +356,11 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
         z_override (float|None): Overrides all z values passed within the string.
     """
 
+    __slots__ = ('coordinate_string', 'z_override')
+
     def __init__(self, coordinate_string: str, **kwargs: str):
         self.coordinate_string = coordinate_string
         self.z_override = kwargs.get('z_override', None)
-        self.uom = kwargs.get('uom', 'FT')
 
     def process_segment(self) -> ICurvedSegment:
         """
@@ -414,21 +403,20 @@ class CurvedSegmentFactory(ICurvedSegmentFactory):
 
     def create_clockwise_segment(self, point_list: list, string_dict: dict) -> ICurvedSegment:
         if string_dict.get('centre') is not None:
-            segment = ClockwiseCurvedSegment(point_list[0], point_list[1], self.uom, centre=point_list[2],
-                                             sample=string_dict.get('sample', 100),
-                                             z=self.z_override)
-        else:
-            segment = ClockwiseCurvedSegment(point_list[0], point_list[1], self.uom,
+            segment = ClockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
                                              sample=string_dict.get('sample', 100), z=self.z_override)
+        else:
+            segment = ClockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100),
+                                             z=self.z_override)
         return segment
 
     def create_anticlockwise_segment(self, point_list: list, string_dict: dict) -> ICurvedSegment:
         if string_dict.get('centre') is not None:
-            segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], self.uom, centre=point_list[2],
+            segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], centre=point_list[2],
                                                  sample=string_dict.get('sample', 100), z=self.z_override)
         else:
-            segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], self.uom,
-                                                 sample=string_dict.get('sample', 100), z=self.z_override)
+            segment = AnticlockwiseCurvedSegment(point_list[0], point_list[1], sample=string_dict.get('sample', 100),
+                                                 z=self.z_override)
         return segment
 
     def generate_segment(self) -> list[ILocation]:
@@ -442,10 +430,10 @@ class ClockwiseCurvedSegment(ICurvedSegment):
     """
     A class for creating curved segments in a clockwise direction.
     """
+    __slots__ = ('z', '_start', '_end', '_centre', '_sample', 'start_bearing', 'end_bearing')
 
-    def __init__(self, start: ILocation, end: ILocation, uom: str, **kwargs):
+    def __init__(self, start: ILocation, end: ILocation, **kwargs):
         self.z = kwargs.get('z', None)
-        self.uom = uom
         self.start = start
         self.end = end
         self.centre = kwargs.get('centre', self.find_midpoint())
@@ -557,8 +545,7 @@ class ClockwiseCurvedSegment(ICurvedSegment):
             if self.z is None:
                 self.z = self.start.z
 
-            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, uom=self.uom,
-                                                              z=self.z)
+            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing += bearing_inc
             self.z += height_inc
@@ -598,9 +585,9 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
     """
     Creates an AnticlockwiseCurvedSegment. For documentation, see ClockwiseCurvedSegment.
     """
+    __slots__ = ('z', '_start', '_end', '_centre', '_sample', 'start_bearing', 'end_bearing')
 
-    def __init__(self, start: ILocation, end: ILocation, uom: str, **kwargs):
-        self.uom = uom
+    def __init__(self, start: ILocation, end: ILocation, **kwargs):
         self.start = start
         self.end = end
         self.z = kwargs.pop('z', None)
@@ -681,8 +668,7 @@ class AnticlockwiseCurvedSegment(ICurvedSegment):
             if self.z is None:
                 self.z = self.start.z
 
-            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z,
-                                                              uom=self.uom)
+            arc_point = Point.from_point_bearing_and_distance(self.centre, start_bearing, distance, z=self.z)
             point_list.append(arc_point)
             start_bearing -= bearing_inc
             self.z += height_inc

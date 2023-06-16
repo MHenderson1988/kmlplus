@@ -1,5 +1,6 @@
 import re
 
+
 def dms_to_decimal(latitude_or_longitude):
     slice_dms = get_dms_slice_dict(latitude_or_longitude)
     calculated_dms_dict = calculate_dms_to_decimal(slice_dms)
@@ -45,6 +46,31 @@ def calculate_dms_to_decimal(dms_sliced_dict):
                            'hemisphere': dms_sliced_dict['hemisphere']}
 
     return calculated_dms_dict
+
+
+def convert_to_metres(a_value, a_uom):
+    if not a_value:
+        return None
+    else:
+        conversion_dict = {
+            'KM': 1000,
+            'MI': 1609.34,
+            'NM': 1852,
+            'M': 1,
+            'FT': 0.3048
+        }
+
+        regex = '^' + a_uom
+        modifier = None
+        for key, value in conversion_dict.items():
+            if re.match(regex, key, flags=re.IGNORECASE):
+                modifier = value
+
+        if modifier is None:
+            raise TypeError(f'{a_uom} is not an accepted unit of measure. Accepted units of measure are M, MI, KM, FT'
+                            f' and NM')
+        else:
+            return a_value * modifier
 
 
 def get_earth_radius(**kwargs) -> float:

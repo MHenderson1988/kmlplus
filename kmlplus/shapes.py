@@ -2,6 +2,7 @@ from typing import Union
 
 from kmlplus.geo import PointFactory, Point
 from kmlplus.interface import ICircle, ILocation, I3DObject, IPolygon, ICylinder, I2DObject
+from kmlplus.util import convert_to_metres
 
 
 class Circle(ICircle, I2DObject):
@@ -17,14 +18,14 @@ class Circle(ICircle, I2DObject):
          kilometres ('KM') and nautical miles ('NM')
         uom (str): Unit of measure for elevation. Accepts and defaults to feet ('FT') and metres ('M')
     """
+    __slots__ = ('_centre', '_radius', 'uom', '_z', '_sample', 'point_list')
 
     def __init__(self, centre: list, radius: float, **kwargs):
-        self.radius_uom: str = kwargs.get('radius_uom', 'M')
         self.uom: str = kwargs.get('uom', 'FT')
-        self.z: float = kwargs.get('z', None)
+        self.z: float = convert_to_metres(kwargs.get('z', None), self.uom)
         self.sample: int = kwargs.get('sample', 100)
         self.centre: ILocation = self.plot_centre(centre)
-        self.radius: float = radius
+        self.radius: float = convert_to_metres(radius, kwargs.get('radius_uom', 'M'))
         self.point_list: list[ILocation] = self.process_points()
 
     def __eq__(self, another_circle: ICircle) -> bool:
@@ -63,13 +64,10 @@ class Circle(ICircle, I2DObject):
 
     @z.setter
     def z(self, value):
-        if not value:
-            self._z = None
-        elif isinstance(value, float):
-            conversion_dict = {'FT': 0.3048, 'M': 1}
-            self._z = value * conversion_dict[self.uom]
+        if value:
+            self._z = float(value)
         else:
-            self.z = float(value)
+            self._z = None
 
     @property
     def sample(self) -> int:
@@ -100,6 +98,7 @@ class Circle(ICircle, I2DObject):
     @radius.setter
     def radius(self, a_radius: Union[float, int, str]):
         if a_radius > 0 and isinstance(a_radius, float):
+
             self._radius = a_radius
         elif a_radius > 0:
             try:
@@ -121,7 +120,7 @@ class Circle(ICircle, I2DObject):
         Returns:
             coordinates(ILocation): ILocation object representing the focus of the circle.
         """
-        coordinates = PointFactory(central_location, uom=self.uom).process_coordinates()[0]
+        coordinates = PointFactory(central_location).process_coordinates()[0]
         return coordinates
 
     def process_points(self) -> list[ILocation]:
@@ -142,8 +141,7 @@ class Circle(ICircle, I2DObject):
             else:
                 z = self.centre.z
 
-            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=z,
-                                                          uom=self.uom, radius_uom=self.radius_uom)
+            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=z)
             point_list.append(point)
             start_bearing -= bearing_increment
 
@@ -188,13 +186,15 @@ class Cylinder(I3DObject, ICylinder):
         upper_radius (float): Overrides any radius in the string for the upper circle.
 
     """
+    __slots__ = (
+    'uom', 'sample', 'radius_uom', '_lower_radius', '_upper_radius', '_upper_layer', '_lower_layer', '_sides')
 
     def __init__(self, lower_coordinates: list, upper_coordinates: list, **kwargs):
         self.uom = kwargs.get('uom', 'FT')
         self.sample = kwargs.get('sample', 100)
         self.radius_uom = kwargs.get('radius_uom', 'M')
-        self.lower_radius = lower_coordinates[1]
-        self.upper_radius = upper_coordinates[1]
+        self.lower_radius = convert_to_metres(lower_coordinates[1], self.uom)
+        self.upper_radius = convert_to_metres(upper_coordinates[1], self.uom)
         self.lower_layer = self.create_layer(
             (lower_coordinates[0], self.lower_radius),
             kwargs.get('lower_layer', None)
@@ -343,10 +343,11 @@ class Polygon(IPolygon, I2DObject):
         uom (str): Unit of measure for elevation, FT or M
         z (float): Override all string elevation values with a single blanket value.
     """
+    __slots__ = ('uom', '_z', '_point_list', 'centroid')
 
     def __init__(self, coordinate_list: list, **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
-        self.z = kwargs.get('z', None)
+        self.z = convert_to_metres(kwargs.get('z', None), self.uom)
         self.point_list = self.process_points(coordinate_list)
         self.centroid = self.calculate_centroid()
 
@@ -378,18 +379,15 @@ class Polygon(IPolygon, I2DObject):
         return self.__len__() != another_2D_object.__len__()
 
     @property
-    def z(self):
+    def z(self) -> float:
         return self._z
 
     @z.setter
     def z(self, value):
-        if not value:
-            self._z = None
-        elif isinstance(value, float):
-            conversion_dict = {'FT': 0.3048, 'M': 1}
-            self._z = value * conversion_dict[self.uom]
+        if value:
+            self._z = float(value)
         else:
-            self.z = float(value)
+            self._z = None
 
     @property
     def point_list(self):
@@ -449,8 +447,7 @@ class Polygon(IPolygon, I2DObject):
         """
         points = PointFactory(
             point_list,
-            z=self._z,
-            uom=self.uom
+            z=self._z
         ).process_coordinates()
 
         return points
@@ -467,6 +464,8 @@ class Polyhedron(I3DObject):
     Keyword Args:
         uom = Unit of measure for elevation, FT or M
     """
+
+    __slots__ = ('uom', '_lower_layer', '_upper_layer', '_sides')
 
     def __init__(self, lower_coordinates: list[str], upper_coordinates: list[str], **kwargs: str):
         self.uom = kwargs.get('uom', 'FT')
@@ -578,9 +577,11 @@ class LineString(I2DObject):
         uom (str): Unit of measure for elevation, FT or M.
     """
 
+    __slots__ = ('uom', '_z', 'point_list')
+
     def __init__(self, coordinate_list, **kwargs):
         self.uom = kwargs.get('uom', 'FT')
-        self.z = kwargs.get('z', None)
+        self.z = convert_to_metres(kwargs.get('z', None), self.uom)
         self.point_list = self.create(coordinate_list)
 
     def __len__(self):
@@ -607,6 +608,17 @@ class LineString(I2DObject):
         else:
             raise TypeError('Polygon will only accept objects of type kmlplus.geo.Point')
 
+    @property
+    def z(self) -> float:
+        return self._z
+
+    @z.setter
+    def z(self, value):
+        if value:
+            self._z = float(value)
+        else:
+            self._z = None
+
     def create(self, coordinate_list: list[str]) -> list[ILocation]:
-        point_list = PointFactory(coordinate_list, uom=self.uom, z=self.z).process_coordinates()
+        point_list = PointFactory(coordinate_list, z=self.z).process_coordinates()
         return point_list
