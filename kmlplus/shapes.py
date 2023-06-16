@@ -193,8 +193,8 @@ class Cylinder(I3DObject, ICylinder):
         self.uom = kwargs.get('uom', 'FT')
         self.sample = kwargs.get('sample', 100)
         self.radius_uom = kwargs.get('radius_uom', 'M')
-        self.lower_radius = convert_to_metres(lower_coordinates[1], self.uom)
-        self.upper_radius = convert_to_metres(upper_coordinates[1], self.uom)
+        self.lower_radius = convert_to_metres(lower_coordinates[1], self.radius_uom)
+        self.upper_radius = convert_to_metres(upper_coordinates[1], self.radius_uom)
         self.lower_layer = self.create_layer(
             (lower_coordinates[0], self.lower_radius),
             kwargs.get('lower_layer', None)

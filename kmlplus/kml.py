@@ -31,7 +31,8 @@ class KmlPlus:
         """
 
         Args:
-            coordinate_list (list): A list containing a single coordinate
+            coordinate_list (list): A list containing a single coordinate. Z values are to be given
+            in metres (M).
 
         Keyword Args:
             fol (str): A string to name the folder in which the point is stored.
