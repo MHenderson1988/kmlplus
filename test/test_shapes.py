@@ -1,17 +1,18 @@
 from unittest import TestCase
-
 from kmlplus.geo import Point
-from kmlplus.shapes import Circle, Polygon, Polyhedron
+from kmlplus.shapes import Circle, Polygon, Polyhedron, Cylinder, LineString
 
 
 class TestCircle(TestCase):
     def setUp(self):
         self.circle_height_args = Circle(['55.1111 -3.2311 10'], 10, sample=100, uom='M')
         self.circle_height_kwargs = Circle(['28.132212 2.332782'], 10, sample=150, z=20, uom='M')
+        self.circle_no_height_args = Circle(['55.1111 -3.2311'], 10, sample=100, uom='M')
 
     def test_create(self):
         self.assertTrue(isinstance(self.circle_height_args.point_list, list))
         self.assertEqual(len(self.circle_height_args.point_list), 101)
+        self.assertEqual(self.circle_height_args.point_list[0].z, 10)
         self.assertTrue(isinstance(self.circle_height_args.point_list[2], Point))
         for i in self.circle_height_args.point_list:
             self.assertEqual(10, i.z)
@@ -19,17 +20,62 @@ class TestCircle(TestCase):
         self.assertTrue(isinstance(self.circle_height_kwargs.point_list, list))
         self.assertEqual(len(self.circle_height_kwargs.point_list), 151)
         self.assertTrue(isinstance(self.circle_height_kwargs.point_list[2], Point))
+        self.assertEqual(self.circle_height_kwargs.point_list[0].z, 20)
         for i in self.circle_height_kwargs.point_list:
+            self.assertTrue(isinstance(i, Point))
             self.assertEqual(i.z, 20)
 
         # Test uom effects
         c = Circle(['55.1111 -3.2311 10'], 10, sample=100, uom='FT')
         for i in c:
+            self.assertTrue(isinstance(i, Point))
             self.assertEqual(10, i.z)
 
         c = Circle(['55.1111 -3.2311 10'], 25, z=250, sample=100, uom='M')
         for i in c:
+            self.assertTrue(isinstance(i, Point))
             self.assertEqual(250, i.z)
+
+
+class TestCylinder(TestCase):
+    def setUp(self):
+        self.test_cylinder = Cylinder(['55.1111 -3.2311', 10], ['55.1111 -3.2311', 50], sample=100, uom='M',
+                                      radius_uom='NM')
+
+    def test_lower_radius(self):
+        self.assertTrue(isinstance(self.test_cylinder.lower_radius, int))
+        self.assertEqual(self.test_cylinder.lower_radius, 10)
+        self.assertEqual(self.test_cylinder.radius_uom, 'NM')
+        self.assertTrue(isinstance(self.test_cylinder.radius_uom, str))
+
+    def test_upper_radius(self):
+        self.assertTrue(isinstance(self.test_cylinder.upper_radius, int))
+        self.assertEqual(self.test_cylinder.upper_radius, 50)
+        self.assertEqual(self.test_cylinder.radius_uom, 'NM')
+        self.assertTrue(isinstance(self.test_cylinder.radius_uom, str))
+
+    def test_sides(self):
+        self.assertTrue(isinstance(self.test_cylinder.sides, list))
+        self.assertEqual(len(self.test_cylinder.sides), 100)
+        self.assertTrue(isinstance(self.test_cylinder.sides[0], Polygon))
+
+    def test_to_kml(self):
+        self.assertTrue(isinstance(self.test_cylinder.to_kml(), tuple))
+        self.assertEqual(len(self.test_cylinder.to_kml()), 3)
+        kml_tup = self.test_cylinder.to_kml()
+        for i in kml_tup:
+            self.assertTrue(isinstance(i, list))
+            for x in kml_tup[0]:
+                self.assertTrue(isinstance(x, tuple))
+                for y in kml_tup[0][0]:
+                    self.assertTrue(isinstance(y, float))
+
+    def test_generate_sides(self):
+        self.assertTrue(isinstance(self.test_cylinder.generate_sides(), list))
+        self.assertEqual(len(self.test_cylinder.generate_sides()), 100)
+        for i in self.test_cylinder.generate_sides():
+            self.assertTrue(isinstance(i, Polygon))
+            self.assertEqual(len(i), 6)
 
 
 class TestPolygon(TestCase):
@@ -54,7 +100,9 @@ class TestPolygon(TestCase):
         self.assertTrue(isinstance(result_no_height, Polygon))
         self.assertEqual(len(result_no_height), 4)
         for i in result_no_height:
+            self.assertNotEqual(i.z, 1.0)
             self.assertEqual(i.z, 0)
+            self.assertFalse(i.z)
             self.assertTrue(isinstance(i, Point))
 
         # Tests for coordinates with a user provided z value.
@@ -99,6 +147,36 @@ class TestPolygon(TestCase):
             self.assertEqual(0, i.z)
 
 
+class TestPolyhedron(TestCase):
+    def setUp(self):
+        self.poly = Polyhedron(['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'],
+                               ['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'],
+                               upper_layer=100)
+
+    def test_generate_sides(self):
+        self.assertTrue(isinstance(self.poly.generate_sides(), list))
+        self.assertEqual(len(self.poly.generate_sides()), 3)
+        for i in self.poly.generate_sides():
+            self.assertTrue(isinstance(i, Polygon))
+            self.assertEqual(len(i), 6)
+
+    def test_to_kml(self):
+        self.assertTrue(isinstance(self.poly.to_kml(), tuple))
+        for i in self.poly.to_kml():
+            self.assertTrue(isinstance(i, list))
+
+
+class TestLineString(TestCase):
+    def setUp(self):
+        self.LineString = LineString(['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'])
+
+    def test_create(self):
+        self.assertTrue(isinstance(self.LineString, LineString))
+        self.assertEqual(len(self.LineString), 3)
+        for i in self.LineString:
+            self.assertTrue(isinstance(i, Point))
+
+
 class TestThreeDimensionShape(TestCase):
 
     def test_generate_sides(self):
@@ -115,8 +193,3 @@ class TestThreeDimensionShape(TestCase):
         lower, upper, sides = poly.to_kml()
 
         self.assertTrue(isinstance(lower, list))
-
-
-class TestLineString(TestCase):
-    def test_create(self):
-        coordinates = ['554433N 0031113W', '440000S 110202']

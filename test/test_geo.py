@@ -81,9 +81,15 @@ class TestPointFactory(TestCase):
         self.pf = PointFactory(['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'])
 
     def test_process_coordinates(self):
+        # Test that decimal degrees coordinates are correctly returned as decimal degrees.
+
         test_dd = self.pf.process_coordinates()
         for i in range(len(test_dd)):
             self.assertTrue(isinstance(test_dd[i], Point))
+
+        self.assertEqual(3, len(test_dd))
+        self.assertEqual(test_dd[0].y, 22.323232)
+        self.assertTrue(isinstance(test_dd[0].y, float))
 
         # Test that dms coordinates are correctly returned as decimal degrees.
         test_dms = self.pf.process_coordinates()
@@ -92,6 +98,8 @@ class TestPointFactory(TestCase):
 
     def test_populate_point_list(self):
         test_point_list = self.pf.populate_point_list()
+        self.assertNotEqual(test_point_list, None)
+        self.assertAlmostEqual(test_point_list[0].y, 22.323232, delta=0.0000001)
         self.assertTrue(isinstance(test_point_list, list))
         self.assertEqual(3, len(test_point_list))
 

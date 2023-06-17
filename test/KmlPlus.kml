@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+    <Document id="1">
+        <Folder id="2">
+            <Style id="5"/>
+            <name>KmlPlus Point</name>
+            <Placemark id="4">
+                <name>KmlPlus Point</name>
+                <styleUrl>#5</styleUrl>
+                <Point id="3">
+                    <coordinates>55.864237,-4.251806,0.0</coordinates>
+                    <extrude>0</extrude>
+                    <altitudeMode>relativeToGround</altitudeMode>
+                </Point>
+            </Placemark>
+        </Folder>
+    </Document>
+</kml>

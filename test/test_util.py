@@ -81,7 +81,9 @@ class TestUtil(TestCase):
         # point, no height
         coordinate_string = '521244N, 0056555W'
         result = point_or_segment(coordinate_string)
-        pass
+        self.assertEqual(result, 'point')
+        self.assertNotEqual(result, 'segment')
+        self.assertTrue(isinstance(result, str))
 
     def test_split_segment_string(self):
         string = 'start=522423N 0042354W, end=522428N 0042254W, direction=clockwise,' \
@@ -112,6 +114,9 @@ class TestUtil(TestCase):
         self.assertEqual(1, result)
 
         result = convert_to_metres(1, 'Ft')
+        self.assertEqual(0.3048, result)
+
+        result = convert_to_metres(1, 'ft')
         self.assertEqual(0.3048, result)
 
         with self.assertRaises(TypeError):
