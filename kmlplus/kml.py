@@ -237,10 +237,22 @@ class KmlPlus:
         else:
             altitude_mode = simplekml.AltitudeMode.absolute
 
-        cylinder = Cylinder((coordinate_list, radius), (coordinate_list, radius),
-                            lower_layer=kwargs.get('lower_layer', None), upper_layer=kwargs.get('upper_layer', None),
-                            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'),
-                            radius_uom=kwargs.get('radius_uom', 'M'))
+        cylinder = Cylinder(
+            (
+                coordinate_list,
+                radius
+            ),
+            (
+                coordinate_list,
+                radius
+            ),
+            lower_layer=kwargs.get('lower_layer', None),
+            upper_layer=kwargs.get('upper_layer', None),
+            lower_layer_uom=kwargs.get('lower_layer_uom', 'FT'),
+            upper_layer_uom=kwargs.get('upper_layer_uom', 'FT'),
+            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'),
+            radius_uom=kwargs.get('radius_uom', 'M')
+        )
         lower, upper, sides = cylinder.to_kml()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Cylinder'))

@@ -39,8 +39,25 @@ class TestCircle(TestCase):
 
 class TestCylinder(TestCase):
     def setUp(self):
-        self.test_cylinder = Cylinder(['55.1111 -3.2311', 10], ['55.1111 -3.2311', 50], sample=100, uom='M',
-                                      radius_uom='NM')
+        self.test_cylinder = Cylinder(
+            ['55.1111 -3.2311', 10],
+            ['55.1111 -3.2311', 50],
+            sample=100,
+            radius_uom='NM',
+            lower_layer=50,
+            upper_layer=100,
+            lower_layer_uom='M',
+            upper_layer_uom='FT'
+        )
+
+    def test_create(self):
+        self.assertTrue(isinstance(self.test_cylinder.lower_layer, Circle))
+        self.assertTrue(isinstance(self.test_cylinder.upper_layer, Circle))
+        self.assertTrue(isinstance(self.test_cylinder.sides, list))
+        self.assertEqual(len(self.test_cylinder.sides), 100)
+        self.assertTrue(isinstance(self.test_cylinder.sides[0], Polygon))
+        self.assertEqual(self.test_cylinder.lower_layer.z, 50)
+        self.assertNotEqual(self.test_cylinder.upper_layer.z, 100)
 
     def test_lower_radius(self):
         self.assertTrue(isinstance(self.test_cylinder.lower_radius, int))

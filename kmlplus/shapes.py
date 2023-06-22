@@ -184,6 +184,10 @@ class Cylinder(I3DObject, ICylinder):
         uom (str): Unit of measure for elevation. Accepts and defaults to feet ('FT') and metres ('M')
         lower_radius (float): Overrides any radius in the string for the lower circle.
         upper_radius (float): Overrides any radius in the string for the upper circle.
+        lower_layer (float): Overrides any elevation in the string for the lower circle.
+        upper_layer (float): Overrides any elevation in the string for the upper circle.
+        lower_layer_uom (str): Unit of measure for elevation. Defaults to feet ('FT')
+        upper_layer_uom (str): Unit of measure for elevation. Defaults to feet ('FT')
 
     """
     __slots__ = (
@@ -197,11 +201,13 @@ class Cylinder(I3DObject, ICylinder):
         self.upper_radius = upper_coordinates[1]
         self.lower_layer = self.create_layer(
             (lower_coordinates[0], self.lower_radius),
-            kwargs.get('lower_layer', None)
+            kwargs.get('lower_layer', None),
+            kwargs.get('lower_layer_uom', 'FT')
         )
         self._upper_layer = self.create_layer(
             (upper_coordinates[0], self.upper_radius),
-            kwargs.get('upper_layer', None)
+            kwargs.get('upper_layer', None),
+            kwargs.get('upper_layer_uom', 'FT')
         )
         self._sides = self.generate_sides()
 
@@ -287,7 +293,7 @@ class Cylinder(I3DObject, ICylinder):
 
         return lower, upper, sides
 
-    def create_layer(self, coordinate_list: tuple[list[str, float, int]], layer_height) -> ICircle:
+    def create_layer(self, coordinate_list: tuple[list[str, float, int]], layer_height, layer_uom) -> ICircle:
         """
         Creates a 2D circle to act as the top or bottom layer of the cylinder
         Args:
@@ -297,11 +303,8 @@ class Cylinder(I3DObject, ICylinder):
         Returns:
             circle (ICircle): A circle object
         """
-        if layer_height:
-            circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=self.uom,
+        circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=layer_uom,
                             radius_uom=self.radius_uom)
-        else:
-            circle = Circle(coordinate_list[0], coordinate_list[1], uom=self.uom, radius_uom=self.radius_uom)
         return circle
 
     def generate_sides(self) -> list[ICircle]:
@@ -476,12 +479,12 @@ class Polyhedron(I3DObject):
         self.lower_layer = self.create_layer(
             lower_coordinates,
             kwargs.get('lower_layer', 0.0),
-            uom=kwargs.get('lower_layer_uom', 'FT')
+            kwargs.get('lower_layer_uom', 'FT')
         )
         self.upper_layer = self.create_layer(
             upper_coordinates,
             kwargs.get('upper_layer', 0.0),
-            uom=kwargs.get('upper_layer_uom', 'FT'),
+            kwargs.get('upper_layer_uom', 'FT'),
         )
         self.sides = self.generate_sides()
 
@@ -515,7 +518,7 @@ class Polyhedron(I3DObject):
         else:
             raise TypeError('Sides can only be passed in a list')
 
-    def create_layer(self, coordinate_list: list[str], layer_height: str, **kwargs) -> IPolygon:
+    def create_layer(self, coordinate_list: list[str], layer_height: str, layer_uom) -> IPolygon:
         """
         Creates a layer for the polygon
         Args:
@@ -526,7 +529,7 @@ class Polyhedron(I3DObject):
 
         """
         if layer_height:
-            poly = Polygon(coordinate_list, z=layer_height, uom=kwargs.get('uom', 'FT'))
+            poly = Polygon(coordinate_list, z=layer_height, uom=layer_uom)
         else:
             poly = Polygon(coordinate_list)
         return poly
