@@ -148,10 +148,25 @@ class TestPolygon(TestCase):
 
 
 class TestPolyhedron(TestCase):
-    def setUp(self):
-        self.poly = Polyhedron(['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'],
-                               ['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'],
-                               upper_layer=100)
+    def setUp(self) -> None:
+        self.poly = Polyhedron(
+            ['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'],
+            ['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'],
+            lower_layer_uom='FT',
+            upper_layer_uom='M',
+            upper_layer=100,
+            lower_layer=10,
+        )
+
+    def test_create(self):
+        self.assertTrue(isinstance(self.poly, Polyhedron))
+        self.assertEqual(len(self.poly.lower_layer), 4)
+        self.assertEqual(len(self.poly.upper_layer), 4)
+        self.assertTrue(isinstance(self.poly.lower_layer, Polygon))
+        self.assertTrue(isinstance(self.poly.upper_layer, Polygon))
+
+        self.assertTrue(self.poly.lower_layer.z, 3.048)
+        self.assertTrue(self.poly.upper_layer.z, 100)
 
     def test_generate_sides(self):
         self.assertTrue(isinstance(self.poly.generate_sides(), list))

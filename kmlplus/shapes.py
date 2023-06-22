@@ -463,13 +463,26 @@ class Polyhedron(I3DObject):
 
     Keyword Args:
         uom = Unit of measure for elevation, FT or M
+        lower_layer (float): The elevation of the lower layer
+        lower_layer_uom (str): Unit of measure for elevation
+        upper_layer (float): The elevation of the upper layer
+        upper_layer_uom (str): Unit of measure for elevation
+
     """
 
     __slots__ = ('uom', '_lower_layer', '_upper_layer', '_sides')
 
     def __init__(self, lower_coordinates: list[str], upper_coordinates: list[str], **kwargs: str):
-        self.lower_layer_uom = kwargs.get('lower_layer_uom', 'FT')
-        self.upper_layer_uom = kwargs.get('upper_layer_uom', 'FT')
+        self.lower_layer = self.create_layer(
+            lower_coordinates,
+            kwargs.get('lower_layer', 0.0),
+            uom=kwargs.get('lower_layer_uom', 'FT')
+        )
+        self.upper_layer = self.create_layer(
+            upper_coordinates,
+            kwargs.get('upper_layer', 0.0),
+            uom=kwargs.get('upper_layer_uom', 'FT'),
+        )
         self.sides = self.generate_sides()
 
     @property
@@ -502,6 +515,22 @@ class Polyhedron(I3DObject):
         else:
             raise TypeError('Sides can only be passed in a list')
 
+    def create_layer(self, coordinate_list: list[str], layer_height: str, **kwargs) -> IPolygon:
+        """
+        Creates a layer for the polygon
+        Args:
+            coordinate_list (list): List containing a string of coordinate information
+            layer_height (str): The elevation value of the layer
+
+        Returns:
+
+        """
+        if layer_height:
+            poly = Polygon(coordinate_list, z=layer_height, uom=kwargs.get('uom', 'FT'))
+        else:
+            poly = Polygon(coordinate_list)
+        return poly
+
     def to_kml(self) -> tuple:
         """
         Processes the upper, lower layers and sides. Converts their data to a KML friendly format.
@@ -520,22 +549,6 @@ class Polyhedron(I3DObject):
             sides.append(holding_list)
 
         return lower, upper, sides
-
-    def create_layer(self, coordinate_list: list[str], layer_height: str) -> IPolygon:
-        """
-        Creates a layer for the polygon
-        Args:
-            coordinate_list (list): List containing a string of coordinate information
-            layer_height (str): The elevation value of the layer
-
-        Returns:
-
-        """
-        if layer_height:
-            poly = Polygon(coordinate_list, z=layer_height, uom=self.uom)
-        else:
-            poly = Polygon(coordinate_list)
-        return poly
 
     def generate_sides(self) -> list[IPolygon]:
         """
@@ -556,7 +569,7 @@ class Polyhedron(I3DObject):
                                            self.upper_layer[i + 1].__str__(), self.upper_layer[i].__str__(),
                                            self.lower_layer[i].__str__()]
 
-                side_polygon = Polygon(polygon_coordinate_list, uom=self.uom)
+                side_polygon = Polygon(polygon_coordinate_list)
 
                 side_coordinates.append(side_polygon)
 

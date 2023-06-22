@@ -99,15 +99,23 @@ class KmlPlus:
 
         self.kml.save(self.save_name)
 
-    def polyhedron(self, coordinate_list: list, **kwargs: Union[float, str]) -> None:
+    def polyhedron(
+            self,
+            lower_coordinate_list: list,
+            upper_coordinate_list: list,
+            **kwargs: Union[float, str]
+            ) -> None:
         """
 
         Args:
-            coordinate_list (list): A list of coordinates
+            lower_coordinate_list: List of coordinates for the lower polygon
+            upper_coordinate_list: List of coordinates for the upper polygon
         Keyword Args:
             fol (str): A string to name the folder in which the point is stored.
             lower_polygon_name (str): Lower polygon object name
             upper_polygon_name (str): Upper polygon object name
+            lower_layer (str): Lower layer z value
+            upper_layer (str): Upper layer z value
             lower_layer_uom (str): Lower layer unit of measure
             upper_layer_uom (str): Upper layer unit of measure
             colour_hex (str): String representing a colour hex
@@ -119,8 +127,14 @@ class KmlPlus:
         Returns:
             None
         """
-        poly = Polyhedron(coordinate_list, coordinate_list, lower_layer=kwargs.get('lower_layer', None),
-                          upper_layer=kwargs.get('upper_layer', None), uom=kwargs.get('uom', 'M'))
+        poly = Polyhedron(
+            lower_coordinate_list,
+            upper_coordinate_list,
+            lower_layer=kwargs.get('lower_layer', None),
+            upper_layer=kwargs.get('upper_layer', None),
+            lower_layer_uom=kwargs.get('lower_layer_uom', 'FT'),
+            upper_layer_uom=kwargs.get('upper_layer_uom', 'FT')
+        )
 
         lower, upper, sides = poly.to_kml()
 
