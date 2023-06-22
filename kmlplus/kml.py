@@ -108,6 +108,8 @@ class KmlPlus:
             fol (str): A string to name the folder in which the point is stored.
             lower_polygon_name (str): Lower polygon object name
             upper_polygon_name (str): Upper polygon object name
+            lower_layer_uom (str): Lower layer unit of measure
+            upper_layer_uom (str): Upper layer unit of measure
             colour_hex (str): String representing a colour hex
             fill (str): 1 or 0, whether or not to fill the polygon
             outline (str): 1 or 0, whether to include outline of polygon
@@ -118,7 +120,8 @@ class KmlPlus:
             None
         """
         poly = Polyhedron(coordinate_list, coordinate_list, lower_layer=kwargs.get('lower_layer', None),
-                          upper_layer=kwargs.get('upper_layer', None))
+                          upper_layer=kwargs.get('upper_layer', None), uom=kwargs.get('uom', 'M'))
+
         lower, upper, sides = poly.to_kml()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Polyhedron'))

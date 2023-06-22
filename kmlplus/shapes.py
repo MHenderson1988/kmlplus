@@ -468,9 +468,8 @@ class Polyhedron(I3DObject):
     __slots__ = ('uom', '_lower_layer', '_upper_layer', '_sides')
 
     def __init__(self, lower_coordinates: list[str], upper_coordinates: list[str], **kwargs: str):
-        self.uom = kwargs.get('uom', 'FT')
-        self.lower_layer = self.create_layer(lower_coordinates, kwargs.get('lower_layer', None))
-        self.upper_layer = self.create_layer(upper_coordinates, kwargs.get('upper_layer', None))
+        self.lower_layer_uom = kwargs.get('lower_layer_uom', 'FT')
+        self.upper_layer_uom = kwargs.get('upper_layer_uom', 'FT')
         self.sides = self.generate_sides()
 
     @property
