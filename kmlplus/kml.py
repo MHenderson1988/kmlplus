@@ -46,6 +46,11 @@ class KmlPlus:
             None
 
         """
+        if kwargs.get('altitude_mode') == 'relativetoground':
+            altitude_mode = simplekml.AltitudeMode.relativetoground
+        else:
+            altitude_mode = simplekml.AltitudeMode.absolute
+
         point = PointFactory(coordinate_list).process_coordinates()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Point'))
@@ -54,7 +59,7 @@ class KmlPlus:
         pnt.coords = [(point[0].x, point[0].y, point[0].z)]
         pnt.style.color = kwargs.get('colour_hex', '7Fc0c0c0')
         pnt.extrude = kwargs.get('extrude', 0)
-        pnt.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        pnt.altitudemode = altitude_mode
 
         self.kml.save(self.save_name)
 
@@ -76,17 +81,21 @@ class KmlPlus:
             None
 
         """
-
         fol = self.kml.newfolder(name=kwargs.get('name', 'KmlPlus LineString'))
 
         linestring = LineString(coordinate_list)
+
+        if kwargs.get('altitude_mode') == 'relativetoground':
+            altitude_mode = simplekml.AltitudeMode.relativetoground
+        else:
+            altitude_mode = simplekml.AltitudeMode.absolute
 
         s = fol.newlinestring(name=kwargs.get('linestring_name', 'KmlPlus Linestring'))
         s.coords = [(p.x, p.y, p.z) for p in linestring]
         s.style.color = kwargs.get('colour_hex', '7Fc0c0c0')
         s.extrude = kwargs.get('extrude', 0)
         s.style.linestyle.width = kwargs.get('width', 1)
-        s.altitudemode = kwargs.get('altitude_mode', simplekml.AltitudeMode.relativetoground)
+        s.altitudemode = altitude_mode
 
         self.kml.save(self.save_name)
 
