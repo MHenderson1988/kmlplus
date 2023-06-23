@@ -17,6 +17,7 @@ class Point(ILocation):
 
     Keyword Args:
         z (float): Elevation
+        uom (str): Unit of measure for elevation. Defaults to Metres
     """
     __slots__ = ('_y', '_x', '_z', 'uom')
 

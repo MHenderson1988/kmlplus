@@ -145,11 +145,13 @@ The linestring function updates the kml file with a KML linestring feature.
 ```
 from kmlplus.kml import KmlPlus
 
-"""
+        """
 
         Args:
             coordinate_list (list): A list containing a single coordinate
         Keyword Args:
+            uom: The unit of measurement for the Z value. Default is metres (M).
+            z (int): The Z value for the point. Default is 0.
             fol (str): A string to name the folder in which the point is stored.
             linestring_name (str): String to name the LineString object
             colour_hex (str): String representing a colour hex
@@ -161,7 +163,7 @@ from kmlplus.kml import KmlPlus
         Returns:
             None
 
-  """
+        """
 
 kml_file = KmlPlus('Point Styling.kml')
 kml_file.linestring(coordinates_list)
@@ -172,16 +174,19 @@ polyhedron(coordinate_list, **kwargs)
 Updates the KmlFile with a polyhedron based upon the coordinates and optional upper and lower limits.
 
 ```
-"""
+        """
 
         Args:
-            coordinate_list (list): A list of coordinates
+            lower_coordinate_list: List of coordinates for the lower polygon
+            upper_coordinate_list: List of coordinates for the upper polygon
         Keyword Args:
             fol (str): A string to name the folder in which the point is stored.
-            lower_layer (float): Height in FT of the lower layer
-            upper_layer (float): Height in FT of the upper layer
             lower_polygon_name (str): Lower polygon object name
             upper_polygon_name (str): Upper polygon object name
+            lower_layer (str): Lower layer z value, default is 0
+            upper_layer (str): Upper layer z value, default is 0
+            lower_layer_uom (str): Lower layer unit of measure, default is M
+            upper_layer_uom (str): Upper layer unit of measure, default is M
             colour_hex (str): String representing a colour hex
             fill (str): 1 or 0, whether or not to fill the polygon
             outline (str): 1 or 0, whether to include outline of polygon
@@ -207,10 +212,13 @@ Creates a 2D circle. Coordinate list contains a single set of coordinates in x, 
             coordinate_list (list): A list containing a single set of coordinates which is the centre point of the circle
             radius (float): The radius of the circle
         Keyword Args:
+            z (float): The Z value for the circle. Default is 0.
             fol (str): Name of the folder in which the KML objects are stored.
             name (str): What to name the Circle object
-            uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
-               Defaults to 'NM'
+            uom (str): The unit of measurement of z. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
+               Defaults to metres
+            radius_uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
+               Defaults to metres
             colour_hex (str): String representing a colour hex
             extrude (int): 1 or 0, Whether to extrude the point
             altitude_mode (str): Accepts simplekml Altitude mode options
@@ -230,27 +238,27 @@ Creates a Cylinder from a single set of coordinates within a list.
 
 ```
 """
+    Args:
+        coordinate_list: A list containing a single set of coordinates representing the centre of the circle
+        radius: The radius of the circle
+    Keyword Args:
+        lower_layer (float): Height/Altitude of the lower layer
+        upper_layer (float): Height/Altitude of the upper layer
+        sample (int): How many points to use when creating the circles which make up the cylinder
+        lower_circle_name (str): Lower circle object name
+        upper_circle_name (str): Upper circle object name
+        radius_uom (str): Radius unit of measure.
+        fol (str): Name of the folder in which the KML objects are stored.
+        uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
+          Defaults to 'NM'
+        colour_hex (str): String representing a colour hex
+        fill (str): 1 or 0, whether or not to fill the polygon
+        outline (str): 1 or 0, whether to include outline of polygon
+        altitude_mode (str): Accepts simplekml Altitude mode options
 
-        Args:
-            coordinate_list: A list containing a single set of coordinates representing the centre of the circle
-            radius: The radius of the circle
-        Keyword Args:
-            lower_layer (float): Height/Altitude of the lower layer
-            upper_layer (float): Height/Altitude of the upper layer
-            sample (int): How many points to use when creating the circles which make up the cylinder
-            lower_circle_name (str): Lower circle object name
-            upper_circle_name (str): Upper circle object name
-            fol (str): Name of the folder in which the KML objects are stored.
-            uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
-              Defaults to 'NM'
-            colour_hex (str): String representing a colour hex
-            fill (str): 1 or 0, whether or not to fill the polygon
-            outline (str): 1 or 0, whether to include outline of polygon
-            altitude_mode (str): Accepts simplekml Altitude mode options
-
-        Returns:
-            None
-        """
+    Returns:
+        None
+"""
 
 kml_file = KmlPlus('Point Styling.kml')
 kml_file.cylinder(coordinates_list, 500, lower_layer=50, upper_layer=500)   
@@ -263,13 +271,16 @@ Creates a single point from a single set of coordinates stored in a list in x, y
 
 ```
 
-"""
+        """
 
         Args:
-            coordinate_list (list): A list containing a single coordinate
+            coordinate_list (list): A list containing a single coordinate. Z values are to be given
+            in metres (M).
 
         Keyword Args:
             fol (str): A string to name the folder in which the point is stored.
+            z (float): The Z value for the point. Default is 0.
+            uom (str): The unit of measurement for the Z value. Default is metres (M).
             point_name (str): String to name the point object
             colour_hex (str): String representing a colour hex
             extrude (int): 1 or 0, Whether to extrude the point
