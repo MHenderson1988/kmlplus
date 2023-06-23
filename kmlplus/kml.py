@@ -53,7 +53,7 @@ class KmlPlus:
         else:
             altitude_mode = simplekml.AltitudeMode.absolute
 
-        point = PointFactory(coordinate_list, z=kwargs.get('z', 0.0),
+        point = PointFactory(coordinate_list, z=kwargs.get('z', None),
                              uom=kwargs.get('uom', 'M')).process_coordinates()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Point'))
