@@ -49,28 +49,25 @@ def calculate_dms_to_decimal(dms_sliced_dict):
 
 
 def convert_to_metres(a_value, a_uom):
-    if not a_value:
-        return None
+    conversion_dict = {
+        'KM': 1000,
+        'MI': 1609.344,
+        'NM': 1852,
+        'M': 1,
+        'FT': 0.3048
+    }
+
+    regex = '^' + a_uom
+    modifier = None
+    for key, value in conversion_dict.items():
+        if re.match(regex, key, flags=re.IGNORECASE):
+            modifier = value
+
+    if modifier is None:
+        raise TypeError(f'{a_uom} is not an accepted unit of measure. Accepted units of measure are M, MI, KM, FT'
+                        f' and NM')
     else:
-        conversion_dict = {
-            'KM': 1000,
-            'MI': 1609.34,
-            'NM': 1852,
-            'M': 1,
-            'FT': 0.3048
-        }
-
-        regex = '^' + a_uom
-        modifier = None
-        for key, value in conversion_dict.items():
-            if re.match(regex, key, flags=re.IGNORECASE):
-                modifier = value
-
-        if modifier is None:
-            raise TypeError(f'{a_uom} is not an accepted unit of measure. Accepted units of measure are M, MI, KM, FT'
-                            f' and NM')
-        else:
-            return a_value * modifier
+        return round((a_value * modifier), 3)
 
 
 def get_earth_radius(**kwargs) -> float:
