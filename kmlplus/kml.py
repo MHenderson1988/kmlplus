@@ -36,6 +36,8 @@ class KmlPlus:
 
         Keyword Args:
             fol (str): A string to name the folder in which the point is stored.
+            z (float): The Z value for the point. Default is 0.
+            uom (str): The unit of measurement for the Z value. Default is metres (M).
             point_name (str): String to name the point object
             colour_hex (str): String representing a colour hex
             extrude (int): 1 or 0, Whether to extrude the point
@@ -51,7 +53,8 @@ class KmlPlus:
         else:
             altitude_mode = simplekml.AltitudeMode.absolute
 
-        point = PointFactory(coordinate_list).process_coordinates()
+        point = PointFactory(coordinate_list, z=kwargs.get('z', 0.0),
+                             uom=kwargs.get('uom', 'M')).process_coordinates()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Point'))
 
@@ -69,6 +72,8 @@ class KmlPlus:
         Args:
             coordinate_list (list): A list containing a single coordinate
         Keyword Args:
+            uom: The unit of measurement for the Z value. Default is metres (M).
+            z (int): The Z value for the point. Default is 0.
             fol (str): A string to name the folder in which the point is stored.
             linestring_name (str): String to name the LineString object
             colour_hex (str): String representing a colour hex
@@ -104,7 +109,7 @@ class KmlPlus:
             lower_coordinate_list: list,
             upper_coordinate_list: list,
             **kwargs: Union[float, str]
-            ) -> None:
+    ) -> None:
         """
 
         Args:
@@ -178,10 +183,13 @@ class KmlPlus:
             coordinate_list (list): A list containing a single set of coordinates which is the centre point of the circle
             radius (float): The radius of the circle
         Keyword Args:
+            z (float): The Z value for the circle. Default is 0.
             fol (str): Name of the folder in which the KML objects are stored.
             name (str): What to name the Circle object
-            uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
-               Defaults to 'NM'
+            uom (str): The unit of measurement of z. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
+               Defaults to metres
+            radius_uom (str): The unit of measurement of the radius. Accepted arguments are 'FT', 'NM', 'MI', 'KM' and 'M'.
+               Defaults to metres
             colour_hex (str): String representing a colour hex
             extrude (int): 1 or 0, Whether to extrude the point
             altitude_mode (str): Accepts simplekml Altitude mode options
@@ -217,6 +225,8 @@ class KmlPlus:
         Keyword Args:
             lower_layer (float): Height/Altitude of the lower layer
             upper_layer (float): Height/Altitude of the upper layer
+            lower_layer_uom (str): The unit of measurement of the lower layer z. Defaults to metres
+            upper_layer_uom (str): The unit of measurement of the upper layer z. Defaults to metres
             sample (int): How many points to use when creating the circles which make up the cylinder
             lower_circle_name (str): Lower circle object name
             upper_circle_name (str): Upper circle object name
@@ -237,10 +247,22 @@ class KmlPlus:
         else:
             altitude_mode = simplekml.AltitudeMode.absolute
 
-        cylinder = Cylinder((coordinate_list, radius), (coordinate_list, radius),
-                            lower_layer=kwargs.get('lower_layer', None), upper_layer=kwargs.get('upper_layer', None),
-                            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'),
-                            radius_uom=kwargs.get('radius_uom', 'M'))
+        cylinder = Cylinder(
+            (
+                coordinate_list,
+                radius
+            ),
+            (
+                coordinate_list,
+                radius
+            ),
+            lower_layer=kwargs.get('lower_layer', None),
+            upper_layer=kwargs.get('upper_layer', None),
+            lower_layer_uom=kwargs.get('lower_layer_uom', 'FT'),
+            upper_layer_uom=kwargs.get('upper_layer_uom', 'FT'),
+            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'),
+            radius_uom=kwargs.get('radius_uom', 'M')
+        )
         lower, upper, sides = cylinder.to_kml()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Cylinder'))

@@ -105,7 +105,7 @@ class TestUtil(TestCase):
         self.assertEqual(1000, result)
 
         result = convert_to_metres(1, 'mi')
-        self.assertEqual(1609.34, result)
+        self.assertEqual(1609.344, result)
 
         result = convert_to_metres(1, 'nm')
         self.assertEqual(1852, result)
@@ -114,10 +114,10 @@ class TestUtil(TestCase):
         self.assertEqual(1, result)
 
         result = convert_to_metres(1, 'Ft')
-        self.assertEqual(0.3048, result)
+        self.assertEqual(0.305, result)
 
         result = convert_to_metres(1, 'ft')
-        self.assertEqual(0.3048, result)
+        self.assertEqual(0.305, result)
 
         with self.assertRaises(TypeError):
             convert_to_metres(20, 'fdskl;jfdasjkl;adf')

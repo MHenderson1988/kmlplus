@@ -166,7 +166,7 @@ class I3DObject(ABC):
         pass
 
     @abstractmethod
-    def create_layer(self, coordinate_list, layer_height):
+    def create_layer(self, coordinate_list, layer_height, layer_uom):
         pass
 
     @abstractmethod
