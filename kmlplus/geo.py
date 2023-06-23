@@ -2,9 +2,8 @@ from typing import Union
 
 from pyproj import Geod
 
-import util
 from kmlplus.interface import ILocation, ILocationFactory, ICurvedSegmentFactory, ICurvedSegment
-from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_string
+from kmlplus.util import dms_to_decimal, detect_coordinate_type, split_segment_string, convert_to_metres
 
 
 class Point(ILocation):
@@ -72,7 +71,7 @@ class Point(ILocation):
     @z.setter
     def z(self, value) -> None:
         if isinstance(value, float):
-            self._z = util.convert_to_metres(value, self.uom)
+            self._z = convert_to_metres(value, self.uom)
         else:
             if value is None:
                 self._z = 0.0

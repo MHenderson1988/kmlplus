@@ -137,8 +137,8 @@ class KmlPlus:
             upper_coordinate_list,
             lower_layer=kwargs.get('lower_layer', None),
             upper_layer=kwargs.get('upper_layer', None),
-            lower_layer_uom=kwargs.get('lower_layer_uom', 'FT'),
-            upper_layer_uom=kwargs.get('upper_layer_uom', 'FT')
+            lower_layer_uom=kwargs.get('lower_layer_uom', 'M'),
+            upper_layer_uom=kwargs.get('upper_layer_uom', 'M')
         )
 
         lower, upper, sides = poly.to_kml()
@@ -204,7 +204,7 @@ class KmlPlus:
             altitude_mode = simplekml.AltitudeMode.absolute
 
         points = Circle(coordinate_list, radius, radius_uom=kwargs.get('radius_uom', 'M'),
-                        uom=('uom', 'FT')).process_points()
+                        uom=('uom', 'M')).process_points()
 
         fol = self.kml.newfolder(name=kwargs.get('fol', 'KmlPlus Circle'))
 
@@ -260,7 +260,7 @@ class KmlPlus:
             upper_layer=kwargs.get('upper_layer', None),
             lower_layer_uom=kwargs.get('lower_layer_uom', 'FT'),
             upper_layer_uom=kwargs.get('upper_layer_uom', 'FT'),
-            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'FT'),
+            sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'M'),
             radius_uom=kwargs.get('radius_uom', 'M')
         )
         lower, upper, sides = cylinder.to_kml()
