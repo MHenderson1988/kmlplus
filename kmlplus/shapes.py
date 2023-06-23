@@ -21,8 +21,8 @@ class Circle(ICircle, I2DObject):
     __slots__ = ('_centre', '_radius', 'uom', '_z', '_sample', 'point_list')
 
     def __init__(self, centre: list, radius: float, **kwargs):
-        self.uom: str = kwargs.get('uom', 'FT')
-        self.z: float = convert_to_metres(kwargs.get('z', None), self.uom)
+        self.uom: str = kwargs.get('uom', 'M')
+        self.z: float = kwargs.get('z', None)
         self.sample: int = kwargs.get('sample', 100)
         self.centre: ILocation = self.plot_centre(centre)
         self.radius: float = convert_to_metres(radius, kwargs.get('radius_uom', 'M'))
@@ -120,7 +120,7 @@ class Circle(ICircle, I2DObject):
         Returns:
             coordinates(ILocation): ILocation object representing the focus of the circle.
         """
-        coordinates = PointFactory(central_location).process_coordinates()[0]
+        coordinates = PointFactory(central_location, uom=self.uom).process_coordinates()[0]
         return coordinates
 
     def process_points(self) -> list[ILocation]:
@@ -140,8 +140,12 @@ class Circle(ICircle, I2DObject):
                 z = self.z
             else:
                 z = self.centre.z
+                # Change uom to metres as centre has already been converted. Failure to do so will have further
+                # calculations performed
+                self.uom = 'M'
 
-            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=z)
+            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=z,
+                                                          uom=self.uom)
             point_list.append(point)
             start_bearing -= bearing_increment
 
@@ -160,7 +164,8 @@ class Circle(ICircle, I2DObject):
         bearing_increment = 360 / self.sample
 
         for n in range(0, self.sample + 1):
-            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=self.z)
+            point = Point.from_point_bearing_and_distance(self.centre, start_bearing, self.radius, z=self.z,
+                                                          uom=self.uom)
             point_list.append(point)
             start_bearing -= bearing_increment
 
@@ -191,10 +196,9 @@ class Cylinder(I3DObject, ICylinder):
 
     """
     __slots__ = (
-    'uom', 'sample', 'radius_uom', '_lower_radius', '_upper_radius', '_upper_layer', '_lower_layer', '_sides')
+        'uom', 'sample', 'radius_uom', '_lower_radius', '_upper_radius', '_upper_layer', '_lower_layer', '_sides')
 
     def __init__(self, lower_coordinates: list, upper_coordinates: list, **kwargs):
-        self.uom = kwargs.get('uom', 'FT')
         self.sample = kwargs.get('sample', 100)
         self.radius_uom = kwargs.get('radius_uom', 'M')
         self.lower_radius = lower_coordinates[1]
@@ -303,8 +307,7 @@ class Cylinder(I3DObject, ICylinder):
         Returns:
             circle (ICircle): A circle object
         """
-        circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=layer_uom,
-                            radius_uom=self.radius_uom)
+        circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=layer_uom)
         return circle
 
     def generate_sides(self) -> list[ICircle]:
@@ -328,7 +331,7 @@ class Cylinder(I3DObject, ICylinder):
                                            self.upper_layer[i + 1].__str__(), self.upper_layer[i].__str__(),
                                            self.lower_layer[i].__str__()]
 
-                side_coordinates.append(Polygon(polygon_coordinate_list, uom=self.uom))
+                side_coordinates.append(Polygon(polygon_coordinate_list))
 
                 i += 1
 
@@ -349,8 +352,8 @@ class Polygon(IPolygon, I2DObject):
     __slots__ = ('uom', '_z', '_point_list', 'centroid')
 
     def __init__(self, coordinate_list: list, **kwargs: str):
-        self.uom = kwargs.get('uom', 'FT')
-        self.z = convert_to_metres(kwargs.get('z', None), self.uom)
+        self.uom = kwargs.get('uom', 'M')
+        self.z = kwargs.get('z', None)
         self.point_list = self.process_points(coordinate_list)
         self.centroid = self.calculate_centroid()
 
@@ -422,7 +425,7 @@ class Polygon(IPolygon, I2DObject):
         latitude_average, longitude_average = latitude_total / len(self.point_list), \
                                               longitude_total / len(self.point_list)
 
-        point = Point(latitude_average, longitude_average)
+        point = Point(latitude_average, longitude_average, uom=self.uom, z=self.z)
         return point
 
     def calculate_bearing_from_centroid(self, point: ILocation) -> ILocation:
@@ -450,7 +453,8 @@ class Polygon(IPolygon, I2DObject):
         """
         points = PointFactory(
             point_list,
-            z=self._z
+            z=self._z,
+            uom=self.uom
         ).process_coordinates()
 
         return points
@@ -479,12 +483,12 @@ class Polyhedron(I3DObject):
         self.lower_layer = self.create_layer(
             lower_coordinates,
             kwargs.get('lower_layer', 0.0),
-            kwargs.get('lower_layer_uom', 'FT')
+            kwargs.get('lower_layer_uom', 'M')
         )
         self.upper_layer = self.create_layer(
             upper_coordinates,
             kwargs.get('upper_layer', 0.0),
-            kwargs.get('upper_layer_uom', 'FT'),
+            kwargs.get('upper_layer_uom', 'M'),
         )
         self.sides = self.generate_sides()
 
@@ -595,8 +599,8 @@ class LineString(I2DObject):
     __slots__ = ('uom', '_z', 'point_list')
 
     def __init__(self, coordinate_list, **kwargs):
-        self.uom = kwargs.get('uom', 'FT')
-        self.z = convert_to_metres(kwargs.get('z', None), self.uom)
+        self.uom = kwargs.get('uom', 'M')
+        self.z = kwargs.get('z', None)
         self.point_list = self.create(coordinate_list)
 
     def __len__(self):
@@ -635,5 +639,5 @@ class LineString(I2DObject):
             self._z = None
 
     def create(self, coordinate_list: list[str]) -> list[ILocation]:
-        point_list = PointFactory(coordinate_list, z=self.z).process_coordinates()
+        point_list = PointFactory(coordinate_list, z=self.z, uom=self.uom).process_coordinates()
         return point_list

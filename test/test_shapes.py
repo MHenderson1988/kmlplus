@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from kmlplus.geo import Point
 from kmlplus.shapes import Circle, Polygon, Polyhedron, Cylinder, LineString
 
@@ -29,7 +30,7 @@ class TestCircle(TestCase):
         c = Circle(['55.1111 -3.2311 10'], 10, sample=100, uom='FT')
         for i in c:
             self.assertTrue(isinstance(i, Point))
-            self.assertEqual(10, i.z)
+            self.assertEqual(3.048, i.z)
 
         c = Circle(['55.1111 -3.2311 10'], 25, z=250, sample=100, uom='M')
         for i in c:
@@ -57,7 +58,8 @@ class TestCylinder(TestCase):
         self.assertEqual(len(self.test_cylinder.sides), 100)
         self.assertTrue(isinstance(self.test_cylinder.sides[0], Polygon))
         self.assertEqual(self.test_cylinder.lower_layer.z, 50)
-        self.assertNotEqual(self.test_cylinder.upper_layer.z, 100)
+        self.assertNotEqual(self.test_cylinder.upper_layer.point_list[0].z, 100.0)
+        self.assertEqual(self.test_cylinder.upper_layer.point_list[0].z, 30.48)
 
     def test_lower_radius(self):
         self.assertTrue(isinstance(self.test_cylinder.lower_radius, int))
@@ -138,7 +140,7 @@ class TestPolygon(TestCase):
         self.assertEqual(len(result_with_height_override), 4)
         for i in result_with_height_override:
             self.assertTrue(isinstance(i, Point))
-            self.assertEqual(152.43352800000002, i.z)
+            self.assertEqual(500.11, i.z)
 
         # Test with DMS
         result_dms_no_height = Polygon(test_dms)
@@ -201,12 +203,46 @@ class TestPolyhedron(TestCase):
 class TestLineString(TestCase):
     def setUp(self):
         self.LineString = LineString(['22.323232 -4.287282', '23.323232 -5.328723', '22.112333 -6.23789238923'])
+        self.LineString_m = LineString(['22.323232 -4.287282 20', '23.323232 -5.328723 20'], uom='m')
+        self.LineString_km = LineString(['22.323232 -4.287282 50', '23.323232 -5.328723 50'], uom='km')
+        self.LineString_ft = LineString(['22.323232 -4.287282 20', '23.323232 -5.328723 20'], uom='ft')
+        self.LineString_mi = LineString(['22.323232 -4.287282 5', '23.323232 -5.328723 5'], uom='mi')
+        self.LineString_nm = LineString(['22.323232 -4.287282 1', '23.323232 -5.328723 1'], uom='nm')
 
     def test_create(self):
         self.assertTrue(isinstance(self.LineString, LineString))
         self.assertEqual(len(self.LineString), 3)
         for i in self.LineString:
             self.assertTrue(isinstance(i, Point))
+
+        for i in self.LineString_m:
+            self.assertTrue(isinstance(i, Point))
+            self.assertEqual(i.uom, 'm')
+            self.assertEqual(i.z, 20)
+
+        for i in self.LineString_km:
+            self.assertTrue(isinstance(i, Point))
+            self.assertEqual(i.uom, 'km')
+            self.assertNotEqual(i.z, 50)
+            self.assertEqual(i.z, 50000)
+
+        for i in self.LineString_ft:
+            self.assertTrue(isinstance(i, Point))
+            self.assertEqual(i.uom, 'ft')
+            self.assertEqual(i.z, 6.096)
+            self.assertNotEqual(i.z, 50)
+
+        for i in self.LineString_mi:
+            self.assertTrue(isinstance(i, Point))
+            self.assertEqual(i.uom, 'mi')
+            self.assertEqual(i.z, 8046.72)
+            self.assertNotEqual(i.z, 5)
+
+        for i in self.LineString_nm:
+            self.assertTrue(isinstance(i, Point))
+            self.assertEqual(i.uom, 'nm')
+            self.assertEqual(i.z, 1852)
+            self.assertNotEqual(i.z, 1)
 
 
 class TestThreeDimensionShape(TestCase):

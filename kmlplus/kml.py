@@ -36,6 +36,7 @@ class KmlPlus:
 
         Keyword Args:
             fol (str): A string to name the folder in which the point is stored.
+            uom (str): The unit of measurement for the Z value. Default is metres (M).
             point_name (str): String to name the point object
             colour_hex (str): String representing a colour hex
             extrude (int): 1 or 0, Whether to extrude the point
@@ -104,7 +105,7 @@ class KmlPlus:
             lower_coordinate_list: list,
             upper_coordinate_list: list,
             **kwargs: Union[float, str]
-            ) -> None:
+    ) -> None:
         """
 
         Args:
