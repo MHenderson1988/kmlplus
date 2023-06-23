@@ -250,18 +250,18 @@ class KmlPlus:
         cylinder = Cylinder(
             (
                 coordinate_list,
-                radius
+                radius,
             ),
             (
                 coordinate_list,
-                radius
+                radius,
             ),
+            radius_uom=kwargs.get('radius_uom', 'M'),
             lower_layer=kwargs.get('lower_layer', None),
             upper_layer=kwargs.get('upper_layer', None),
             lower_layer_uom=kwargs.get('lower_layer_uom', 'FT'),
             upper_layer_uom=kwargs.get('upper_layer_uom', 'FT'),
             sample=kwargs.get('sample', 100), uom=kwargs.get('uom', 'M'),
-            radius_uom=kwargs.get('radius_uom', 'M')
         )
         lower, upper, sides = cylinder.to_kml()
 
