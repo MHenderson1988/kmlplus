@@ -206,12 +206,12 @@ class Cylinder(I3DObject, ICylinder):
         self.lower_layer = self.create_layer(
             (lower_coordinates[0], self.lower_radius),
             kwargs.get('lower_layer', None),
-            kwargs.get('lower_layer_uom', 'FT')
+            kwargs.get('lower_layer_uom', 'M')
         )
         self._upper_layer = self.create_layer(
             (upper_coordinates[0], self.upper_radius),
             kwargs.get('upper_layer', None),
-            kwargs.get('upper_layer_uom', 'FT')
+            kwargs.get('upper_layer_uom', 'M')
         )
         self._sides = self.generate_sides()
 
@@ -307,7 +307,8 @@ class Cylinder(I3DObject, ICylinder):
         Returns:
             circle (ICircle): A circle object
         """
-        circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height, uom=layer_uom)
+        circle = Circle(coordinate_list[0], coordinate_list[1], z=layer_height,
+                        uom=layer_uom, radius_uom=self.radius_uom)
         return circle
 
     def generate_sides(self) -> list[ICircle]:
