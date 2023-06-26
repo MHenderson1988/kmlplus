@@ -208,6 +208,7 @@ class TestLineString(TestCase):
         self.LineString_ft = LineString(['22.323232 -4.287282 20', '23.323232 -5.328723 20'], uom='ft')
         self.LineString_mi = LineString(['22.323232 -4.287282 5', '23.323232 -5.328723 5'], uom='mi')
         self.LineString_nm = LineString(['22.323232 -4.287282 1', '23.323232 -5.328723 1'], uom='nm')
+        self.LineString_z = LineString(['22.323232 -4.287282 1', '23.323232 -5.328723 1'], z=20)
 
     def test_create(self):
         self.assertTrue(isinstance(self.LineString, LineString))
@@ -243,6 +244,10 @@ class TestLineString(TestCase):
             self.assertEqual(i.uom, 'nm')
             self.assertEqual(i.z, 1852)
             self.assertNotEqual(i.z, 1)
+
+        for i in self.LineString_z:
+            self.assertTrue(isinstance(i, Point))
+            self.assertEqual(i.z, 20)
 
 
 class TestThreeDimensionShape(TestCase):

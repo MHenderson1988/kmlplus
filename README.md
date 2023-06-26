@@ -307,30 +307,6 @@ kml_file = KmlPlus('Point Styling.kml')
 kml_file.point(coordinates_list)   
 ```
 
-### Example script
-
-```
-    kml_file = KmlPlus(file_name='Point Styling.kml')
-
-    kml_file.linestring(test_data.birmingham_cta_9, uom='FT')
-    kml_file.cylinder(test_data.beccles_parachute, 50000, upper_layer=5000)
-    kml_file.point(test_data.beccles_parachute)
-
-    kml_file.polyhedron(test_data.birmingham_cta_10, lower_layer=6500, upper_layer=10500,
-                        name='Birmingham CTA 10')
-    kml_file.polyhedron(test_data.birmingham_cta_9, lower_layer=6500, upper_layer=8500,
-                        name='Birmingham CTA 9')
-
-    kml_file.polyhedron(test_data.prestwick_cta_1, lower_layer=1500, upper_layer=5500, name='Prestwick CTA 1')
-    kml_file.polyhedron(test_data.prestwick_cta_2, lower_layer=2000, upper_layer=5500, name='Prestwick CTA 2')
-    kml_file.polyhedron(test_data.prestwick_cta_3, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 3')
-    kml_file.polyhedron(test_data.prestwick_cta_4, lower_layer=3000, upper_layer=5500, name='Prestwick CTA 4')
-    kml_file.polyhedron(test_data.prestwick_cta_5, lower_layer=3500, upper_layer=5500, name='Prestwick CTA 5')
-    kml_file.polyhedron(test_data.prestwick_cta_6, lower_layer=4000, upper_layer=5500, name='Prestwick CTA 6')
-    kml_file.polyhedron(test_data.prestwick_ctr, upper_layer=5500, name='Prestwick CTR')
-    kml_file.polyhedron(test_data.test_airspace, upper_layer=50000, lower_layer=0, name='EG D406C ESKMEALS')
-```
-
 ## Acknowledgements
 
 - [Simplekml](https://pypi.org/project/simplekml/) - for creating an awesome library which has helped me process_points
